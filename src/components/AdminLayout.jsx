@@ -1,7 +1,15 @@
 import { Outlet } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { handleLogoutApi } from "../apis/index";
 
 function AdminLayout() {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    handleLogoutApi();
+    navigate("/login");
+  };
   return (
     <div classNameName="wrapper">
       {/* SIDEBAR START */}
@@ -660,7 +668,15 @@ function AdminLayout() {
                         </a>
                         <div className="dropdown-divider"></div>
                         <a className="dropdown-item" href="#">
-                          Logout
+                          <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => {
+                              handleLogout();
+                            }}
+                          >
+                            Logout
+                          </Button>
                         </a>
                       </li>
                     </div>

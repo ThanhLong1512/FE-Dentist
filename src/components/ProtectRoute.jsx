@@ -1,41 +1,76 @@
 import { Navigate, Outlet } from "react-router-dom";
 import React, { useEffect } from "react";
 
-const ProtectedRoute = ({ isAdmin }) => {
+const ProtectedRoute = () => {
   useEffect(() => {
-    // Danh sách các đường dẫn CSS cần thêm
     const cssFiles = [
       "/admin/css/admin.css",
       "/admin/css/plugins.min.css",
+      "/admin/css/plugins.css",
+      "/admin/css/plugins.css.map",
       "/admin/css/kaiadmin.min.css",
       "/admin/css/demo.css",
+      "/admin/css/demo.css.map",
+      "/admin/css/fonts.css",
+      "/admin/css/fonts.min.css",
+      "/admin/css/kaiadmin.css.map",
+      "/admin/css/demo.css",
+      "/admin/css/bootstrap.css",
     ];
+    const jsFiles = [
+      "/admin/js/core/jquery-3.7.1.min.js",
+      "/admin/js/core/bootstrap.min.js",
+      "/admin/js/core/popper.min.js",
+      "/admin/js/plugins/jquery.scrollbar.min.js",
+      "/admin/js/kaiadmin.min.js",
+      "/admin/js/demo.js",
+      "/admin/js/kaiadmin.js",
+      "/admin/js/setting-demo.js",
+      "/admin/js/setting-demo2.js",
+    ];
+    const existingLinks = document.querySelectorAll('link[rel="stylesheet"]');
+    existingLinks.forEach((link) => {
+      if (
+        link.href.includes("/admin/css/") ||
+        cssFiles.some((file) => link.href.includes(file))
+      ) {
+        link.parentNode.removeChild(link);
+      }
+    });
 
-    // Mảng để lưu trữ các thẻ <link> đã thêm
-    const links = [];
-
-    // Thêm từng thẻ <link> vào <head>
+    const existingScripts = document.querySelectorAll("script");
+    existingScripts.forEach((script) => {
+      if (
+        script.src.includes("/admin/js/") ||
+        jsFiles.some((file) => script.src.includes(file))
+      ) {
+        script.parentNode.removeChild(script);
+      }
+    });
+    const elements = [];
     cssFiles.forEach((href) => {
       const link = document.createElement("link");
       link.href = href;
       link.rel = "stylesheet";
       document.head.appendChild(link);
-      links.push(link); // Lưu thẻ <link> vào mảng
+      elements.push(link);
     });
-
-    // Xóa các thẻ <link> khi component unmount
+    jsFiles.forEach((src) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = false;
+      document.body.appendChild(script);
+      elements.push(script);
+    });
     return () => {
-      links.forEach((link) => {
-        document.head.removeChild(link);
+      elements.forEach((element) => {
+        element.parentNode.removeChild(element);
       });
     };
   }, []);
-  if (!isAdmin) {
-    return <Navigate to="/login" replace />;
-  }
 
   return (
-    <div classNameName="wrapper">
+    <div className="wrapper">
       {/* SIDEBAR START */}
       <div className="sidebar" data-background-color="dark">
         <div className="sidebar-logo">
@@ -692,8 +727,8 @@ const ProtectedRoute = ({ isAdmin }) => {
             </div>
           </nav>
         </div>
-        <div classNameName="container">
-          <div classNameName="page-inner">
+        <div className="container">
+          <div className="page-inner">
             <Outlet />
           </div>
         </div>

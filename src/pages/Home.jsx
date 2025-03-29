@@ -1,5 +1,22 @@
 import { Link } from "react-router-dom";
+import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import authorizedAxiosInstance from "../utils/authorizedAxios";
+import { API_ROOT } from "../utils/constants";
+import { handleLogoutApi } from "../apis/index";
 function Home() {
+  let formatEmail;
+  const useInfoFromLocalStorage = localStorage.getItem("userInfo");
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    handleLogoutApi();
+    navigate("/login");
+  };
+  if (useInfoFromLocalStorage) {
+    const { id, email, role } = JSON.parse(useInfoFromLocalStorage);
+    formatEmail = email.split("@")[0];
+  }
+
   return (
     <div className="mm-wrapper">
       <div className="mm-page mm-slideout" id="mm-0">
@@ -83,11 +100,47 @@ function Home() {
                             <span>Contact</span>
                           </Link>
                         </li>
-                        <li>
-                          <Link to="/login">
-                            <span>Login</span>
-                          </Link>
-                        </li>
+                        {useInfoFromLocalStorage ? (
+                          <>
+                            <li>
+                              <span
+                                style={{
+                                  marginRight: "10px",
+                                  display: "inline-block",
+                                  width: "230px",
+                                }}
+                              >
+                                {formatEmail}{" "}
+                                <span
+                                  style={{
+                                    fontSize: "20px",
+                                    marginRight: "5px",
+                                  }}
+                                >
+                                  👋
+                                </span>
+                              </span>
+                            </li>
+                            <li>
+                              <Button
+                                variant="contained"
+                                color="error"
+                                sx={{ width: "100px" }}
+                                onClick={() => {
+                                  handleLogout();
+                                }}
+                              >
+                                Log out
+                              </Button>
+                            </li>
+                          </>
+                        ) : (
+                          <li>
+                            <Link to="/login">
+                              <span>Login</span>
+                            </Link>
+                          </li>
+                        )}
                       </ul>
                     </nav>
 

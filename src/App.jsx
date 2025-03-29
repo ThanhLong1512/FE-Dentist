@@ -1,4 +1,10 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+} from "react-router-dom";
 
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
@@ -14,40 +20,53 @@ import FormsAdmin from "./pages/admin/FormsAdmin";
 import TableAdmin from "./pages/admin/TableAdmin";
 
 function App() {
-  const isAdmin = true;
+  const isAdmin =
+    JSON.parse(localStorage.getItem("useInfo"))?.role === "admin"
+      ? true
+      : false;
+
+  const ProtectedRoutes = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (!userInfo) return <Navigate to="/login" replace={true} />;
+    return <Outlet />;
+  };
+  const UnauthorizedRoutes = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (userInfo) return <Navigate to="/home" replace={true} />;
+    return <Outlet />;
+  };
 
   return (
     <BrowserRouter>
       <Routes>
         <Route index element={<Navigate replace to="home" />} />
         <Route path="home" element={<Home />} />
-
-        {/* Route cho client (AppLayout) */}
-
         <Route element={<AppLayout />}>
           <Route path="blog" element={<Blog />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="login" element={<Login />} />
+          <Route element={<ProtectedRoutes />}>
+            <Route path="contact" element={<Contact />} />
+          </Route>
+          <Route element={<UnauthorizedRoutes />}>
+            <Route path="login" element={<Login />} />
+          </Route>
           <Route path="shop" element={<Shop />} />
           <Route path="*" element={<NotFound />} />
         </Route>
-
-        {/* Route cho admin (AdminLayout) */}
-        {isAdmin && (
-          <Route
-            path="admin"
-            element={
-              <ProtectedRoute isAdmin={isAdmin}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate replace to="dashboard" />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="users" element={<FormsAdmin />} />
-            <Route path="table" element={<TableAdmin />} />
-          </Route>
-        )}
+        <Route
+          path="admin/*"
+          element={
+            isAdmin ? <ProtectedRoute /> : <Navigate replace to="/home" />
+          }
+        >
+          {isAdmin && (
+            <>
+              <Route index element={<Navigate replace to="dashboard" />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="users" element={<FormsAdmin />} />
+              <Route path="table" element={<TableAdmin />} />
+            </>
+          )}
+        </Route>
       </Routes>
     </BrowserRouter>
   );
