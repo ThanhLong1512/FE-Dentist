@@ -16,12 +16,12 @@ import Blog from "./pages/Blog";
 import ProtectedRoute from "./components/ProtectRoute";
 import AdminLayout from "./components/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
-import FormsAdmin from "./pages/admin/FormsAdmin";
-import TableAdmin from "./pages/admin/TableAdmin";
+import FormsAdmin from "./pages/admin/Accounts";
+import TableAdmin from "./pages/admin/Employees";
 
 function App() {
   const isAdmin =
-    JSON.parse(localStorage.getItem("useInfo"))?.role === "admin"
+    JSON.parse(localStorage.getItem("userInfo"))?.role === "admin"
       ? true
       : false;
 
@@ -63,7 +63,7 @@ function App() {
               <Route index element={<Navigate replace to="dashboard" />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="users" element={<FormsAdmin />} />
-              <Route path="table" element={<TableAdmin />} />
+              <Route path="employees" element={<TableAdmin />} />
             </>
           )}
         </Route>

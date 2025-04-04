@@ -30,6 +30,7 @@ function Login() {
       email: res.data.email,
       role: res.data.role,
     };
+    console.log("role: ", res.data.role);
     const accessToken = res.data.accessToken;
     const refreshToken = res.data.refreshToken;
     localStorage.setItem("accessToken", accessToken);

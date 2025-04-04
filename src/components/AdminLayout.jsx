@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { handleLogoutApi } from "../apis/index";
@@ -41,18 +41,27 @@ function AdminLayout() {
           <div className="sidebar-content">
             <ul className="nav nav-secondary">
               <li className="nav-item active">
-                <a
-                  data-bs-toggle="collapse"
-                  href="#dashboard"
-                  className="collapsed"
-                  aria-expanded="false"
-                >
-                  <i className="fas fa-home"></i>
-                  <p>Dashboard</p>
-                  <span className="caret"></span>
-                </a>
+                <Link to="/dashboard">
+                  <a
+                    data-bs-toggle="collapse"
+                    href="#dashboard"
+                    className="collapsed"
+                    aria-expanded="false"
+                  >
+                    <i className="fas fa-home"></i>
+
+                    <p>Dashboard</p>
+
+                    <span className="caret"></span>
+                  </a>
+                </Link>
                 <div className="collapse" id="dashboard">
                   <ul className="nav nav-collapse">
+                    <Link to="/dashboard" className="theme-btn btn-style-three">
+                      <span span className="sub-item">
+                        Dashboard 1
+                      </span>
+                    </Link>
                     <li>
                       <a href="../demo1/index.html">
                         <span className="sub-item">Dashboard 1</span>
@@ -68,81 +77,22 @@ function AdminLayout() {
                 <h4 className="text-section">Components</h4>
               </li>
               <li className="nav-item">
-                <a data-bs-toggle="collapse" href="#base">
-                  <i className="fas fa-layer-group"></i>
-                  <p>Base</p>
-                  <span className="caret"></span>
-                </a>
-                <div className="collapse" id="base">
-                  <ul className="nav nav-collapse">
-                    <li>
-                      <a href="components/avatars.html">
-                        <span className="sub-item">Avatars</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/buttons.html">
-                        <span className="sub-item">Buttons</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/gridsystem.html">
-                        <span className="sub-item">Grid System</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/panels.html">
-                        <span className="sub-item">Panels</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/notifications.html">
-                        <span className="sub-item">Notifications</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/sweetalert.html">
-                        <span className="sub-item">Sweet Alert</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/font-awesome-icons.html">
-                        <span className="sub-item">Font Awesome Icons</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/simple-line-icons.html">
-                        <span className="sub-item">Simple Line Icons</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/typography.html">
-                        <span className="sub-item">Typography</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                <Link to="/users">
+                  <a data-bs-toggle="collapse" href="#base">
+                    <i className="fas fa-layer-group"></i>
+                    <p>User</p>
+                    <span className="caret"></span>
+                  </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarLayouts">
-                  <i className="fas fa-th-list"></i>
-                  <p>Sidebar Layouts</p>
-                  <span className="caret"></span>
-                </a>
-                <div className="collapse" id="sidebarLayouts">
-                  <ul className="nav nav-collapse">
-                    <li>
-                      <a href="sidebar-style-2.html">
-                        <span className="sub-item">Sidebar Style 2</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="icon-menu.html">
-                        <span className="sub-item">Icon Menu</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                <Link to="/table">
+                  <a data-bs-toggle="collapse" href="#sidebarLayouts">
+                    <i className="fas fa-th-list"></i>
+                    <p>Sidebar Layouts</p>
+                    <span className="caret"></span>
+                  </a>
+                </Link>
               </li>
               <li className="nav-item">
                 <a data-bs-toggle="collapse" href="#forms">

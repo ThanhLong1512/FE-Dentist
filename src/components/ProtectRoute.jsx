@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const ProtectedRoute = () => {
   useEffect(() => {
@@ -17,17 +18,17 @@ const ProtectedRoute = () => {
       "/admin/css/demo.css",
       "/admin/css/bootstrap.css",
     ];
-    const jsFiles = [
-      "/admin/js/core/jquery-3.7.1.min.js",
-      "/admin/js/core/bootstrap.min.js",
-      "/admin/js/core/popper.min.js",
-      "/admin/js/plugins/jquery.scrollbar.min.js",
-      "/admin/js/kaiadmin.min.js",
-      "/admin/js/demo.js",
-      "/admin/js/kaiadmin.js",
-      "/admin/js/setting-demo.js",
-      "/admin/js/setting-demo2.js",
-    ];
+    // const jsFiles = [
+    //   "/admin/js/core/jquery-3.7.1.min.js",
+    //   "/admin/js/core/bootstrap.min.js",
+    //   "/admin/js/core/popper.min.js",
+    //   "/admin/js/plugins/jquery.scrollbar.min.js",
+    //   "/admin/js/kaiadmin.min.js",
+    //   "/admin/js/demo.js",
+    //   "/admin/js/kaiadmin.js",
+    //   "/admin/js/setting-demo.js",
+    //   "/admin/js/setting-demo2.js",
+    // ];
     const existingLinks = document.querySelectorAll('link[rel="stylesheet"]');
     existingLinks.forEach((link) => {
       if (
@@ -38,15 +39,15 @@ const ProtectedRoute = () => {
       }
     });
 
-    const existingScripts = document.querySelectorAll("script");
-    existingScripts.forEach((script) => {
-      if (
-        script.src.includes("/admin/js/") ||
-        jsFiles.some((file) => script.src.includes(file))
-      ) {
-        script.parentNode.removeChild(script);
-      }
-    });
+    // const existingScripts = document.querySelectorAll("script");
+    // existingScripts.forEach((script) => {
+    //   if (
+    //     script.src.includes("/admin/js/") ||
+    //     jsFiles.some((file) => script.src.includes(file))
+    //   ) {
+    //     script.parentNode.removeChild(script);
+    //   }
+    // });
     const elements = [];
     cssFiles.forEach((href) => {
       const link = document.createElement("link");
@@ -55,13 +56,13 @@ const ProtectedRoute = () => {
       document.head.appendChild(link);
       elements.push(link);
     });
-    jsFiles.forEach((src) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.async = false;
-      document.body.appendChild(script);
-      elements.push(script);
-    });
+    // jsFiles.forEach((src) => {
+    //   const script = document.createElement("script");
+    //   script.src = src;
+    //   script.async = false;
+    //   document.body.appendChild(script);
+    //   elements.push(script);
+    // });
     return () => {
       elements.forEach((element) => {
         element.parentNode.removeChild(element);
@@ -99,7 +100,7 @@ const ProtectedRoute = () => {
         <div className="sidebar-wrapper scrollbar scrollbar-inner">
           <div className="sidebar-content">
             <ul className="nav nav-secondary">
-              <li className="nav-item active">
+              <Link className="nav-item active" to="/admin/dashboard">
                 <a
                   data-bs-toggle="collapse"
                   href="#dashboard"
@@ -109,7 +110,7 @@ const ProtectedRoute = () => {
                   <i className="fas fa-home"></i>
                   <p>Dashboard</p>
                 </a>
-              </li>
+              </Link>
               <li className="nav-section">
                 <span className="sidebar-mini-icon">
                   <i className="fa fa-ellipsis-h"></i>
@@ -117,83 +118,22 @@ const ProtectedRoute = () => {
                 <h4 className="text-section">Components</h4>
               </li>
               <li className="nav-item">
-                <a data-bs-toggle="collapse" href="#base">
-                  <i className="fas fa-layer-group"></i>
-                  <p>Base</p>
-                  <span className="caret"></span>
-                </a>
-                <div className="collapse" id="base">
-                  <ul className="nav nav-collapse">
-                    <li>
-                      <a href="components/avatars.html">
-                        <span className="sub-item">Avatars</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/buttons.html">
-                        <span className="sub-item">Buttons</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/gridsystem.html">
-                        <span className="sub-item">Grid System</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/panels.html">
-                        <span className="sub-item">Panels</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/notifications.html">
-                        <span className="sub-item">Notifications</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/sweetalert.html">
-                        <span className="sub-item">Sweet Alert</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/font-awesome-icons.html">
-                        <span className="sub-item">Font Awesome Icons</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/simple-line-icons.html">
-                        <span className="sub-item">Simple Line Icons</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="components/typography.html">
-                        <span className="sub-item">Typography</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                <Link to="/admin/users">
+                  <a data-bs-toggle="collapse" href="#base">
+                    <i className="fas fa-layer-group"></i>
+                    <p>Accounts</p>
+                  </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a data-bs-toggle="collapse" href="#sidebarLayouts">
-                  <i className="fas fa-th-list"></i>
-                  <p>Sidebar Layouts</p>
-                  <span className="caret"></span>
-                </a>
-                <div className="collapse" id="sidebarLayouts">
-                  <ul className="nav nav-collapse">
-                    <li>
-                      <a href="sidebar-style-2.html">
-                        <span className="sub-item">Sidebar Style 2</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="icon-menu.html">
-                        <span className="sub-item">Icon Menu</span>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                <Link to="/admin/employees">
+                  <a data-bs-toggle="collapse" href="#sidebarLayouts">
+                    <i className="fas fa-th-list"></i>
+                    <p>Employees</p>
+                  </a>
+                </Link>
               </li>
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <a data-bs-toggle="collapse" href="#forms">
                   <i className="fas fa-pen-square"></i>
                   <p>Forms</p>
@@ -336,7 +276,7 @@ const ProtectedRoute = () => {
                     </li>
                   </ul>
                 </div>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>
