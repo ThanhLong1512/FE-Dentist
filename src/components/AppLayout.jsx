@@ -56,8 +56,6 @@ function AppLayout() {
               ))}
             </div>
           </div>
-
-          {/* Layout Options */}
           <div className="lower-options">
             <h6>RTL Supported</h6>
             <ul className="rtl-version option-box">

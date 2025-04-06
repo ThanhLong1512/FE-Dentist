@@ -1,6 +1,22 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 function Header() {
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    const user = localStorage.getItem('userInfo');
+    if (user) {
+      setUserInfo(JSON.parse(user));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userInfo');
+    setUserInfo(null);
+    window.location.href = '/login';
+  };
+
   return (
     <>
       <div className="preloader" style={{ display: "none" }}></div>
@@ -85,9 +101,11 @@ function Header() {
                     <li>
                       <Link to="/contact">Contact</Link>
                     </li>
-                    <li>
-                      <Link to="/login">Login</Link>
-                    </li>
+                    {!userInfo && (
+                      <li>
+                        <Link to="/login">Login</Link>
+                      </li>
+                    )}
                   </ul>
                 </nav>
 
@@ -123,15 +141,20 @@ function Header() {
               {/* Navigation */}
               <nav className="nav main-menu">
                 <ul className="navigation" id="navbar">
-                  <li className="dropdown">
-                    <span>Home</span>
+                  <li>
+                    <Link to="/home">Home</Link>
                   </li>
-                  <li className="dropdown">
-                    <span>Shop</span>
+                  <li>
+                    <Link to="/shop">Shop</Link>
                   </li>
                   <li>
                     <Link to="/contact">Contact</Link>
                   </li>
+                  {!userInfo && (
+                    <li>
+                      <Link to="/login">Login</Link>
+                    </li>
+                  )}
                 </ul>
               </nav>
 
