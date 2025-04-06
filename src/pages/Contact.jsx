@@ -8,7 +8,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { setHours, setMinutes } from 'date-fns';
 import 'react-toastify/dist/ReactToastify.css';
-import './Contact.css';
 
 function Contact() {
   const [services, setServices] = useState([]);
