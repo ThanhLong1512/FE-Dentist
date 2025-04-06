@@ -18,17 +18,17 @@ const ProtectedRoute = () => {
       "/admin/css/demo.css",
       "/admin/css/bootstrap.css",
     ];
-    // const jsFiles = [
-    //   "/admin/js/core/jquery-3.7.1.min.js",
-    //   "/admin/js/core/bootstrap.min.js",
-    //   "/admin/js/core/popper.min.js",
-    //   "/admin/js/plugins/jquery.scrollbar.min.js",
-    //   "/admin/js/kaiadmin.min.js",
-    //   "/admin/js/demo.js",
-    //   "/admin/js/kaiadmin.js",
-    //   "/admin/js/setting-demo.js",
-    //   "/admin/js/setting-demo2.js",
-    // ];
+    const jsFiles = [
+      "/admin/js/core/jquery-3.7.1.min.js",
+      "/admin/js/core/bootstrap.min.js",
+      "/admin/js/core/popper.min.js",
+      "/admin/js/plugins/jquery.scrollbar.min.js",
+      "/admin/js/kaiadmin.min.js",
+      "/admin/js/demo.js",
+      "/admin/js/kaiadmin.js",
+      "/admin/js/setting-demo.js",
+      "/admin/js/setting-demo2.js",
+    ];
     const existingLinks = document.querySelectorAll('link[rel="stylesheet"]');
     existingLinks.forEach((link) => {
       if (
@@ -39,15 +39,15 @@ const ProtectedRoute = () => {
       }
     });
 
-    // const existingScripts = document.querySelectorAll("script");
-    // existingScripts.forEach((script) => {
-    //   if (
-    //     script.src.includes("/admin/js/") ||
-    //     jsFiles.some((file) => script.src.includes(file))
-    //   ) {
-    //     script.parentNode.removeChild(script);
-    //   }
-    // });
+    const existingScripts = document.querySelectorAll("script");
+    existingScripts.forEach((script) => {
+      if (
+        script.src.includes("/admin/js/") ||
+        jsFiles.some((file) => script.src.includes(file))
+      ) {
+        script.parentNode.removeChild(script);
+      }
+    });
     const elements = [];
     cssFiles.forEach((href) => {
       const link = document.createElement("link");
@@ -56,13 +56,13 @@ const ProtectedRoute = () => {
       document.head.appendChild(link);
       elements.push(link);
     });
-    // jsFiles.forEach((src) => {
-    //   const script = document.createElement("script");
-    //   script.src = src;
-    //   script.async = false;
-    //   document.body.appendChild(script);
-    //   elements.push(script);
-    // });
+    jsFiles.forEach((src) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = false;
+      document.body.appendChild(script);
+      elements.push(script);
+    });
     return () => {
       elements.forEach((element) => {
         element.parentNode.removeChild(element);

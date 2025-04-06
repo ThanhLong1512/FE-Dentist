@@ -2,161 +2,298 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { API_ROOT } from "../utils/constants";
+import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { setHours, setMinutes } from 'date-fns';
+import 'react-toastify/dist/ReactToastify.css';
+import './Contact.css';
 
 function Contact() {
-  const [employees, setEmployee] = useState();
+  const [services, setServices] = useState([]);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    message: '',
+    selectedServices: [],
+    appointmentDate: null
+  });
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8080/api/v1/employees/getEmployees`,
-          { withCredentials: true }
+          `${API_ROOT}/api/v1/services` 
         );
-        console.log(res.data);
-        setEmployee(res.data);
+        setServices(res.data);
       } catch (error) {
         toast.error(error.response?.data?.message || error?.message);
       }
     };
     fetchData();
   }, []);
-  if (!employees) {
-    console.log(employees);
-    return <h1>Thành công test Middleware</h1>;
-  } else {
-    return (
-      <>
-        <section className="contact-section" id="contact">
-          <div className="small-container">
-            <div className="sec-title text-center">
-              <span className="sub-title">Contact Now</span>
-              <h2>Write us a Message !</h2>
-              <span className="divider">
-                <svg viewBox="0 0 300.08 300.08">
-                  <path d="m293.26 184.14h-82.877l-12.692-76.138c-.546-3.287-3.396-5.701-6.718-5.701-.034 0-.061 0-.089 0-3.369.027-6.199 2.523-6.677 5.845l-12.507 87.602-14.874-148.69c-.355-3.43-3.205-6.056-6.643-6.138-.048 0-.096 0-.143 0-3.39 0-6.274 2.489-6.752 5.852l-19.621 137.368h-9.405l-12.221-42.782c-.866-3.028-3.812-5.149-6.8-4.944-3.13.109-5.777 2.332-6.431 5.395l-8.941 42.332h-73.049c-3.771 0-6.82 3.049-6.82 6.82 0 3.778 3.049 6.82 6.82 6.82h78.566c3.219 0 6.002-2.251 6.67-5.408l4.406-20.856 6.09 21.313c.839 2.939 3.526 4.951 6.568 4.951h20.46c3.396 0 6.274-2.489 6.752-5.845l12.508-87.596 14.874 148.683c.355 3.437 3.205 6.056 6.643 6.138h.143c3.39 0 6.274-2.489 6.752-5.845l14.227-99.599 6.397 38.362c.546 3.287 3.396 5.702 6.725 5.702h88.66c3.771 0 6.82-3.049 6.82-6.82-.001-3.772-3.05-6.821-6.821-6.821z"></path>
-                </svg>
-              </span>
-            </div>
 
-            <div className="contact-box">
-              <div className="row">
-                <div className="contact-info-block col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner">
-                    <span className="icon flaticon-worldwide"></span>
-                    <h4>
-                      <strong>Address</strong>
-                    </h4>
-                    <p>
-                      185, Pickton Near Street, <br />
-                      Los Angeles, USA
-                    </p>
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleServicesChange = (selectedOptions) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedServices: selectedOptions
+    }));
+  };
+
+  const filterPassedTime = (time) => {
+    const currentDate = new Date();
+    const selectedDate = new Date(time);
+    return currentDate.getTime() < selectedDate.getTime();
+  };
+
+  const handleDateChange = (date) => {
+    setFormData(prev => ({
+      ...prev,
+      appointmentDate: date
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (!formData.fullName || !formData.email || !formData.phone || formData.selectedServices.length === 0 || !formData.appointmentDate) {
+        toast.error('Please fill in all required fields', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        return;
+      }
+
+      const appointmentData = {
+        Date: formData.appointmentDate.toISOString(),
+        service: formData.selectedServices.map(service => service.value)
+      };
+
+      try {
+        console.log('Sending appointment data:', appointmentData);
+        const response = await axios.post(`${API_ROOT}/api/v1/appointments`, appointmentData, {
+          withCredentials: true,
+        });
+        
+        if (response.data) {
+          toast.success('Booking Appointment Successfully!', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+
+          setFormData({
+            fullName: '',
+            email: '',
+            phone: '',
+            message: '',
+            selectedServices: [],
+            appointmentDate: null
+          });
+        }
+      } catch (error) {
+        console.error('Appointment error:', error);
+        if (error.response?.status === 401) {
+          toast.error('Please login to book an appointment', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          navigate('/login');
+          return;
+        }
+        toast.error('Error booking appointment. Please try again.', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred. Please try again.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  };
+
+  const serviceOptions = services?.map(service => ({
+    value: service._id,
+    label: `${service.nameService} - ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(service.priceService)}`,
+  }));
+
+  const customSelectStyles = {
+    control: (provided) => ({
+      ...provided,
+      borderRadius: '30px',
+      border: '1px solid #e6e6e6',
+      minHeight: '50px',
+      boxShadow: 'none',
+      '&:hover': {
+        border: '1px solid #2ea3f2'
+      }
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: '#2ea3f2',
+      borderRadius: '15px',
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    multiValueRemove: (provided) => ({
+      ...provided,
+      color: 'white',
+      '&:hover': {
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        color: 'white',
+      },
+    })
+  };
+
+  return (
+    <>
+      <section className="contact-section" id="contact">
+        <div className="container">
+          <div className="sec-title text-center mb-5">
+            <h2 className="title">Book Your Appointment</h2>
+            <p className="subtitle">Schedule a visit with our professional team</p>
+          </div>
+
+          <div className="appointment-form-container">
+            <div className="contact-form">
+              <form id="appointment-form">
+                <div className="row g-4">
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        className="form-control"
+                        placeholder="Full Name *"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="form-control"
+                        placeholder="Email Address *"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="form-control"
+                        placeholder="Phone Number *"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <DatePicker
+                        selected={formData.appointmentDate}
+                        onChange={handleDateChange}
+                        showTimeSelect
+                        filterTime={filterPassedTime}
+                        dateFormat="MMMM d, yyyy h:mm aa"
+                        minDate={new Date()}
+                        minTime={setHours(setMinutes(new Date(), 0), 8)}
+                        maxTime={setHours(setMinutes(new Date(), 0), 17)}
+                        placeholderText="Select Date and Time *"
+                        className="form-control"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-12">
+                    <div className="form-group">
+                      <Select
+                        isMulti
+                        name="services"
+                        options={serviceOptions}
+                        className="basic-multi-select"
+                        classNamePrefix="select"
+                        value={formData.selectedServices}
+                        onChange={handleServicesChange}
+                        placeholder="Select Services *"
+                        styles={customSelectStyles}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-12">
+                    <div className="form-group">
+                      <textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        className="form-control"
+                        placeholder="Additional Notes (Optional)"
+                        rows="4"
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <div className="col-12 text-center">
+                    <button
+                      className="btn-appointment"
+                      type="button"
+                      onClick={handleSubmit}
+                    >
+                      Book Appointment
+                    </button>
                   </div>
                 </div>
-
-                <div className="contact-info-block col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner">
-                    <span className="icon flaticon-phone"></span>
-                    <h4>
-                      <strong>Phone</strong>
-                    </h4>
-                    <p>
-                      <a href="#">(+92) 313 888 000</a>
-                    </p>
-                    <p>
-                      <a href="#">(+92) 313 999 000</a>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="contact-info-block col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner">
-                    <span className="icon flaticon-email"></span>
-                    <h4>
-                      <strong>Email</strong>
-                    </h4>
-                    <p>
-                      <a href="mailto:support@example.com">
-                        support@example.com
-                      </a>
-                    </p>
-                    <p>
-                      <a href="mailto:support@example.com">
-                        support@example.com
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="form-box">
-              <div className="contact-form">
-                <form action="#" method="post" id="email-form">
-                  <div className="row">
-                    <div className="form-group col-lg-12">
-                      <div className="response"></div>
-                    </div>
-
-                    <div className="col-lg-6 col-md-12">
-                      <div className="form-group">
-                        <input
-                          type="text"
-                          name="username"
-                          className="username"
-                          placeholder="Full Name *"
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <input
-                          type="email"
-                          name="email"
-                          className="email"
-                          placeholder="Email Address *"
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <input
-                          type="text"
-                          name="username"
-                          className="username"
-                          placeholder="Your Phone"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="col-lg-6 col-md-12">
-                      <div className="form-group">
-                        <textarea
-                          name="contact_message"
-                          className="message"
-                          placeholder="Massage"
-                        ></textarea>
-                      </div>
-                    </div>
-
-                    <div className="form-group col-lg-12 text-center pt-3">
-                      <button
-                        className="theme-btn btn-style-one"
-                        type="button"
-                        id="submit"
-                        name="submit-form"
-                      >
-                        <span className="btn-title">Send Message</span>
-                        <span></span> <span></span> <span></span> <span></span>{" "}
-                        <span></span>
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
+              </form>
             </div>
           </div>
-        </section>
-      </>
-    );
-  }
+        </div>
+      </section>
+    </>
+  );
 }
 
 export default Contact;
