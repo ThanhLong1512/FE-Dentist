@@ -5,17 +5,11 @@ function Header() {
   const [userInfo, setUserInfo] = useState(null);
 
   useEffect(() => {
-    const user = localStorage.getItem('userInfo');
+    const user = localStorage.getItem("userInfo");
     if (user) {
       setUserInfo(JSON.parse(user));
     }
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('userInfo');
-    setUserInfo(null);
-    window.location.href = '/login';
-  };
 
   return (
     <>
@@ -143,6 +137,9 @@ function Header() {
                 <ul className="navigation" id="navbar">
                   <li>
                     <Link to="/home">Home</Link>
+                  </li>
+                  <li>
+                    <Link to="/blog">Blog</Link>
                   </li>
                   <li>
                     <Link to="/shop">Shop</Link>

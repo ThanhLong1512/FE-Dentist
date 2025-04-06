@@ -1,4 +1,29 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
 function Shop() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/v1/services');
+        setServices(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
     <div className="sidebar-page-container">
       <div className="auto-container">
@@ -24,412 +49,43 @@ function Shop() {
                     </option>
                   </select>
                 </div>
-                <div className="items-label">Showing all 9 results</div>
+                <div className="items-label">Showing {services.length} results</div>
               </div>
 
               <div className="row">
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/1.jpg" alt="" />
+                {services.map((service) => (
+                  <div key={service._id} className="shop-item col-lg-4 col-md-6 col-sm-12">
+                    <div className="inner-box">
+                      <div className="image-box">
+                        <figure className="image">
+                          <a href="#">
+                            <img src={service.photoService.url} alt={service.nameService} />
+                          </a>
+                        </figure>
+                      </div>
+                      <div className="lower-content">
+                        <h4 className="name">
+                          <a href="#">{service.nameService}</a>
+                        </h4>
+                        <div className="price">
+                          {service.priceService.toLocaleString('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                          })}
+                        </div>
+                        <div className="description">
+                          {service.description}
+                        </div>
+                        <div className="unit">
+                          Đơn vị: {service.Unit}
+                        </div>
+                        <a href="#" className="theme-btn add-to-cart">
+                          Đặt lịch ngay
                         </a>
-                      </figure>
-                      <span className="onsale">Sale</span>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
                       </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Hand Sanitizer</a>
-                      </h4>
-                      <div className="price">
-                        {" "}
-                        $12.00 <del>$14.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
                     </div>
                   </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/2.jpg" alt="" />
-                        </a>
-                      </figure>
-                      <span className="onsale">-17%</span>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Liquid Sanitizer</a>
-                      </h4>
-                      <div className="price">
-                        {" "}
-                        $14.00 <del>$17.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/3.jpg" alt="" />
-                        </a>
-                      </figure>
-                      <span className="onsale">-17%</span>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Sanitizer Gel</a>
-                      </h4>
-                      <div className="price">
-                        $25.00 <del>$15.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/4.jpg" alt="" />
-                        </a>
-                      </figure>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Vitamin D3</a>
-                      </h4>
-                      <div className="price"> $16.88</div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/5.jpg" alt="" />
-                        </a>
-                      </figure>
-                      <span className="onsale">-17%</span>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Vitamin B2</a>
-                      </h4>
-                      <div className="price">
-                        {" "}
-                        $14.00 <del>$17.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/6.jpg" alt="" />
-                        </a>
-                      </figure>
-                      <span className="onsale">-17%</span>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Vitamin C+</a>
-                      </h4>
-                      <div className="price">
-                        $25.00 <del>$15.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/7.jpg" alt="" />
-                        </a>
-                      </figure>
-                      <span className="onsale">-17%</span>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Dental Instruments</a>
-                      </h4>
-                      <div className="price"> $16.88</div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/8.jpg" alt="" />
-                        </a>
-                      </figure>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">First Aid Kit</a>
-                      </h4>
-                      <div className="price">
-                        {" "}
-                        $14.00 <del>$17.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/9.jpg" alt="" />
-                        </a>
-                      </figure>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">classNameic Stethoscope</a>
-                      </h4>
-                      <div className="price">
-                        $25.00 <del>$15.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/10.jpg" alt="" />
-                        </a>
-                      </figure>
-                      <span className="onsale">-17%</span>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Zinc Tablet</a>
-                      </h4>
-                      <div className="price"> $16.88</div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/11.jpg" alt="" />
-                        </a>
-                      </figure>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Iron Tablet</a>
-                      </h4>
-                      <div className="price">
-                        {" "}
-                        $14.00 <del>$17.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="shop-item col-lg-4 col-md-6 col-sm-12">
-                  <div className="inner-box">
-                    <div className="image-box">
-                      <figure className="image">
-                        <a href="shop-single.html">
-                          <img src="images/resource/products/12.jpg" alt="" />
-                        </a>
-                      </figure>
-                    </div>
-                    <div className="lower-content">
-                      <div className="rating">
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star"></span>
-                        <span className="fa fa-star light"></span>
-                      </div>
-                      <h4 className="name">
-                        <a href="shop-single.html">Folic Acid</a>
-                      </h4>
-                      <div className="price">
-                        $25.00 <del>$15.00</del>
-                      </div>
-                      <a
-                        href="shopping-cart.html"
-                        className="theme-btn add-to-cart"
-                      >
-                        {" "}
-                        Add to cart
-                      </a>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <ul className="styled-pagination">
