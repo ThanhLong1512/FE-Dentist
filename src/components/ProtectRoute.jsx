@@ -1,74 +1,91 @@
 import { Navigate, Outlet } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const ProtectedRoute = () => {
-  useEffect(() => {
-    const cssFiles = [
-      "/admin/css/admin.css",
-      "/admin/css/plugins.min.css",
-      "/admin/css/plugins.css",
-      "/admin/css/plugins.css.map",
-      "/admin/css/kaiadmin.min.css",
-      "/admin/css/demo.css",
-      "/admin/css/demo.css.map",
-      "/admin/css/fonts.css",
-      "/admin/css/fonts.min.css",
-      "/admin/css/kaiadmin.css.map",
-      "/admin/css/demo.css",
-      "/admin/css/bootstrap.css",
-    ];
-    const jsFiles = [
-      "/admin/js/core/jquery-3.7.1.min.js",
-      "/admin/js/core/bootstrap.min.js",
-      "/admin/js/core/popper.min.js",
-      "/admin/js/plugins/jquery.scrollbar.min.js",
-      "/admin/js/kaiadmin.min.js",
-      "/admin/js/demo.js",
-      "/admin/js/kaiadmin.js",
-      "/admin/js/setting-demo.js",
-      "/admin/js/setting-demo2.js",
-    ];
-    const existingLinks = document.querySelectorAll('link[rel="stylesheet"]');
-    existingLinks.forEach((link) => {
-      if (
-        link.href.includes("/admin/css/") ||
-        cssFiles.some((file) => link.href.includes(file))
-      ) {
-        link.parentNode.removeChild(link);
-      }
-    });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-    const existingScripts = document.querySelectorAll("script");
-    existingScripts.forEach((script) => {
-      if (
-        script.src.includes("/admin/js/") ||
-        jsFiles.some((file) => script.src.includes(file))
-      ) {
-        script.parentNode.removeChild(script);
+  useEffect(() => {
+    const checkAdmin = () => {
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const isUserAdmin = userInfo && userInfo.role === 'admin';
+        setIsAdmin(isUserAdmin);
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        setIsAdmin(false);
+      } finally {
+        setIsLoading(false);
       }
-    });
-    const elements = [];
-    cssFiles.forEach((href) => {
-      const link = document.createElement("link");
-      link.href = href;
-      link.rel = "stylesheet";
-      document.head.appendChild(link);
-      elements.push(link);
-    });
-    jsFiles.forEach((src) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.async = false;
-      document.body.appendChild(script);
-      elements.push(script);
-    });
-    return () => {
-      elements.forEach((element) => {
-        element.parentNode.removeChild(element);
-      });
     };
+
+    checkAdmin();
   }, []);
+
+  useEffect(() => {
+    if (isAdmin) {
+      const cssFiles = [
+        "/admin/css/admin.css",
+        "/admin/css/plugins.min.css",
+        "/admin/css/plugins.css",
+        "/admin/css/plugins.css.map",
+        "/admin/css/kaiadmin.min.css",
+        "/admin/css/demo.css",
+        "/admin/css/demo.css.map",
+        "/admin/css/fonts.css",
+        "/admin/css/fonts.min.css",
+        "/admin/css/kaiadmin.css.map",
+        "/admin/css/demo.css",
+        "/admin/css/bootstrap.css",
+      ];
+      const jsFiles = [
+        "/admin/js/core/jquery-3.7.1.min.js",
+        "/admin/js/core/bootstrap.min.js",
+        "/admin/js/core/popper.min.js",
+        "/admin/js/plugins/jquery.scrollbar.min.js",
+        "/admin/js/kaiadmin.min.js",
+        "/admin/js/demo.js",
+        "/admin/js/kaiadmin.js",
+        "/admin/js/setting-demo.js",
+        "/admin/js/setting-demo2.js",
+      ];
+
+      // Add admin CSS and JS
+      const elements = [];
+      cssFiles.forEach((href) => {
+        const link = document.createElement("link");
+        link.href = href;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+        elements.push(link);
+      });
+
+      jsFiles.forEach((src) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = false;
+        document.body.appendChild(script);
+        elements.push(script);
+      });
+
+      return () => {
+        elements.forEach((element) => {
+          if (element.parentNode) {
+            element.parentNode.removeChild(element);
+          }
+        });
+      };
+    }
+  }, [isAdmin]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/home" replace />;
+  }
 
   return (
     <div className="wrapper">

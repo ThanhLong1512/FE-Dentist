@@ -32,10 +32,26 @@ function App() {
     if (!userInfo) return <Navigate to="/login" replace={true} />;
     return <Outlet />;
   };
+
   const UnauthorizedRoutes = () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     if (userInfo) return <Navigate to="/home" replace={true} />;
     return <Outlet />;
+  };
+
+  const AdminRoutes = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (!userInfo || userInfo.role !== "admin") {
+      // Remove any admin CSS/JS before redirecting
+      const adminStyles = document.querySelectorAll('link[href*="/admin/"]');
+      const adminScripts = document.querySelectorAll('script[src*="/admin/"]');
+      
+      adminStyles.forEach(style => style.remove());
+      adminScripts.forEach(script => script.remove());
+      
+      return <Navigate to="/home" replace={true} />;
+    }
+    return <ProtectedRoute />;
   };
 
   return (
@@ -45,29 +61,18 @@ function App() {
         <Route path="home" element={<Home />} />
         <Route element={<AppLayout />}>
           <Route path="blog" element={<Blog />} />
-          <Route element={<ProtectedRoutes />}>
-            <Route path="contact" element={<Contact />} />
-          </Route>
+          <Route path="contact" element={<Contact />} />
           <Route element={<UnauthorizedRoutes />}>
             <Route path="login" element={<Login />} />
           </Route>
           <Route path="shop" element={<Shop />} />
           <Route path="*" element={<NotFound />} />
         </Route>
-        <Route
-          path="admin/*"
-          element={
-            isAdmin ? <ProtectedRoute /> : <Navigate replace to="/home" />
-          }
-        >
-          {isAdmin && (
-            <>
-              <Route index element={<Navigate replace to="dashboard" />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="users" element={<FormsAdmin />} />
-              <Route path="employees" element={<TableAdmin />} />
-            </>
-          )}
+        <Route path="admin/*" element={<AdminRoutes />}>
+          <Route index element={<Navigate replace to="dashboard" />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="users" element={<FormsAdmin />} />
+          <Route path="employees" element={<TableAdmin />} />
         </Route>
       </Routes>
       <ToastContainer 

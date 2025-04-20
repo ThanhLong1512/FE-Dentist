@@ -11,23 +11,27 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function Contact() {
   const [services, setServices] = useState([]);
+  const [shifts, setShifts] = useState([]);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
     message: '',
     selectedServices: [],
-    appointmentDate: null
+    appointmentDate: null,
+    shift: ''
   });
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const res = await axios.get(
-          `${API_ROOT}/api/v1/services` 
-        );
-        setServices(res.data);
+      try {   
+        
+        const today = new Date();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const currentDayOfWeek = days[today.getDay()];
+        const shiftsRes = await axios.get(`${API_ROOT}/api/v1/shifts/${currentDayOfWeek}`, {withCredentials: true});// Debug log
+        setShifts(shiftsRes.data.data);
       } catch (error) {
         toast.error(error.response?.data?.message || error?.message);
       }
@@ -43,10 +47,12 @@ function Contact() {
     }));
   };
 
-  const handleServicesChange = (selectedOptions) => {
+
+
+  const handleShiftChange = (e) => {
     setFormData(prev => ({
       ...prev,
-      selectedServices: selectedOptions
+      shift: e.target.value
     }));
   };
 
@@ -65,7 +71,9 @@ function Contact() {
 
   const handleSubmit = async () => {
     try {
-      if (!formData.fullName || !formData.email || !formData.phone || formData.selectedServices.length === 0 || !formData.appointmentDate) {
+      if (!formData.fullName || !formData.email || !formData.phone || 
+         !formData.appointmentDate || 
+          !formData.shift) {
         toast.error('Please fill in all required fields', {
           position: "top-right",
           autoClose: 3000,
@@ -79,7 +87,12 @@ function Contact() {
 
       const appointmentData = {
         Date: formData.appointmentDate.toISOString(),
-        service: formData.selectedServices.map(service => service.value)
+        shift: formData.shift,
+        patient: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone
+        }
       };
 
       try {
@@ -104,7 +117,8 @@ function Contact() {
             phone: '',
             message: '',
             selectedServices: [],
-            appointmentDate: null
+            appointmentDate: null,
+            shift: ''
           });
         }
       } catch (error) {
@@ -249,17 +263,20 @@ function Contact() {
 
                   <div className="col-12">
                     <div className="form-group">
-                      <Select
-                        isMulti
-                        name="services"
-                        options={serviceOptions}
-                        className="basic-multi-select"
-                        classNamePrefix="select"
-                        value={formData.selectedServices}
-                        onChange={handleServicesChange}
-                        placeholder="Select Services *"
-                        styles={customSelectStyles}
-                      />
+                      <select
+                        name="shift"
+                        value={formData.shift}
+                        onChange={handleShiftChange}
+                        className="form-control"
+                        required
+                      >
+                        <option value="">Select Available Shift *</option>
+                        {shifts.map((shift) => (
+                          <option key={shift._id} value={shift._id}>
+                            {shift.employee?.name || 'Unknown Doctor'} - {shift.StartTime} to {shift.EndTime} ({shift.employee.service.nameService})
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 

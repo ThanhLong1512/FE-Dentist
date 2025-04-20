@@ -17,3 +17,10 @@ export const handleRefreshTokenApi = async (refreshToken) => {
     { refreshToken }
   );
 };
+
+export const get2FA_QRCodeAPI = async () => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/users/get_2fa_qr_code`
+  );
+  return res.data;
+};
