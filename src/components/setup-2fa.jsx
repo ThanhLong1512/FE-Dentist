@@ -7,6 +7,7 @@ import SecurityIcon from "@mui/icons-material/Security";
 import CancelIcon from "@mui/icons-material/Cancel";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import axios from "axios";
 import { use } from "react";
 import { is } from "date-fns/locale";
 import { get2FA_QRCodeAPI } from "../apis";
@@ -18,9 +19,21 @@ function Setup2FA({ isOpen, toggleOpen }) {
   useEffect(() => {
     // Call API to get QR code image for 2FA
     if (isOpen) {
-      get2FA_QRCodeAPI().then((res) => {
-        setQrCodeImage(res.data);
-      });
+      axios
+        .get("http://localhost:8080/api/v1/users/get_2fa_qr_code", {
+          withCredentials: true, // Nếu cần gửi credential
+        })
+        .then((response) => {
+          // Tạo URL từ blob nếu là ảnh
+          console.log("response:", response.data.data);
+          const imageURL = response.data.data;
+          // const imageUrl = URL.createObjectURL(response.data);
+          setQrCodeImage(imageURL);
+        })
+        .catch((error) => {
+          console.error("Error fetching QR code:", error);
+          // Xử lý lỗi nếu cần
+        });
     }
   }, [isOpen]);
   const handleCloseModal = () => {

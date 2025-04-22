@@ -46,7 +46,7 @@ authorizedAxiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     const refreshTokenFromLocalStorage = localStorage.getItem("refreshToken");
-    if (error.response?.status === 41 && !originalRequest._retry) {
+    if (error.response?.status === 410 && !originalRequest._retry) {
       // Gán thêm một giá trị _retry luôn = true trong khoảng thời gian chờ, để việc refresh token này chỉ luôn gọi 1 lần tại 1 thời điểm
       originalRequest._retry = true;
 
@@ -54,9 +54,9 @@ authorizedAxiosInstance.interceptors.response.use(
         .then((res) => {
           // Nếu trả về thành công từ API thì gán accessToken vào localStorage hoặc Cookie
           // Cách 1: Trương hợp gán lại accessToken từ localStorage
-          const { accessToken } = res.data;
+          const { accessTokenNew } = res.data;
           localStorage.setItem("accessToken", accessToken);
-          authorizedAxiosInstance.defaults.headers.Authorization = `Bearer ${accessToken}`;
+          authorizedAxiosInstance.defaults.headers.Authorization = `Bearer ${accessTokenNew}`;
           // Bước cuối cùng: return lại axios instance của chúng ta kết hợp cái originalConfig để gọi lại những api ban đầu bị lỗi
           return authorizedAxiosInstance(originalRequest);
         })
