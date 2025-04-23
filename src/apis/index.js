@@ -11,10 +11,9 @@ export const handleLogoutApi = async () => {
     `${API_ROOT}/api/v1/users/logout`
   );
 };
-export const handleRefreshTokenApi = async (refreshToken) => {
+export const handleRefreshTokenApi = async () => {
   return await authorizedAxiosInstance.put(
-    `${API_ROOT}/api/v1/users/refreshToken`,
-    { refreshToken }
+    `${API_ROOT}/api/v1/users/refreshToken`
   );
 };
 

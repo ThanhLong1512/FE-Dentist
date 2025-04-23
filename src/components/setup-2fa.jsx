@@ -17,22 +17,18 @@ function Setup2FA({ isOpen, toggleOpen }) {
   const [error, setError] = useState(null);
   const [qrCodeImage, setQrCodeImage] = useState(null);
   useEffect(() => {
-    // Call API to get QR code image for 2FA
     if (isOpen) {
       axios
         .get("http://localhost:8080/api/v1/users/get_2fa_qr_code", {
-          withCredentials: true, // Nếu cần gửi credential
+          withCredentials: true,
         })
         .then((response) => {
-          // Tạo URL từ blob nếu là ảnh
-          console.log("response:", response.data.data);
           const imageURL = response.data.data;
-          // const imageUrl = URL.createObjectURL(response.data);
           setQrCodeImage(imageURL);
         })
         .catch((error) => {
+          location.href = "/login"
           console.error("Error fetching QR code:", error);
-          // Xử lý lỗi nếu cần
         });
     }
   }, [isOpen]);
@@ -49,6 +45,17 @@ function Setup2FA({ isOpen, toggleOpen }) {
     }
     console.log("handleConfirmSetup2FA > otpToken: ", otpToken);
     // Call API here
+    axios
+      .post(
+        "http://localhost:8080/api/v1/users/setUp2FA",
+        { otpTokenClient: otpToken },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        console.log("Setup 2FA response: ", response.data);
+        toast.success("Setup 2FA successfully!");
+        // handleCloseModal();
+      });
   };
 
   return (

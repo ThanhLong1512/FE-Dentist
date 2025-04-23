@@ -29,12 +29,8 @@ function Login() {
       id: res.data.id,
       email: res.data.email,
       role: res.data.role,
+      requires2FA: res.data.requires2FA,
     };
-    console.log("role: ", res.data.role);
-    const accessToken = res.data.accessToken;
-    const refreshToken = res.data.refreshToken;
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
     res.data.role === "user" ? navigate("/home") : navigate("/admin/dashboard");
   };
