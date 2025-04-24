@@ -6,10 +6,12 @@ import authorizedAxiosInstance from "../utils/authorizedAxios";
 import { API_ROOT } from "../utils/constants";
 import { handleLogoutApi } from "../apis/index";
 import Setup2FA from "../components/setup-2fa";
+import Require2FA from "../components/require-2fa";
 function Home() {
   const [openSetup2FA, setOpenSetup2FA] = useState(false);
   let formatEmail,
-    check2FA = false;
+    check2FA = false,
+    checkVerify2FA;
   const useInfoFromLocalStorage = localStorage.getItem("userInfo");
   const navigate = useNavigate();
   const handleLogout = async () => {
@@ -24,16 +26,19 @@ function Home() {
       id: user._id,
       role: user.role,
       require_2FA: user.require_2FA,
+      is_2fa_verified: is_2fa_verified,
+      last_login: last_login,
     };
     localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
     setOpenSetup2FA(false);
   };
   if (useInfoFromLocalStorage) {
-    const { id, email, role, require_2FA } = JSON.parse(
+    const { id, email, role, require_2FA, is_2fa_verified } = JSON.parse(
       useInfoFromLocalStorage
     );
     formatEmail = email.split("@")[0];
     check2FA = require_2FA;
+    checkVerify2FA = is_2fa_verified;
   }
 
   return (
@@ -85,7 +90,6 @@ function Home() {
           </span>
         </div>
       )}
-      {/* {check2FA && !user.is_2fa_verified && <Require2FA />} */}
       <Setup2FA
         isOpen={openSetup2FA}
         toggleOpen={setOpenSetup2FA}
@@ -2624,6 +2628,7 @@ function Home() {
           </div>
         </div>
       </div>
+      {check2FA && !checkVerify2FA && <Require2FA />}
     </>
   );
 }

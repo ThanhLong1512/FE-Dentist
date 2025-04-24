@@ -11,6 +11,7 @@ import authorizedAxiosInstance from "./../utils/authorizedAxios";
 import { toast } from "react-toastify";
 import { API_ROOT } from "./../utils/constants";
 import { useNavigate } from "react-router-dom";
+import { is } from "date-fns/locale";
 
 function Login() {
   const {
@@ -30,6 +31,8 @@ function Login() {
       email: res.data.email,
       role: res.data.role,
       require_2FA: res.data.require_2FA,
+      is_2fa_verified: res.data.is_2fa_verified,
+      last_login: res.data.last_login,
     };
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
     res.data.role === "user" ? navigate("/home") : navigate("/admin/dashboard");
