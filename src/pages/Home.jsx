@@ -8,49 +8,89 @@ import { handleLogoutApi } from "../apis/index";
 import Setup2FA from "../components/setup-2fa";
 function Home() {
   const [openSetup2FA, setOpenSetup2FA] = useState(false);
-  let formatEmail;
+  let formatEmail,
+    check2FA = false;
   const useInfoFromLocalStorage = localStorage.getItem("userInfo");
   const navigate = useNavigate();
   const handleLogout = async () => {
     handleLogoutApi();
     navigate("/login");
   };
+  const handleSuccessSetup2FA = (response) => {
+    // console.log(response);
+    const { is_2fa_verified, last_login, user } = response.data;
+    const newUserInfo = {
+      email: user.email,
+      id: user._id,
+      role: user.role,
+      require_2FA: user.require_2FA,
+    };
+    localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
+    setOpenSetup2FA(false);
+  };
   if (useInfoFromLocalStorage) {
-    const { id, email, role } = JSON.parse(useInfoFromLocalStorage);
+    const { id, email, role, require_2FA } = JSON.parse(
+      useInfoFromLocalStorage
+    );
     formatEmail = email.split("@")[0];
+    check2FA = require_2FA;
   }
 
   return (
     <>
-      <div
-        style={{
-          backgroundColor: "#fff8e1",
-          padding: "8px 12px",
-          borderRadius: "4px",
-          borderLeft: "4px solid #ff9800",
-          margin: "5px 0",
-        }}
-      >
-        <span style={{ color: "#ff9800", fontWeight: "500" }}>
-          Lời khuyên bảo mật:
-        </span>
-        <span style={{ color: "#5f5f5f" }}>
-          Bật xác thực 2 bước để bảo vệ tài khoản tốt hơn.
-          <Link
-            to="#"
-            onClick={() => setOpenSetup2FA(true)}
-            style={{
-              color: "#1976d2",
-              marginLeft: "5px",
-              textDecoration: "underline",
-              cursor: "pointer",
-            }}
-          >
-            Bật ngay
-          </Link>
-        </span>
-      </div>
-      <Setup2FA isOpen={openSetup2FA} toggleOpen={setOpenSetup2FA} />
+      {check2FA ? (
+        <div
+          style={{
+            backgroundColor: "#e1f5fe",
+            padding: "8px 12px",
+            borderRadius: "4px",
+            borderLeft: "4px solid #03a9f4",
+            margin: "5px 0",
+          }}
+        >
+          <span style={{ fontWeight: "500" }}>
+            Tình trạng bảo mật tài khoản:
+          </span>{" "}
+          <span style={{ color: "#2e7d32" }}>
+            Đã bật xác thực 2 lớp - Two-Factor Authentication (2FA)
+          </span>
+        </div>
+      ) : (
+        <div
+          style={{
+            backgroundColor: "#fff8e1",
+            padding: "8px 12px",
+            borderRadius: "4px",
+            borderLeft: "4px solid #ff9800",
+            margin: "5px 0",
+          }}
+        >
+          <span style={{ color: "#ff9800", fontWeight: "500" }}>
+            Lời khuyên bảo mật:
+          </span>
+          <span style={{ color: "#5f5f5f" }}>
+            Bật xác thực 2 bước để bảo vệ tài khoản tốt hơn.
+            <Link
+              to="#"
+              onClick={() => setOpenSetup2FA(true)}
+              style={{
+                color: "#1976d2",
+                marginLeft: "5px",
+                textDecoration: "underline",
+                cursor: "pointer",
+              }}
+            >
+              Bật ngay
+            </Link>
+          </span>
+        </div>
+      )}
+      {/* {check2FA && !user.is_2fa_verified && <Require2FA />} */}
+      <Setup2FA
+        isOpen={openSetup2FA}
+        toggleOpen={setOpenSetup2FA}
+        handleSuccessSetup2FA={handleSuccessSetup2FA}
+      />
       <div className="mm-wrapper">
         <div className="mm-page mm-slideout" id="mm-0">
           <div className="page-wrapper">

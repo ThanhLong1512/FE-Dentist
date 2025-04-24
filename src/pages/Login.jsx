@@ -29,7 +29,7 @@ function Login() {
       id: res.data.id,
       email: res.data.email,
       role: res.data.role,
-      requires2FA: res.data.requires2FA,
+      require_2FA: res.data.require_2FA,
     };
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
     res.data.role === "user" ? navigate("/home") : navigate("/admin/dashboard");

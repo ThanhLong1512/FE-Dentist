@@ -12,7 +12,7 @@ import { use } from "react";
 import { is } from "date-fns/locale";
 import { get2FA_QRCodeAPI } from "../apis";
 
-function Setup2FA({ isOpen, toggleOpen }) {
+function Setup2FA({ isOpen, toggleOpen, handleSuccessSetup2FA }) {
   const [otpToken, setConfirmOtpToken] = useState("");
   const [error, setError] = useState(null);
   const [qrCodeImage, setQrCodeImage] = useState(null);
@@ -27,7 +27,7 @@ function Setup2FA({ isOpen, toggleOpen }) {
           setQrCodeImage(imageURL);
         })
         .catch((error) => {
-          location.href = "/login"
+          location.href = "/login";
           console.error("Error fetching QR code:", error);
         });
     }
@@ -43,8 +43,7 @@ function Setup2FA({ isOpen, toggleOpen }) {
       toast.error(errMsg);
       return;
     }
-    console.log("handleConfirmSetup2FA > otpToken: ", otpToken);
-    // Call API here
+
     axios
       .post(
         "http://localhost:8080/api/v1/users/setUp2FA",
@@ -52,9 +51,11 @@ function Setup2FA({ isOpen, toggleOpen }) {
         { withCredentials: true }
       )
       .then((response) => {
+        handleSuccessSetup2FA(response.data);
         console.log("Setup 2FA response: ", response.data);
         toast.success("Setup 2FA successfully!");
-        // handleCloseModal();
+        setError(null);
+        handleCloseModal();
       });
   };
 
