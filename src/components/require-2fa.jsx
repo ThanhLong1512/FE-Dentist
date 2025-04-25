@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
+import axios from "axios";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
@@ -7,13 +8,10 @@ import SecurityIcon from "@mui/icons-material/Security";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 
-function Require2FA() {
+function Require2FA({ handleSuccessVerify2FA }) {
   const [otpToken, setConfirmOtpToken] = useState("");
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    // Call API to get QR code image for 2FA
-  }, []);
+  const [loading, setLoading] = useState(false);
 
   const handleRequire2FA = () => {
     if (!otpToken) {
@@ -22,16 +20,34 @@ function Require2FA() {
       toast.error(errMsg);
       return;
     }
+
+    setLoading(true);
     console.log("handleRequire2FA > otpToken: ", otpToken);
+
     // Call API here
+    axios
+      .put(
+        "http://localhost:8080/api/v1/users/verify2FA",
+        { otpTokenClient: otpToken },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        handleSuccessVerify2FA(response.data);
+        toast.success("Verify 2FA successfully!");
+        setError(null);
+      })
+      .catch((err) => {
+        const errMsg = err.response?.data?.message || "Verification failed";
+        toast.error(errMsg);
+        setError(errMsg);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
-    <Modal
-      disableScrollLock
-      open={true} // Chỗ này cứ để true, còn về phần hiển thị render Modal này hay không thì dựa theo trường require_2fa của user
-      sx={{ overflowY: "auto" }}
-    >
+    <Modal disableScrollLock open={true} sx={{ overflowY: "auto" }}>
       <Box
         sx={{
           position: "relative",
@@ -115,8 +131,9 @@ function Require2FA() {
                 fontSize: "1em",
               }}
               onClick={handleRequire2FA}
+              disabled={loading}
             >
-              Confirm
+              {loading ? "Verifying..." : "Confirm"}
             </Button>
           </Box>
         </Box>

@@ -52,7 +52,6 @@ function Setup2FA({ isOpen, toggleOpen, handleSuccessSetup2FA }) {
       )
       .then((response) => {
         handleSuccessSetup2FA(response.data);
-        console.log("Setup 2FA response: ", response.data);
         toast.success("Setup 2FA successfully!");
         setError(null);
         handleCloseModal();
