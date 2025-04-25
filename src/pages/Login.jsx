@@ -12,6 +12,7 @@ import authorizedAxiosInstance from "./../utils/authorizedAxios";
 import { API_ROOT } from "./../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { el } from "date-fns/locale";
+import axios from "axios";
 function Login() {
   const {
     register,
@@ -21,20 +22,52 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSuccessGoogle = async (credentialResponse) => {
-    const { credential } = credentialResponse;
-    const res = await authorizedAxiosInstance.post(
-      `${API_ROOT}/api/v1/users/loginGoogle`,
-      { token: credential },
-      { withCredentials: true }
-    );
-    if (res) {
-      alert("Login Google successfully!");
-    } else {
-      alert("Login Google failed!");
+    try {
+      const { credential } = credentialResponse;
+
+      // Gọi API đăng nhập Google
+      const res = await axios.post(
+        `${API_ROOT}/api/v1/users/loginGoogle`,
+        {
+          token: credential,
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (res.data) {
+        console.log("Login successful:", res.data);
+
+        // Lưu thông tin người dùng vào localStorage
+        const userInfo = {
+          id: res.data.id,
+          email: res.data.email,
+          role: res.data.role,
+          require_2FA: res.data.require_2FA,
+          is_2fa_verified: res.data.is_2fa_verified,
+          last_login: res.data.last_login,
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+        // Chuyển hướng người dùng dựa trên vai trò
+        res.data.role === "user"
+          ? navigate("/home")
+          : navigate("/admin/dashboard");
+      } else {
+        console.error("Login response does not contain data");
+        alert("Login with Google failed!");
+      }
+    } catch (error) {
+      // Xử lý lỗi khi gọi API
+      console.error("Google login error:", error);
+      alert(
+        error.response?.data?.message ||
+          "Login with Google failed. Please try again."
+      );
     }
-  };
-  const handleErrorGoogle = (error) => {
-    console.log("Login error: ", error);
   };
 
   const submitLogIn = async (payLoad) => {
@@ -159,10 +192,7 @@ function Login() {
                       >
                         Login
                       </Button>
-                      <GoogleLogin
-                        onSuccess={handleSuccessGoogle}
-                        onError={handleErrorGoogle}
-                      />
+                      <GoogleLogin onSuccess={handleSuccessGoogle} />
                     </CardActions>
                   </MuiCard>
                 </Zoom>
