@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import { GoogleLogin } from "@react-oauth/google";
 import { Card as MuiCard } from "@mui/material";
 import CardActions from "@mui/material/CardActions";
 import TextField from "@mui/material/TextField";
@@ -8,11 +9,9 @@ import Alert from "@mui/material/Alert";
 import { useForm } from "react-hook-form";
 import Typography from "@mui/material/Typography";
 import authorizedAxiosInstance from "./../utils/authorizedAxios";
-import { toast } from "react-toastify";
 import { API_ROOT } from "./../utils/constants";
 import { useNavigate } from "react-router-dom";
-import { is } from "date-fns/locale";
-
+import { el } from "date-fns/locale";
 function Login() {
   const {
     register,
@@ -20,6 +19,23 @@ function Login() {
     formState: { errors },
   } = useForm();
   const navigate = useNavigate();
+
+  const handleSuccessGoogle = async (credentialResponse) => {
+    const { credential } = credentialResponse;
+    const res = await authorizedAxiosInstance.post(
+      `${API_ROOT}/api/v1/users/loginGoogle`,
+      { token: credential },
+      { withCredentials: true }
+    );
+    if (res) {
+      alert("Login Google successfully!");
+    } else {
+      alert("Login Google failed!");
+    }
+  };
+  const handleErrorGoogle = (error) => {
+    console.log("Login error: ", error);
+  };
 
   const submitLogIn = async (payLoad) => {
     const res = await authorizedAxiosInstance.post(
@@ -143,6 +159,10 @@ function Login() {
                       >
                         Login
                       </Button>
+                      <GoogleLogin
+                        onSuccess={handleSuccessGoogle}
+                        onError={handleErrorGoogle}
+                      />
                     </CardActions>
                   </MuiCard>
                 </Zoom>
