@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { GoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "react-facebook-login";
 import { Card as MuiCard } from "@mui/material";
 import CardActions from "@mui/material/CardActions";
 import TextField from "@mui/material/TextField";
@@ -13,6 +14,8 @@ import { API_ROOT } from "./../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { el } from "date-fns/locale";
 import axios from "axios";
+import { Facebook, Google } from "@mui/icons-material";
+
 function Login() {
   const {
     register,
@@ -70,6 +73,52 @@ function Login() {
     }
   };
 
+  const handleClickFacebook = async (response) => {};
+
+  const handleResponseFacebook = async (response) => {
+    try {
+      const res = await axios.post(
+        `${API_ROOT}/api/v1/users/loginFacebook`,
+        {
+          accessToken: response.accessToken,
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (res.data) {
+        console.log("Login successful:", res.data);
+
+        // Lưu thông tin người dùng vào localStorage
+        const userInfo = {
+          id: res.data.id,
+          email: res.data.email,
+          role: res.data.role,
+          require_2FA: res.data.require_2FA,
+          is_2fa_verified: res.data.is_2fa_verified,
+          last_login: res.data.last_login,
+        };
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        res.data.role === "user"
+          ? navigate("/home")
+          : navigate("/admin/dashboard");
+      } else {
+        console.error("Login response does not contain data");
+        alert("Login with Facebook failed!");
+      }
+    } catch (error) {
+      // Xử lý lỗi khi gọi API
+      console.error("Facebook login error:", error);
+      alert(
+        error.response?.data?.message ||
+          "Login with Google failed. Please try again."
+      );
+    }
+  };
+
   const submitLogIn = async (payLoad) => {
     const res = await authorizedAxiosInstance.post(
       `${API_ROOT}/api/v1/users/login`,
@@ -86,6 +135,36 @@ function Login() {
     localStorage.setItem("userInfo", JSON.stringify(userInfo));
     res.data.role === "user" ? navigate("/home") : navigate("/admin/dashboard");
   };
+
+  // Custom render props cho nút Google
+  const renderGoogleButton = ({ onClick }) => (
+    <Button
+      onClick={onClick}
+      variant="outlined"
+      fullWidth
+      sx={{
+        mt: 2,
+        py: 1,
+        color: "#757575",
+        borderColor: "#dadce0",
+
+        textTransform: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+      startIcon={
+        <Google
+          sx={{
+            color: "#4285F4",
+          }}
+        />
+      }
+    >
+      Sign in with Google
+    </Button>
+  );
+
   return (
     <section className="login-section">
       <div className="auto-container">
@@ -182,17 +261,111 @@ function Login() {
                         )}
                       </Box>
                     </Box>
-                    <CardActions sx={{ padding: "0.5em 1em 1em 1em" }}>
+                    <CardActions
+                      sx={{
+                        padding: "0.5em 1em 1em 1em",
+                        flexDirection: "column",
+                      }}
+                    >
                       <Button
                         type="submit"
                         variant="contained"
                         color="primary"
                         size="large"
                         fullWidth
+                        sx={{ py: 1 }}
                       >
                         Login
                       </Button>
-                      <GoogleLogin onSuccess={handleSuccessGoogle} />
+
+                      <Typography
+                        variant="body2"
+                        align="center"
+                        sx={{ my: 1.5, color: "#757575" }}
+                      >
+                        Or continue with
+                      </Typography>
+
+                      {/* Nút Google - đã điều chỉnh */}
+                      <GoogleLogin
+                        onSuccess={handleSuccessGoogle}
+                        render={({ onClick }) => (
+                          <Button
+                            onClick={onClick}
+                            variant="outlined"
+                            fullWidth
+                            sx={{
+                              mt: 1,
+                              py: 1,
+                              color: "#757575",
+                              borderColor: "#dadce0",
+
+                              textTransform: "none",
+                              fontSize: "0.875rem",
+                              height: "40px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 1,
+                            }}
+                            startIcon={
+                              <Google
+                                sx={{
+                                  color: "#4285F4",
+                                  fontSize: "1.2rem",
+                                }}
+                              />
+                            }
+                          >
+                            Sign in with Google
+                          </Button>
+                        )}
+                      />
+
+                      <FacebookLogin
+                        appId="2441728712860238"
+                        autoLoad={false}
+                        fields="name,email,picture"
+                        onClick={handleClickFacebook}
+                        callback={handleResponseFacebook}
+                        render={({ onClick }) => (
+                          <Button
+                            onClick={onClick}
+                            variant="outlined"
+                            fullWidth
+                            sx={{
+                              mt: 2,
+                              py: 1,
+                              borderColor: "#dadce0",
+                              textTransform: "none",
+                              fontSize: "0.875rem",
+                              height: "40px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 1,
+                              background:
+                                "linear-gradient(to right, #4267B2, #3b5998)",
+                              color: "white",
+                              "&:hover": {
+                                background:
+                                  "linear-gradient(to right, #3b5998, #4267B2)",
+                                color: "white",
+                              },
+                            }}
+                            startIcon={
+                              <Facebook
+                                sx={{
+                                  color: "white",
+                                  fontSize: "1.2rem",
+                                }}
+                              />
+                            }
+                          >
+                            Sign in with Facebook
+                          </Button>
+                        )}
+                      />
                     </CardActions>
                   </MuiCard>
                 </Zoom>
