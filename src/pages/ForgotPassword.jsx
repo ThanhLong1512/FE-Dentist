@@ -1,39 +1,58 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Mail } from "lucide-react";
+import OTPInput from "../components/OTPInput";
+import { RecoveryContext } from "../App";
 
 function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const { setEmail, email } = useContext(RecoveryContext);
+  const [showOTPInput, setShowOTPInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState({ type: "success", text: "" });
+  const [error, setError] = useState("");
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
+    setError(""); // Clear error khi người dùng thay đổi email
   };
 
-  const handleSubmitClick = () => {
-    if (!email) return;
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleSubmitClick = async () => {
+    if (!email) {
+      setError("Vui lòng nhập địa chỉ email");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Địa chỉ email không hợp lệ");
+      return;
+    }
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setMessage({
-        type: "success",
-        text: "Hướng dẫn đặt lại mật khẩu đã được gửi đến email của bạn!",
-      });
+    try {
+      // Giả định gọi API kiểm tra email tồn tại ở đây
+      // await checkEmailExists(email);
+
+      // Nếu email hợp lệ và tồn tại trong hệ thống
+      setShowOTPInput(true);
+    } catch (err) {
+      setError("Có lỗi xảy ra khi kiểm tra email");
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col py-12 sm:px-6 lg:px-8 ">
-      {/* Thêm thẻ style để nhúng Tailwind từ CDN */}
+    <div className="min-h-screen flex flex-col py-12 sm:px-6 lg:px-8">
       <style>
         {`
           @import url("https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css");
         `}
       </style>
-
+      {email && <OTPInput />}
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div className="text-center">
@@ -46,15 +65,9 @@ function ForgotPassword() {
             </p>
           </div>
 
-          {message.text && (
-            <div
-              className={`mt-4 p-3 rounded-md ${
-                message.type === "success"
-                  ? "bg-green-50 text-green-800"
-                  : "bg-red-50 text-red-800"
-              }`}
-            >
-              {message.text}
+          {error && (
+            <div className="mt-4 p-3 rounded-md bg-red-50 text-red-800">
+              {error}
             </div>
           )}
 
@@ -82,7 +95,6 @@ function ForgotPassword() {
                 />
               </div>
             </div>
-
             <div>
               <button
                 onClick={handleSubmitClick}
@@ -90,11 +102,10 @@ function ForgotPassword() {
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting
-                  ? "Đang gửi..."
+                  ? "Đang kiểm tra..."
                   : "Gửi hướng dẫn đặt lại mật khẩu"}
               </button>
             </div>
-
             <div className="text-center">
               <a
                 href="#"

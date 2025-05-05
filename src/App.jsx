@@ -5,7 +5,8 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-
+import { createContext } from "react";
+import { useState } from "react";
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -22,7 +23,10 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ForgotPassword from "./pages/ForgotPassword";
 
+export const RecoveryContext = createContext();
 function App() {
+  const [email, setEmail] = useState("");
+  const [otp, setOTP] = useState("");
   const isAdmin =
     JSON.parse(localStorage.getItem("userInfo"))?.role === "admin"
       ? true
@@ -57,38 +61,40 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route index element={<Navigate replace to="home" />} />
-        <Route path="home" element={<Home />} />
-        <Route element={<AppLayout />}>
-          <Route path="blog" element={<Blog />} />
-          <Route path="contact" element={<Contact />} />
-          <Route element={<UnauthorizedRoutes />}>
-            <Route path="login" element={<Login />} />
+      <RecoveryContext.Provider value={{ email, setEmail, otp, setOTP }}>
+        <Routes>
+          <Route index element={<Navigate replace to="home" />} />
+          <Route path="home" element={<Home />} />
+          <Route element={<AppLayout />}>
+            <Route path="blog" element={<Blog />} />
+            <Route path="contact" element={<Contact />} />
+            <Route element={<UnauthorizedRoutes />}>
+              <Route path="login" element={<Login />} />
+            </Route>
+            <Route path="shop" element={<Shop />} />
+            <Route path="*" element={<NotFound />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
-          <Route path="shop" element={<Shop />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-        </Route>
-        <Route path="admin/*" element={<AdminRoutes />}>
-          <Route index element={<Navigate replace to="dashboard" />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="users" element={<FormsAdmin />} />
-          <Route path="employees" element={<TableAdmin />} />
-        </Route>
-      </Routes>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+          <Route path="admin/*" element={<AdminRoutes />}>
+            <Route index element={<Navigate replace to="dashboard" />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="users" element={<FormsAdmin />} />
+            <Route path="employees" element={<TableAdmin />} />
+          </Route>
+        </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+      </RecoveryContext.Provider>
     </BrowserRouter>
   );
 }
