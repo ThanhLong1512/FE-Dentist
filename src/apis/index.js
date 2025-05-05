@@ -35,3 +35,11 @@ export const handleLogin = async (data) => {
   );
   return res.data;
 };
+
+export const handleSendRecoveryEmail = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/users/send_recovery_email`,
+    data
+  );
+  return res.data;
+};

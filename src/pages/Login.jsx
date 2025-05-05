@@ -11,10 +11,12 @@ import { useForm } from "react-hook-form";
 import Typography from "@mui/material/Typography";
 import authorizedAxiosInstance from "./../utils/authorizedAxios";
 import { API_ROOT } from "./../utils/constants";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { el } from "date-fns/locale";
 import axios from "axios";
 import { Facebook, Google } from "@mui/icons-material";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 
 function Login() {
   const {
@@ -149,7 +151,6 @@ function Login() {
         py: 1,
         color: "#757575",
         borderColor: "#dadce0",
-
         textTransform: "none",
         display: "flex",
         alignItems: "center",
@@ -262,6 +263,34 @@ function Login() {
                           </Alert>
                         )}
                       </Box>
+
+                      {/* Thêm Remember me và Forgot password */}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mt: 1,
+                        }}
+                      >
+                        <FormControlLabel
+                          control={<Checkbox {...register("remember")} />}
+                          label="Remember me"
+                        />
+                        <Typography
+                          component={Link}
+                          to="/forgot-password"
+                          sx={{
+                            color: "primary.main",
+                            textDecoration: "none",
+                            "&:hover": {
+                              textDecoration: "underline",
+                            },
+                          }}
+                        >
+                          Forgot password?
+                        </Typography>
+                      </Box>
                     </Box>
                     <CardActions
                       sx={{
@@ -301,7 +330,6 @@ function Login() {
                               py: 1,
                               color: "#757575",
                               borderColor: "#dadce0",
-
                               textTransform: "none",
                               fontSize: "0.875rem",
                               height: "40px",
