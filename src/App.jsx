@@ -18,8 +18,9 @@ import AdminLayout from "./components/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import FormsAdmin from "./pages/admin/Accounts";
 import TableAdmin from "./pages/admin/Employees";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   const isAdmin =
@@ -45,10 +46,10 @@ function App() {
       // Remove any admin CSS/JS before redirecting
       const adminStyles = document.querySelectorAll('link[href*="/admin/"]');
       const adminScripts = document.querySelectorAll('script[src*="/admin/"]');
-      
-      adminStyles.forEach(style => style.remove());
-      adminScripts.forEach(script => script.remove());
-      
+
+      adminStyles.forEach((style) => style.remove());
+      adminScripts.forEach((script) => script.remove());
+
       return <Navigate to="/home" replace={true} />;
     }
     return <ProtectedRoute />;
@@ -67,6 +68,7 @@ function App() {
           </Route>
           <Route path="shop" element={<Shop />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
         <Route path="admin/*" element={<AdminRoutes />}>
           <Route index element={<Navigate replace to="dashboard" />} />
@@ -75,7 +77,7 @@ function App() {
           <Route path="employees" element={<TableAdmin />} />
         </Route>
       </Routes>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}

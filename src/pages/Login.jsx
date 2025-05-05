@@ -136,6 +136,8 @@ function Login() {
     res.data.role === "user" ? navigate("/home") : navigate("/admin/dashboard");
   };
 
+  const submitRegister = async (payLoad) => {};
+
   // Custom render props cho nút Google
   const renderGoogleButton = ({ onClick }) => (
     <Button
