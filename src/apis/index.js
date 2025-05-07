@@ -43,3 +43,10 @@ export const handleSendRecoveryEmail = async (data) => {
   );
   return res.data;
 };
+export const handleResetPassword = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/users/reset_password`,
+    data
+  );
+  return res.data;
+};

@@ -2,16 +2,17 @@ import { useState, useContext } from "react";
 import { Mail } from "lucide-react";
 import OTPInput from "../components/OTPInput";
 import { RecoveryContext } from "../App";
+import { handleSendRecoveryEmail } from "../apis";
 
 function ForgotPassword() {
-  const { setEmail, email } = useContext(RecoveryContext);
-  const [showOTPInput, setShowOTPInput] = useState(false);
+  const { setEmail, email, showOTPInput, setShowOTPInput, setOTP } =
+    useContext(RecoveryContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
-    setError(""); // Clear error khi người dùng thay đổi email
+    setError("");
   };
 
   const validateEmail = (email) => {
@@ -20,6 +21,12 @@ function ForgotPassword() {
   };
 
   const handleSubmitClick = async () => {
+    const OTP = Math.floor(Math.random() * 9000 + 1000);
+    setOTP(OTP);
+    const data = {
+      recipient_email: email,
+      OTP: OTP,
+    };
     if (!email) {
       setError("Vui lòng nhập địa chỉ email");
       return;
@@ -31,18 +38,10 @@ function ForgotPassword() {
     }
 
     setIsSubmitting(true);
-
-    try {
-      // Giả định gọi API kiểm tra email tồn tại ở đây
-      // await checkEmailExists(email);
-
-      // Nếu email hợp lệ và tồn tại trong hệ thống
-      setShowOTPInput(true);
-    } catch (err) {
-      setError("Có lỗi xảy ra khi kiểm tra email");
-    } finally {
+    await handleSendRecoveryEmail(data).then(() => {
       setIsSubmitting(false);
-    }
+      setShowOTPInput(true);
+    });
   };
 
   return (
@@ -52,7 +51,7 @@ function ForgotPassword() {
           @import url("https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css");
         `}
       </style>
-      {email && <OTPInput />}
+      {showOTPInput && <OTPInput />}
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div className="text-center">

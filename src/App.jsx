@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import { createContext } from "react";
 import { useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -19,14 +21,14 @@ import AdminLayout from "./components/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import FormsAdmin from "./pages/admin/Accounts";
 import TableAdmin from "./pages/admin/Employees";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 
 export const RecoveryContext = createContext();
 function App() {
   const [email, setEmail] = useState("");
   const [otp, setOTP] = useState("");
+  const [showOTPInput, setShowOTPInput] = useState(false);
   const isAdmin =
     JSON.parse(localStorage.getItem("userInfo"))?.role === "admin"
       ? true
@@ -61,7 +63,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <RecoveryContext.Provider value={{ email, setEmail, otp, setOTP }}>
+      <RecoveryContext.Provider
+        value={{ email, setEmail, otp, setOTP, showOTPInput, setShowOTPInput }}
+      >
         <Routes>
           <Route index element={<Navigate replace to="home" />} />
           <Route path="home" element={<Home />} />
@@ -74,6 +78,7 @@ function App() {
             <Route path="shop" element={<Shop />} />
             <Route path="*" element={<NotFound />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
           </Route>
           <Route path="admin/*" element={<AdminRoutes />}>
             <Route index element={<Navigate replace to="dashboard" />} />

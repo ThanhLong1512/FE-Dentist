@@ -17,6 +17,7 @@ import axios from "axios";
 import { Facebook, Google } from "@mui/icons-material";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import { handleRegister } from "../apis";
 
 function Login() {
   const {
@@ -138,7 +139,9 @@ function Login() {
     res.data.role === "user" ? navigate("/home") : navigate("/admin/dashboard");
   };
 
-  const submitRegister = async (payLoad) => {};
+  const submitRegister = async (payLoad) => {
+    console.log("Register payload:", payLoad);
+  };
 
   // Custom render props cho nút Google
   const renderGoogleButton = ({ onClick }) => (
