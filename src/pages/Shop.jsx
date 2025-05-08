@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { handleGetService } from "../apis";
 
 function Shop() {
   const [services, setServices] = useState([]);
@@ -8,14 +9,15 @@ function Shop() {
 
   useEffect(() => {
     const fetchServices = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/api/v1/services');
-        setServices(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
+      await handleGetService()
+        .then((res) => {
+          setServices(res);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message);
+          setLoading(false);
+        });
     };
 
     fetchServices();
@@ -49,17 +51,25 @@ function Shop() {
                     </option>
                   </select>
                 </div>
-                <div className="items-label">Showing {services.length} results</div>
+                <div className="items-label">
+                  Showing {services.length} results
+                </div>
               </div>
 
               <div className="row">
                 {services.map((service) => (
-                  <div key={service._id} className="shop-item col-lg-4 col-md-6 col-sm-12">
+                  <div
+                    key={service._id}
+                    className="shop-item col-lg-4 col-md-6 col-sm-12"
+                  >
                     <div className="inner-box">
                       <div className="image-box">
                         <figure className="image">
                           <a href="#">
-                            <img src={service.photoService.url} alt={service.nameService} />
+                            <img
+                              src={service.photoService.url}
+                              alt={service.nameService}
+                            />
                           </a>
                         </figure>
                       </div>
@@ -68,19 +78,18 @@ function Shop() {
                           <a href="#">{service.nameService}</a>
                         </h4>
                         <div className="price">
-                          {service.priceService.toLocaleString('vi-VN', {
-                            style: 'currency',
-                            currency: 'VND'
+                          {service.priceService.toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
                           })}
                         </div>
-                        <div className="description">
-                          {service.description}
-                        </div>
-                        <div className="unit">
-                          Đơn vị: {service.Unit}
-                        </div>
-                        <a href="#" className="theme-btn add-to-cart">
-                          Đặt lịch ngay
+                        <div className="description">{service.description}</div>
+                        <div className="unit">Đơn vị: {service.Unit}</div>
+                        <a
+                          href="#"
+                          className="theme-btn add-to-cart text-decoration-none"
+                        >
+                          Add to cart
                         </a>
                       </div>
                     </div>

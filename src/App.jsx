@@ -23,6 +23,9 @@ import FormsAdmin from "./pages/admin/Accounts";
 import TableAdmin from "./pages/admin/Employees";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import Product from "./pages/Product";
 
 export const RecoveryContext = createContext();
 function App() {
@@ -79,6 +82,9 @@ function App() {
             <Route path="*" element={<NotFound />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/product/:id" element={<Product />} />
           </Route>
           <Route path="admin/*" element={<AdminRoutes />}>
             <Route index element={<Navigate replace to="dashboard" />} />

@@ -15,7 +15,6 @@ function Header() {
     <>
       <div className="preloader" style={{ display: "none" }}></div>
       <header className="main-header header-style-two">
-        {/* Header Top */}
         <div className="header-top-two">
           <div className="auto-container">
             <div className="inner-container">
@@ -103,13 +102,17 @@ function Header() {
                   </ul>
                 </nav>
 
-                {/* Header Icons */}
                 <div className="outer-box">
                   <button className="cart-btn">
-                    <i className="icon flaticon-shopping-cart"></i>
+                    <Link
+                      to="/cart"
+                      className="icon "
+                      style={{ color: "white" }}
+                    >
+                      <i className=" flaticon-shopping-cart"></i>
+                    </Link>
                     <span className="count">3</span>
                   </button>
-
                   <button className="search-btn">
                     <span className="fa fa-search"></span>
                   </button>
@@ -119,7 +122,6 @@ function Header() {
           </div>
         </div>
 
-        {/* Sticky Header */}
         <div className="sticky-header">
           <div className="auto-container">
             <div className="main-box">

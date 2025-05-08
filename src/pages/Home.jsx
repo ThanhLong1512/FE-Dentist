@@ -203,13 +203,13 @@ function Home() {
                             </Link>
                           </li>
                           <li className="dropdown">
-                            <Link to="/blog">
-                              <span>Blog</span>
+                            <Link to="/shop">
+                              <span>Shop</span>
                             </Link>
                           </li>
                           <li className="dropdown">
-                            <Link to="/shop">
-                              <span>Shop</span>
+                            <Link to="/blog">
+                              <span>Blog</span>
                             </Link>
                           </li>
                           <li>

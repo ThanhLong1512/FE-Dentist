@@ -50,3 +50,7 @@ export const handleResetPassword = async (data) => {
   );
   return res.data;
 };
+export const handleGetService = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/services`);
+  return res.data;
+};

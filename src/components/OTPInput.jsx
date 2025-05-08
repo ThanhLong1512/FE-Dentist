@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function OTPInput() {
   const { email, otp, setShowOTPInput } = useContext(RecoveryContext);
@@ -71,45 +72,37 @@ export default function OTPInput() {
         pauseOnHover
       />
 
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <div className="bg-white py-8 px-6 shadow-xl rounded-lg sm:px-10 relative">
-            {/* Close button */}
-            <button
-              onClick={handleClose}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none"
-              aria-label="Close"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900">Xác minh OTP</h2>
-              <p className="mt-2 text-sm text-gray-600">
-                Chúng tôi đã gửi mã OTP đến email {email}
-              </p>
+      <div className="modal-backdrop fade show"></div>
+      <div className="modal d-block" tabIndex="-1">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header border-0">
+              <button
+                type="button"
+                className="btn-close"
+                onClick={handleClose}
+                aria-label="Close"
+              ></button>
             </div>
 
-            <div className="mt-8">
-              <div className="flex flex-row items-center justify-between mx-auto w-full max-w-xs mb-8">
+            <div className="modal-body text-center p-4">
+              <h2 className="mb-3">Xác minh OTP</h2>
+              <p className="text-muted mb-4">
+                Chúng tôi đã gửi mã OTP đến email {email}
+              </p>
+
+              <div className="d-flex justify-content-center mb-4">
                 {[0, 1, 2, 3].map((index) => (
-                  <div key={index} className="w-16 h-16">
+                  <div key={index} className="mx-2">
                     <input
                       maxLength="1"
-                      className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-lg border border-gray-300 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-indigo-500"
+                      className="form-control text-center py-3"
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                        fontSize: "1.5rem",
+                        fontWeight: "bold",
+                      }}
                       type="text"
                       value={OTPinput[index]}
                       onChange={(e) => {
@@ -129,31 +122,25 @@ export default function OTPInput() {
                 ))}
               </div>
 
-              <div className="space-y-4">
-                <button
-                  onClick={verifyOTP}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Xác minh
-                </button>
+              <button
+                onClick={verifyOTP}
+                className="btn btn-primary w-100 mb-3 py-2"
+              >
+                Xác minh
+              </button>
 
-                <div className="text-center text-sm text-gray-600">
-                  <p>
-                    Không nhận được mã?{" "}
-                    <button
-                      onClick={resendOTP}
-                      disabled={disable}
-                      className={`font-medium ${
-                        disable
-                          ? "text-gray-400"
-                          : "text-indigo-600 hover:text-indigo-500"
-                      }`}
-                    >
-                      {disable ? `Gửi lại sau ${timerCount}s` : "Gửi lại mã"}
-                    </button>
-                  </p>
-                </div>
-              </div>
+              <p className="text-muted">
+                Không nhận được mã?{" "}
+                <button
+                  onClick={resendOTP}
+                  disabled={disable}
+                  className={`btn btn-link p-0 ${
+                    disable ? "text-muted" : "text-primary"
+                  }`}
+                >
+                  {disable ? `Gửi lại sau ${timerCount}s` : "Gửi lại mã"}
+                </button>
+              </p>
             </div>
           </div>
         </div>
