@@ -1,372 +1,236 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useContext } from "react";
+import { RecoveryContext } from "../App";
+
 function Checkout() {
+  const [provinces, setProvinces] = useState([]);
+  const { totalPrice } = useContext(RecoveryContext);
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await axios.get("https://provinces.open-api.vn/api/");
+        setProvinces(response.data);
+      } catch (error) {
+        console.error("Error fetching provinces:", error);
+      }
+    };
+    fetchProvinces();
+  }, []);
   return (
     <section className="checkout-page">
-      <div className="auto-container">
-        <div className="checkout-form">
-          <form
-            method="post"
-            action="https://skyethemes.com/html/2022/medicoz/checkout.html"
-          >
-            <div className="row clearfix">
-              <div className="column col-lg-6 col-md-12 col-sm-12">
-                <div className="inner-column">
-                  <div className="sec-title">
-                    <h3>Billing Details</h3>
-                  </div>
-
-                  <div className="row clearfix">
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">
-                        First Name <sup>*</sup>
-                      </div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">Last Name </div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12">
-                      <div className="field-label">Company Name</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">Email Address</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">Phone</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12">
-                      <div className="field-label">Country</div>
-                      <select>
-                        <option>Pakistan</option>
-                        <option>India</option>
-                        <option>Australia</option>
-                        <option>Usa</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12">
-                      <div className="field-label">Address</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder="Street address"
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12">
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder="Apartment,suite,unit etc. (optional)"
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12">
-                      <div className="field-label">Town/City</div>
-
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">State / County</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">Postcode/ ZIP</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-lg-12 col-md-12 col-sm-12">
-                      <input
-                        type="checkbox"
-                        name="shipping-option"
-                        id="account-option"
-                      />{" "}
-                      &ensp;{" "}
-                      <label for="account-option">Create An Account?</label>
-                      <div className="text">
-                        Create an account by entering the information below. if
-                        you are a returning custoer please login at the top of
-                        the page.
-                      </div>
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12">
-                      <div className="field-label">
-                        <span>Account Password</span>
-                      </div>
-                      <input
-                        type="password"
-                        name="field-name"
-                        value=""
-                        placeholder="Password"
-                      />
-                    </div>
-                  </div>
+      <div className="auto-container" style={{ display: "flex", gap: "20px" }}>
+        <div className="checkout-form" style={{ flex: "50%" }}>
+          <div className="row clearfix">
+            <div
+              className="column col-lg-6 col-md-12 col-sm-12"
+              style={{ width: "100%" }}
+            >
+              <div className="inner-column">
+                <div className="sec-title">
+                  <h3>Billing Details</h3>
                 </div>
-              </div>
 
-              <div className="column col-lg-6 col-md-12 col-sm-12">
-                <div className="inner-column">
-                  <div className="sec-title">
-                    <h3>Ship to a different address?</h3>
-                  </div>
-
-                  <div className="row clearfix">
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">
-                        First Name <sup>*</sup>
-                      </div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
+                <div className="row clearfix">
+                  <div className="form-group col-md-6 col-sm-12">
+                    <div className="field-label">
+                      First Name <sup>*</sup>
                     </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">Last Name </div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12 ">
-                      <div className="field-label">Company Name</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12 ">
-                      <div className="field-label">Country</div>
-                      <select>
-                        <option>Pakistan</option>
-                        <option>India</option>
-                        <option>Australia</option>
-                        <option>Usa</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12 ">
-                      <div className="field-label">Address</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder="Street address"
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12 ">
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder="Apartment,suite,unit etc. (optional)"
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12 ">
-                      <div className="field-label">Town/City</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">State / County</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-6 col-sm-12">
-                      <div className="field-label">Postcode/ ZIP</div>
-                      <input
-                        type="text"
-                        name="field-name"
-                        value=""
-                        placeholder=""
-                      />
-                    </div>
-
-                    <div className="form-group col-md-12 col-sm-12 ">
-                      <div className="field-label">Other Notes</div>
-                      <textarea
-                        className=""
-                        placeholder="Notes about your order,e.g. special notes for delivery."
-                      ></textarea>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </form>
-        </div>
-
-        <div className="order-box">
-          <div className="sec-title">
-            <h3>Your Order</h3>
-          </div>
-          <div className="title-box clearfix">
-            <div className="col">PRODUCT</div>
-            <div className="col">TOTAL</div>
-          </div>
-          <ul>
-            <li className="clearfix">
-              <strong>Product Title</strong>
-              <span>$35.00</span>
-            </li>
-            <li className="clearfix">
-              SUBTOTAL<span>$35.00</span>
-            </li>
-            <li className="clearfix">
-              SHIPPING<span className="free">Free Shipping</span>
-            </li>
-            <li className="clearfix">
-              TOTAL<span>$35.00</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="payment-box">
-          <div className="upper-box">
-            <div className="payment-options">
-              <ul>
-                <li>
-                  <div className="radio-option">
                     <input
-                      type="radio"
-                      name="payment-group"
-                      id="payment-2"
-                      checked
+                      type="text"
+                      name="field-name"
+                      value=""
+                      placeholder=""
                     />
-                    <label for="payment-2">
-                      <strong>Direct Bank Transfer</strong>
-                      <span className="small-text">
-                        Make your payment directly into our bank account. Please
-                        use your Order ID as the payment reference. Your order
-                        won’t be shipped until the funds have cleared in our
-                        account.
-                      </span>
-                    </label>
                   </div>
-                </li>
-                <li>
-                  <div className="radio-option">
-                    <input type="radio" name="payment-group" id="payment-1" />
-                    <label for="payment-1">
-                      <strong>Check Payments</strong>
-                      <span className="small-text">
-                        Make your payment directly into our bank account. Please
-                        use your Order ID as the payment reference. Your order
-                        won’t be shipped until the funds have cleared in our
-                        account.
-                      </span>
-                    </label>
-                  </div>
-                </li>
 
-                <li>
-                  <div className="radio-option">
-                    <input type="radio" name="payment-group" id="payment-3" />
-                    <label for="payment-3">
-                      <strong>Cash on Delivery</strong>
-                      <span className="small-text">
-                        Make your payment directly into our bank account. Please
-                        use your Order ID as the payment reference. Your order
-                        won’t be shipped until the funds have cleared in our
-                        account.
-                      </span>
-                    </label>
+                  <div className="form-group col-md-6 col-sm-12">
+                    <div className="field-label">Last Name </div>
+                    <input
+                      type="text"
+                      name="field-name"
+                      value=""
+                      placeholder=""
+                    />
                   </div>
-                </li>
-                <li>
-                  <div className="radio-option">
-                    <input type="radio" name="payment-group" id="payment-4" />
-                    <label for="payment-4">
-                      <strong>PayPal</strong>
-                      <span className="image">
-                        <img src="images/icons/paypal.png" alt="" />
-                      </span>
-                    </label>
-                    <a href="#" className="what-paypall">
-                      What is PayPal?
-                    </a>
+
+                  <div className="form-group col-md-6 col-sm-12">
+                    <div className="field-label">Email Address</div>
+                    <input
+                      type="text"
+                      name="field-name"
+                      value=""
+                      placeholder=""
+                    />
                   </div>
-                </li>
-              </ul>
+
+                  <div className="form-group col-md-6 col-sm-12">
+                    <div className="field-label">Phone</div>
+                    <input
+                      type="text"
+                      name="field-name"
+                      value=""
+                      placeholder=""
+                    />
+                  </div>
+
+                  <div className="form-group col-md-12 col-sm-12">
+                    <div className="field-label">Provinces</div>
+                    <select>
+                      {provinces.map((province) => (
+                        <option key={province.code} value={province.code}>
+                          {province.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group col-md-12 col-sm-12">
+                    <div className="field-label">Address</div>
+                    <input type="text" name="field-name" value="" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="lower-box">
-            <a href="#" className="theme-btn btn-style-one">
-              <span className="btn-title">Place Order</span>
-            </a>
+        </div>
+        <div
+          className="block"
+          style={{ display: "flex", flexDirection: "column", flex: "40%" }}
+        >
+          <div className="order-box">
+            <div className="sec-title">
+              <h3>Your Order</h3>
+            </div>
+            <div className="title-box clearfix">
+              <div className="col">PRODUCT</div>
+              <div className="col">TOTAL</div>
+            </div>
+            <ul>
+              <li className="clearfix">
+                <strong>Product Price</strong>
+                <span>
+                  {" "}
+                  {totalPrice.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  })}
+                </span>
+              </li>
+              <li className="clearfix">
+                SHIPPING<span className="free">Free Shipping</span>
+              </li>
+              <li className="clearfix">
+                TOTAL
+                <span>
+                  {" "}
+                  {totalPrice.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  })}
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="payment-box">
+            <div className="upper-box">
+              <div className="payment-options">
+                <ul>
+                  <li>
+                    <div className="radio-option">
+                      <input
+                        type="radio"
+                        name="payment-group"
+                        id="momo-payment"
+                      />
+                      <label htmlFor="momo-payment">
+                        <strong> MoMo Wallet</strong>
+                        <span className="image">
+                          <img
+                            src="images/payments/momo.png"
+                            alt="MoMo"
+                            style={{ height: "24px", marginLeft: "10px" }}
+                          />
+                        </span>
+                        <span className="small-text">
+                          Pay via MoMo application with QR Code or phone number
+                          phone.
+                        </span>
+                      </label>
+                    </div>
+                  </li>
+
+                  <li>
+                    <div className="radio-option">
+                      <input
+                        type="radio"
+                        name="payment-group"
+                        id="zalopay-payment"
+                      />
+                      <label htmlFor="zalopay-payment">
+                        <strong>ZaloPay Wallet</strong>
+                        <span className="image">
+                          <img
+                            src="images/payments/zalopay.png"
+                            alt="ZaloPay"
+                            style={{ height: "24px", marginLeft: "10px" }}
+                          />
+                        </span>
+                        <span className="small-text">
+                          Pay quickly via ZaloPay application.
+                        </span>
+                      </label>
+                    </div>
+                  </li>
+
+                  <li>
+                    <div className="radio-option">
+                      <input
+                        type="radio"
+                        name="payment-group"
+                        id="vnpay-payment"
+                      />
+                      <label htmlFor="vnpay-payment">
+                        <strong>VNPay</strong>
+                        <span className="image">
+                          <img
+                            src="images/payments/vnpay.png"
+                            alt="VNPay"
+                            style={{ height: "24px", marginLeft: "10px" }}
+                          />
+                        </span>
+                        <span className="small-text">
+                          Payment via domestic bank card or Internet Banking
+                        </span>
+                      </label>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="radio-option">
+                      <input
+                        type="radio"
+                        name="payment-group"
+                        id="cod-payment"
+                        defaultChecked
+                      />
+                      <label htmlFor="cod-payment">
+                        <strong>Payment upon receipt (COD)</strong>
+                        <span className="small-text">
+                          You only have to pay when you receive the goods
+                          delivery officer.
+                        </span>
+                      </label>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div className="lower-box">
+              <button className="theme-btn btn-style-one">
+                <span className="btn-title">Order</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

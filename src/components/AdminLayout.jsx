@@ -8,7 +8,7 @@ function AdminLayout() {
   const navigate = useNavigate();
   const handleLogout = async () => {
     handleLogoutApi();
-    navigate("/login");
+    navigate("/home");
   };
   return (
     <div classNameName="wrapper">

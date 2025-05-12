@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useContext } from "react";
+import { RecoveryContext } from "../App";
 
 function Header() {
   const [userInfo, setUserInfo] = useState(null);
-
+  const { countCart } = useContext(RecoveryContext);
   useEffect(() => {
     const user = localStorage.getItem("userInfo");
+
     if (user) {
       setUserInfo(JSON.parse(user));
     }
@@ -55,11 +58,6 @@ function Header() {
                     </a>
                   </li>
                 </ul>
-                <div className="btn-box">
-                  <Link to="/appointment" className="theme-btn btn-style-three">
-                    <span className="btn-title">Appointment</span>
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
@@ -111,7 +109,11 @@ function Header() {
                     >
                       <i className=" flaticon-shopping-cart"></i>
                     </Link>
-                    <span className="count">3</span>
+                    {countCart ? (
+                      <span className="count">{countCart}</span>
+                    ) : (
+                      <span className="count">0</span>
+                    )}
                   </button>
                   <button className="search-btn">
                     <span className="fa fa-search"></span>

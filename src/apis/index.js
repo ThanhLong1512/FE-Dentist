@@ -3,6 +3,7 @@ import { API_ROOT } from "../utils/constants";
 
 export const handleLogoutApi = async () => {
   localStorage.removeItem("userInfo");
+  localStorage.removeItem("cart");
   return await authorizedAxiosInstance.delete(
     `${API_ROOT}/api/v1/users/logout`
   );
@@ -52,5 +53,12 @@ export const handleResetPassword = async (data) => {
 };
 export const handleGetService = async () => {
   const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/services`);
+  return res.data;
+};
+
+export const handleGetProvince = async () => {
+  const res = await authorizedAxiosInstance.get(
+    `https://provinces.open-api.vn/api/`
+  );
   return res.data;
 };

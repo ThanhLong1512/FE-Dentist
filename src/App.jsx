@@ -32,6 +32,8 @@ function App() {
   const [email, setEmail] = useState("");
   const [otp, setOTP] = useState("");
   const [showOTPInput, setShowOTPInput] = useState(false);
+  const [countCart, setCountCart] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
   const isAdmin =
     JSON.parse(localStorage.getItem("userInfo"))?.role === "admin"
       ? true
@@ -67,7 +69,18 @@ function App() {
   return (
     <BrowserRouter>
       <RecoveryContext.Provider
-        value={{ email, setEmail, otp, setOTP, showOTPInput, setShowOTPInput }}
+        value={{
+          email,
+          setEmail,
+          otp,
+          setOTP,
+          showOTPInput,
+          setShowOTPInput,
+          countCart,
+          setCountCart,
+          totalPrice,
+          setTotalPrice,
+        }}
       >
         <Routes>
           <Route index element={<Navigate replace to="home" />} />
