@@ -18,8 +18,20 @@ authorizedAxiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Nếu nhận mã 401 từ BE thì gọi api logout
     if (error.response?.status === 401) {
+      console.log(error.response?.data?.message);
+      toast.error(
+        error.response?.data?.message ||
+          "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!",
+        {
+          position: "top-right",
+          autoClose: 7000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
       handleLogoutApi().then(() => {
         location.href = "/login";
       });

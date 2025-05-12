@@ -34,7 +34,7 @@ export const handleLogin = async (data) => {
     `${API_ROOT}/api/v1/users/login`,
     data
   );
-  return res.data;
+  return res;
 };
 
 export const handleSendRecoveryEmail = async (data) => {

@@ -18,6 +18,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { handleRegister } from "../apis";
 import { ToastContainer, toast } from "react-toastify";
+import { handleLogin } from "../apis";
 import "react-toastify/dist/ReactToastify.css";
 
 function Login() {
@@ -118,10 +119,7 @@ function Login() {
   };
 
   const submitLogIn = async (payLoad) => {
-    const res = await authorizedAxiosInstance.post(
-      `${API_ROOT}/api/v1/users/login`,
-      payLoad
-    );
+    const res = await handleLogin(payLoad);
     const userInfo = {
       id: res.data.id,
       email: res.data.email,
