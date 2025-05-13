@@ -62,3 +62,27 @@ export const handleGetProvince = async () => {
   );
   return res.data;
 };
+
+export const handlePayWithMoMo = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/payments/paymentWithMoMo`,
+    data
+  );
+  return res.data;
+};
+
+export const handlePayWithZaloPay = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/payments/paymentWithZaloPay`,
+    data
+  );
+  return res.data;
+};
+
+export const handlePayWithVNPay = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/payments/paymentWithVNPay`,
+    data
+  );
+  return res.data;
+};

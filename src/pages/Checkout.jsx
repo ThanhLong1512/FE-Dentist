@@ -2,10 +2,21 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useContext } from "react";
 import { RecoveryContext } from "../App";
+import {
+  handlePayWithMoMo,
+  handlePayWithVNPay,
+  handlePayWithZaloPay,
+} from "../apis";
 
 function Checkout() {
   const [provinces, setProvinces] = useState([]);
   const { totalPrice } = useContext(RecoveryContext);
+  const [selectedPayment, setSelectedPayment] = useState("cod");
+  const [services, setServices] = useState(() => {
+    const cartData = localStorage.getItem("cart");
+    return cartData ? JSON.parse(cartData) : [];
+  });
+
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
@@ -17,6 +28,57 @@ function Checkout() {
     };
     fetchProvinces();
   }, []);
+
+  // Xử lý thay đổi phương thức thanh toán
+  const handlePaymentChange = (e) => {
+    setSelectedPayment(e.target.value);
+  };
+
+  const handleOrder = async () => {
+    try {
+      switch (selectedPayment) {
+        case "momo":
+          console.log("Processing payment with MoMo");
+          await handlePayWithMoMo({
+            totalPrice,
+            service: services,
+          });
+          break;
+        case "zalopay":
+          console.log("Processing payment with ZaloPay");
+          // Gọi API ZaloPay
+          await axios.post("/api/payment/zalopay", {
+            amount: totalPrice,
+            // Thêm các thông tin cần thiết khác
+          });
+          break;
+        case "vnpay":
+          console.log("Processing payment with VNPay");
+          // Gọi API VNPay
+          await axios.post("/api/payment/vnpay", {
+            amount: totalPrice,
+            // Thêm các thông tin cần thiết khác
+          });
+          break;
+        case "cod":
+          console.log("Processing COD payment");
+          // Gọi API xử lý COD
+          await axios.post("/api/payment/cod", {
+            amount: totalPrice,
+            // Thêm các thông tin cần thiết khác
+          });
+          break;
+        default:
+          console.log("Invalid payment method");
+      }
+
+      alert("Đơn hàng đã được xử lý thành công!");
+    } catch (error) {
+      console.error("Error processing order:", error);
+      alert("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!");
+    }
+  };
+
   return (
     <section className="checkout-page">
       <div className="auto-container" style={{ display: "flex", gap: "20px" }}>
@@ -143,6 +205,9 @@ function Checkout() {
                         type="radio"
                         name="payment-group"
                         id="momo-payment"
+                        value="momo"
+                        checked={selectedPayment === "momo"}
+                        onChange={handlePaymentChange}
                       />
                       <label htmlFor="momo-payment">
                         <strong> MoMo Wallet</strong>
@@ -167,6 +232,9 @@ function Checkout() {
                         type="radio"
                         name="payment-group"
                         id="zalopay-payment"
+                        value="zalopay"
+                        checked={selectedPayment === "zalopay"}
+                        onChange={handlePaymentChange}
                       />
                       <label htmlFor="zalopay-payment">
                         <strong>ZaloPay Wallet</strong>
@@ -190,6 +258,9 @@ function Checkout() {
                         type="radio"
                         name="payment-group"
                         id="vnpay-payment"
+                        value="vnpay"
+                        checked={selectedPayment === "vnpay"}
+                        onChange={handlePaymentChange}
                       />
                       <label htmlFor="vnpay-payment">
                         <strong>VNPay</strong>
@@ -206,12 +277,16 @@ function Checkout() {
                       </label>
                     </div>
                   </li>
+
                   <li>
                     <div className="radio-option">
                       <input
                         type="radio"
                         name="payment-group"
                         id="cod-payment"
+                        value="cod"
+                        checked={selectedPayment === "cod"}
+                        onChange={handlePaymentChange}
                         defaultChecked
                       />
                       <label htmlFor="cod-payment">
@@ -227,7 +302,7 @@ function Checkout() {
               </div>
             </div>
             <div className="lower-box">
-              <button className="theme-btn btn-style-one">
+              <button className="theme-btn btn-style-one" onClick={handleOrder}>
                 <span className="btn-title">Order</span>
               </button>
             </div>
