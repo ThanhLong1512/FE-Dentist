@@ -1,6 +1,49 @@
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { handleGetService } from "../apis";
+
 function DetailService() {
+  const { ServiceID } = useParams();
+  const [service, setService] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("description");
+
+  useEffect(() => {
+    async function callGetService() {
+      try {
+        setLoading(true);
+        const res = await handleGetService(ServiceID);
+        if (!res) {
+          throw new Error("No data received from API");
+        }
+        setService(res);
+      } catch (err) {
+        console.error("API Error:", err);
+        setError(err.message || "Failed to load service details");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (ServiceID) {
+      callGetService();
+    } else {
+      setError("Missing Service ID");
+      setLoading(false);
+    }
+  }, [ServiceID]);
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+  };
+
+  if (loading) return <div className="loading">Loading service details...</div>;
+
+  if (error) return <div className="error">Error: {error}</div>;
+
+  if (!service) return <div>No service data available</div>;
+
   return (
     <div className="sidebar-page-container">
       <div className="auto-container">
@@ -12,56 +55,86 @@ function DetailService() {
                   <div className="row clearfix">
                     <div className="image-column col-md-6 col-sm-12">
                       <figure className="image-box">
-                        <a
-                          href="images/resource/products/product-sinlge.jpg"
-                          className="lightbox-image"
-                          title="Image Caption Here"
-                        >
-                          <img
-                            src="images/resource/products/product-sinlge.jpg"
-                            alt=""
-                          />
-                        </a>
+                        <img
+                          src={
+                            service?.photoService?.url ||
+                            "/placeholder-image.jpg"
+                          }
+                          alt={service?.nameService || "Service image"}
+                        />
                       </figure>
                     </div>
                     <div className="info-column col-md-6 col-sm-12">
                       <div className="details-header">
-                        <h4>Hand Sanitizer</h4>
+                        <h4>{service?.nameService || "Unnamed Service"}</h4>
                         <div className="rating">
-                          <span className="fa fa-star"></span>
-                          <span className="fa fa-star"></span>
-                          <span className="fa fa-star"></span>
-                          <span className="fa fa-star"></span>
-                          <span className="fa fa-star"></span>
+                          {[...Array(5)].map((_, i) => (
+                            <span key={i} className="fa fa-star"></span>
+                          ))}
                         </div>
                         <a className="reviews" href="#">
-                          ( 3 Customer Reviews )
+                          {`( ${
+                            service?.ratingsQuantity || 0
+                          } Customer Reviews )`}
                         </a>
                         <div className="item-price">
-                          $25.00 <del>$30</del>
+                          {service?.priceDiscount?.toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }) || "N/A"}
+                          {service?.priceService && (
+                            <del>
+                              {service.priceService.toLocaleString("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              })}
+                            </del>
+                          )}
                         </div>
                       </div>
-
-                      <div className="text">
-                        There are many variations of passages of Lorem Ipsum
-                        available, but the majority have suffered alteration in
-                        some form, by injected humour, or randomised words which
-                        don't look even slightly believable. If you are going.
-                      </div>
+                      <div className="text">{service.summary}</div>
                       <div className="other-options clearfix">
                         <div className="item-quantity">
-                          <input
-                            className="quantity-spinner"
-                            type="text"
-                            value="2"
-                            name="quantity"
-                          />
+                          <div className="input-group bootstrap-touchspin">
+                            <span
+                              className="input-group-addon bootstrap-touchspin-prefix"
+                              style={{ display: "none" }}
+                            ></span>
+                            <input
+                              className="quantity-spinner form-control"
+                              type="text"
+                              value="2"
+                              name="quantity"
+                              style={{ display: "block" }}
+                              readOnly
+                            />
+                            <span
+                              className="input-group-addon bootstrap-touchspin-postfix"
+                              style={{ display: "none" }}
+                            ></span>
+                            <span className="input-group-btn-vertical">
+                              <button
+                                className="btn btn-default bootstrap-touchspin-up"
+                                type="button"
+                              >
+                                <i className="fa fa-chevron-up"></i>
+                              </button>
+                              <button
+                                className="btn btn-default bootstrap-touchspin-down"
+                                type="button"
+                              >
+                                <i className="fa fa-chevron-down"></i>
+                              </button>
+                            </span>
+                          </div>
                         </div>
                         <button
                           type="button"
-                          className="theme-btn btn-style-one add-to-cart"
+                          class="theme-btn btn-style-one add-to-cart"
                         >
                           <span className="btn-title">Add To Cart</span>
+                          <span></span> <span></span> <span></span>{" "}
+                          <span></span> <span></span>
                         </button>
                       </div>
                     </div>
@@ -71,30 +144,36 @@ function DetailService() {
                 <div className="product-info-tabs">
                   <div className="prod-tabs tabs-box">
                     <ul className="tab-btns tab-buttons clearfix">
-                      <li data-tab="#prod-details" className="tab-btn">
+                      <li
+                        data-tab="#prod-details"
+                        className={`tab-btn ${
+                          activeTab === "description" ? "active-btn" : ""
+                        } `}
+                        onClick={() => handleTabClick("description")}
+                      >
                         Descripton
                       </li>
                       <li
                         data-tab="#prod-reviews"
-                        className="tab-btn active-btn"
+                        className={`tab-btn ${
+                          activeTab === "review" ? "active-btn" : ""
+                        } `}
+                        onClick={() => handleTabClick("review")}
                       >
-                        Review (3)
+                        {`Review (${service.ratingsQuantity})`}
                       </li>
                     </ul>
 
                     <div className="tabs-content">
-                      <div className="tab" id="prod-details">
+                      <div
+                        className={`tab ${
+                          activeTab === "description" ? "active-tab" : ""
+                        }`}
+                        id="prod-details"
+                      >
                         <div className="content">
                           <h3>Product Descripton</h3>
-                          <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit, sed do eiusmod tempor incididunt ut labore et
-                            dolore magna aliqua. Ut enim ad minim veniam, quis
-                            nostrud exercitation ullamco laboris nisi ut aliquip
-                            ex ea commodo consequat. Duis aute irure dolor in
-                            reprehenderit in voluptate velit esse cillum dolore
-                            eu fugiat nulla pariatur.
-                          </p>
+                          <p>{service.description}</p>
                           <p>
                             Excepteur sint occaecat cupidatat non proident, sunt
                             in culpa qui officia deserunt mollit anim id est
@@ -107,15 +186,20 @@ function DetailService() {
                         </div>
                       </div>
 
-                      <div className="tab active-tab" id="prod-reviews">
-                        <h2 className="title">3 Reviews For Patient Ninja</h2>
+                      <div
+                        className={`tab ${
+                          activeTab === "review" ? "active-tab" : ""
+                        }`}
+                        id="prod-reviews"
+                      >
+                        <h2 className="title">{`${service.ratingsQuantity} Reviews For ${service.nameService}`}</h2>
 
                         <div className="comments-area style-two">
                           <div className="comment-box">
                             <div className="comment">
                               <div className="author-thumb">
                                 <img
-                                  src="images/resource/avatar-1.jpg"
+                                  src="/images/resource/avatar-1.jpg"
                                   alt=""
                                 />
                               </div>
@@ -144,7 +228,7 @@ function DetailService() {
                             <div className="comment">
                               <div className="author-thumb">
                                 <img
-                                  src="images/resource/avatar-2.jpg"
+                                  src="/images/resource/avatar-2.jpg"
                                   alt=""
                                 />
                               </div>
@@ -172,7 +256,7 @@ function DetailService() {
                             <div className="comment">
                               <div className="author-thumb">
                                 <img
-                                  src="images/resource/avatar-3.jpg"
+                                  src="/images/resource/avatar-3.jpg"
                                   alt=""
                                 />
                               </div>

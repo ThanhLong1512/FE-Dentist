@@ -51,7 +51,7 @@ export const handleResetPassword = async (data) => {
   );
   return res.data;
 };
-export const handleGetService = async () => {
+export const handleGetServices = async () => {
   const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/services`);
   return res.data;
 };
@@ -83,6 +83,13 @@ export const handlePayWithVNPay = async (data) => {
   const res = await authorizedAxiosInstance.post(
     `${API_ROOT}/api/v1/payments/paymentWithVNPay`,
     data
+  );
+  return res.data;
+};
+
+export const handleGetService = async (serviceID) => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/services/${serviceID}`
   );
   return res.data;
 };

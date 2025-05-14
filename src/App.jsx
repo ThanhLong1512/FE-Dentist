@@ -98,7 +98,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/shop/:idService" element={<DetailService />} />
+            <Route path="/shop/:ServiceID" element={<DetailService />} />
           </Route>
           <Route path="admin/*" element={<AdminRoutes />}>
             <Route index element={<Navigate replace to="dashboard" />} />

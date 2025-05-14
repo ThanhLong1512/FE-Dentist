@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { handleGetService } from "../apis";
+import { handleGetServices } from "../apis";
 import { useContext } from "react";
 import { RecoveryContext } from "../App";
+import { useNavigate } from "react-router-dom";
 
 function Shop() {
   const [services, setServices] = useState([]);
@@ -12,6 +13,7 @@ function Shop() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { setCountCart } = useContext(RecoveryContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(store));
@@ -24,7 +26,7 @@ function Shop() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await handleGetService();
+        const res = await handleGetServices();
         setServices(res);
         setLoading(false);
       } catch (err) {
@@ -96,10 +98,12 @@ function Shop() {
                     <div className="inner-box">
                       <div className="image-box">
                         <figure className="image">
-                          <a href="#">
+                          <a>
                             <img
                               src={service.photoService.url}
                               alt={service.nameService}
+                              onClick={() => navigate(`${service._id}`)}
+                              style={{ cursor: "pointer" }}
                             />
                           </a>
                         </figure>

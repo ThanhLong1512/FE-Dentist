@@ -8,7 +8,6 @@ function Header() {
   const { countCart } = useContext(RecoveryContext);
   useEffect(() => {
     const user = localStorage.getItem("userInfo");
-
     if (user) {
       setUserInfo(JSON.parse(user));
     }
@@ -71,7 +70,7 @@ function Header() {
               <div className="logo-box">
                 <div className="logo">
                   <Link to="/home">
-                    <img src="images/logo-9.png" alt="Company Logo" />
+                    <img src="/images/logo-9.png" alt="Company Logo" />
                   </Link>
                 </div>
               </div>
