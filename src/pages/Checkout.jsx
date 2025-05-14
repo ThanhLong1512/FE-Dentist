@@ -16,7 +16,6 @@ function Checkout() {
     const cartData = localStorage.getItem("cart");
     return cartData ? JSON.parse(cartData) : [];
   });
-
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
@@ -28,51 +27,46 @@ function Checkout() {
     };
     fetchProvinces();
   }, []);
-
-  // Xử lý thay đổi phương thức thanh toán
   const handlePaymentChange = (e) => {
     setSelectedPayment(e.target.value);
   };
 
   const handleOrder = async () => {
     try {
+      const serviceID = services.map((service) => service._id);
       switch (selectedPayment) {
         case "momo":
-          console.log("Processing payment with MoMo");
           await handlePayWithMoMo({
             totalPrice,
-            service: services,
+            service: serviceID,
+          }).then((res) => {
+            localStorage.removeItem("cart");
+            window.location.href = res.data.payUrl;
           });
           break;
         case "zalopay":
-          console.log("Processing payment with ZaloPay");
-          // Gọi API ZaloPay
-          await axios.post("/api/payment/zalopay", {
-            amount: totalPrice,
-            // Thêm các thông tin cần thiết khác
+          await handlePayWithZaloPay({
+            totalPrice,
+            service: serviceID,
+          }).then((res) => {
+            localStorage.removeItem("cart");
+            window.location.href = res.data.payUrl;
           });
           break;
         case "vnpay":
-          console.log("Processing payment with VNPay");
-          // Gọi API VNPay
-          await axios.post("/api/payment/vnpay", {
-            amount: totalPrice,
-            // Thêm các thông tin cần thiết khác
+          await handlePayWithVNPay({
+            totalPrice,
+            service: serviceID,
+          }).then((res) => {
+            window.location.href = res.data.paymentUrl;
           });
           break;
         case "cod":
-          console.log("Processing COD payment");
-          // Gọi API xử lý COD
-          await axios.post("/api/payment/cod", {
-            amount: totalPrice,
-            // Thêm các thông tin cần thiết khác
-          });
+          location.href = "/home";
           break;
         default:
           console.log("Invalid payment method");
       }
-
-      alert("Đơn hàng đã được xử lý thành công!");
     } catch (error) {
       console.error("Error processing order:", error);
       alert("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!");

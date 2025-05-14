@@ -1,4 +1,6 @@
-function Product() {
+import { useParams, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+function DetailService() {
   return (
     <div className="sidebar-page-container">
       <div className="auto-container">
@@ -491,4 +493,4 @@ function Product() {
   );
 }
 
-export default Product;
+export default DetailService;

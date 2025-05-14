@@ -25,7 +25,8 @@ import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import Product from "./pages/Product";
+import Product from "./pages/DetailService";
+import DetailService from "./pages/DetailService";
 
 export const RecoveryContext = createContext();
 function App() {
@@ -97,7 +98,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/product/:id" element={<Product />} />
+            <Route path="/shop/:idService" element={<DetailService />} />
           </Route>
           <Route path="admin/*" element={<AdminRoutes />}>
             <Route index element={<Navigate replace to="dashboard" />} />

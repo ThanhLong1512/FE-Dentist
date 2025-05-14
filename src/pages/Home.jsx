@@ -265,9 +265,9 @@ function Home() {
                         <a
                           href="appointment.html"
                           id="appointment-btn"
-                          className="theme-btn btn-style-one"
+                          className="theme-btn btn-style-one text-decoration-none"
                         >
-                          <span className="btn-title">Appointment</span>
+                          <span className="btn-title ">Appointment</span>
                           <span></span> <span></span> <span></span>{" "}
                           <span></span> <span></span>
                         </a>
@@ -315,7 +315,9 @@ function Home() {
                         id="appointment-btn"
                         className="theme-btn btn-style-one"
                       >
-                        <span className="btn-title">Appointment</span>
+                        <span className="btn-title text-decoration-none ">
+                          Appointment
+                        </span>
                         <span></span> <span></span> <span></span> <span></span>{" "}
                         <span></span>
                       </a>
