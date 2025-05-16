@@ -96,7 +96,7 @@ function HomeFooter() {
                         <div className="thumb">
                           <a href="blog-post-image.html">
                             <img
-                              src="images/resource/post-thumb-1.jpg"
+                              src="/images/resource/post-thumb-1.jpg"
                               alt=""
                             />
                           </a>
@@ -114,7 +114,7 @@ function HomeFooter() {
                         <div className="thumb">
                           <a href="blog-post-image.html">
                             <img
-                              src="images/resource/post-thumb-2.jpg"
+                              src="/images/resource/post-thumb-2.jpg"
                               alt=""
                             />
                           </a>
@@ -132,7 +132,7 @@ function HomeFooter() {
                         <div className="thumb">
                           <a href="blog-post-image.html">
                             <img
-                              src="images/resource/post-thumb-3.jpg"
+                              src="/images/resource/post-thumb-3.jpg"
                               alt=""
                             />
                           </a>

@@ -130,7 +130,7 @@ function Header() {
               <div className="logo-box">
                 <div className="logo">
                   <Link to="/home">
-                    <img src="images/logo.png" alt="Company Logo" />
+                    <img src="/images/logo.png" alt="Company Logo" />
                   </Link>
                 </div>
               </div>
@@ -177,7 +177,7 @@ function Header() {
         <div className="mobile-header">
           <div className="logo">
             <Link to="/home">
-              <img src="images/logo.png" alt="Company Logo" />
+              <img src="/images/logo.png" alt="Company Logo" />
             </Link>
           </div>
 

@@ -55,7 +55,6 @@ function App() {
   const AdminRoutes = () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     if (!userInfo || userInfo.role !== "admin") {
-      // Remove any admin CSS/JS before redirecting
       const adminStyles = document.querySelectorAll('link[href*="/admin/"]');
       const adminScripts = document.querySelectorAll('script[src*="/admin/"]');
 

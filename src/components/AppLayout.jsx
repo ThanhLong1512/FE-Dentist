@@ -9,7 +9,6 @@ function AppLayout() {
   return (
     <div className="mm-page mm-slideout" id="mm-0">
       <div className="page-wrapper">
-        <Loading />
         <Header />
         <Banner />
         <Outlet />
@@ -76,7 +75,7 @@ function AppLayout() {
                   <li
                     key={index}
                     style={{
-                      backgroundImage: `url(images/background/boxed-bg/${
+                      backgroundImage: `url(/images/background/boxed-bg/${
                         index + 1
                       }.png)`,
                     }}

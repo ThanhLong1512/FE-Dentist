@@ -3,6 +3,7 @@ import { handleGetServices } from "../apis";
 import { useContext } from "react";
 import { RecoveryContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import Loading from "../components/Loading";
 
 function Shop() {
   const [services, setServices] = useState([]);
@@ -10,8 +11,6 @@ function Shop() {
     const cartData = localStorage.getItem("cart");
     return cartData ? JSON.parse(cartData) : [];
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { setCountCart } = useContext(RecoveryContext);
   const navigate = useNavigate();
 
@@ -28,11 +27,7 @@ function Shop() {
       try {
         const res = await handleGetServices();
         setServices(res);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
+      } catch (err) {}
     };
 
     fetchServices();
@@ -56,8 +51,6 @@ function Shop() {
       }
     });
   };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="sidebar-page-container">

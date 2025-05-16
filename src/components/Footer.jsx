@@ -3,7 +3,7 @@ function Footer() {
     <footer className="main-footer">
       <div
         className="widgets-section"
-        style={{ backgroundImage: "url(images/background/7.jpg)" }}
+        style={{ backgroundImage: "url(/images/background/7.jpg)" }}
       >
         <div className="auto-container">
           <div className="row">
@@ -13,7 +13,7 @@ function Footer() {
                   <div className="footer-widget about-widget">
                     <div className="logo">
                       <a href="index.html">
-                        <img src="images/logo-2.png" alt="logo" />
+                        <img src="/images/logo-2.png" alt="logo" />
                       </a>
                     </div>
                     <div className="text">
@@ -78,7 +78,7 @@ function Footer() {
                           <div className="thumb">
                             <a href="blog-post-image.html">
                               <img
-                                src={`images/resource/post-thumb-${num}.jpg`}
+                                src={`/images/resource/post-thumb-${num}.jpg`}
                                 alt={`Post ${num}`}
                               />
                             </a>

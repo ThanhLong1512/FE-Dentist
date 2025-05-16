@@ -1,12 +1,14 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { handleGetService } from "../apis";
+import Loading from "../components/Loading";
 
 function DetailService() {
   const { ServiceID } = useParams();
   const [service, setService] = useState(null);
+  const [review, setReview] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const [activeTab, setActiveTab] = useState("description");
 
   useEffect(() => {
@@ -17,9 +19,9 @@ function DetailService() {
         if (!res) {
           throw new Error("No data received from API");
         }
+        setReview(res.reviews);
         setService(res);
       } catch (err) {
-        console.error("API Error:", err);
         setError(err.message || "Failed to load service details");
       } finally {
         setLoading(false);
@@ -38,11 +40,8 @@ function DetailService() {
     setActiveTab(tab);
   };
 
-  if (loading) return <div className="loading">Loading service details...</div>;
-
-  if (error) return <div className="error">Error: {error}</div>;
-
-  if (!service) return <div>No service data available</div>;
+  if (loading) return <Loading />;
+  console.log(review);
 
   return (
     <div className="sidebar-page-container">
@@ -103,7 +102,7 @@ function DetailService() {
                             <input
                               className="quantity-spinner form-control"
                               type="text"
-                              value="2"
+                              defaultValue="2"
                               name="quantity"
                               style={{ display: "block" }}
                               readOnly
@@ -130,7 +129,7 @@ function DetailService() {
                         </div>
                         <button
                           type="button"
-                          class="theme-btn btn-style-one add-to-cart"
+                          className="theme-btn btn-style-one add-to-cart"
                         >
                           <span className="btn-title">Add To Cart</span>
                           <span></span> <span></span> <span></span>{" "}
@@ -387,7 +386,7 @@ function DetailService() {
                     <input
                       type="search"
                       name="search-field"
-                      value=""
+                      defaultValue=""
                       placeholder="Search....."
                       required=""
                     />
@@ -440,7 +439,7 @@ function DetailService() {
                     <div className="post-thumb">
                       <a href="shop-single.html">
                         <img
-                          src="images/resource/products/product-thumb-1.jpg"
+                          src="/images/resource/products/product-thumb-1.jpg"
                           alt=""
                         />
                       </a>
@@ -462,7 +461,7 @@ function DetailService() {
                     <div className="post-thumb">
                       <a href="shop-single.html">
                         <img
-                          src="images/resource/products/product-thumb-2.jpg"
+                          src="/images/resource/products/product-thumb-2.jpg"
                           alt=""
                         />
                       </a>
@@ -484,7 +483,7 @@ function DetailService() {
                     <div className="post-thumb">
                       <a href="shop-single.html">
                         <img
-                          src="images/resource/products/product-thumb-3.jpg"
+                          src="/images/resource/products/product-thumb-3.jpg"
                           alt=""
                         />
                       </a>
@@ -521,7 +520,7 @@ function DetailService() {
                     <input
                       type="text"
                       name="input"
-                      value=""
+                      defaultValue=""
                       placeholder="Your email address..."
                       required=""
                     />
