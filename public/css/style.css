@@ -11,7 +11,7 @@ Version: 1.0.0
 5. Main Header
 6. Search Popup
 7. Sticky Header
-8. Mobile Header
+8. Mobile Header.shop-comment-form .rating-box .rating a:hover
 9. Header Style Two / Three / Four
 10. Page Title
 11. Section Title
@@ -12423,7 +12423,7 @@ Sidebar Page Container
   display: inline-block;
 }
 
-.shop-comment-form .rating-box .rating a:hover {
+.shop-comment-form .rating-box .rating .active {
   color: orange;
 }
 

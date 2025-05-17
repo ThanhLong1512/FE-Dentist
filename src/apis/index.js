@@ -93,3 +93,26 @@ export const handleGetService = async (serviceID) => {
   );
   return res.data;
 };
+
+export const handlePostReview = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/reviews`,
+    data
+  );
+  return res.data;
+};
+
+export const handleDeleteReview = async (reviewID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/reviews/${reviewID}`
+  );
+  return res;
+};
+
+export const handleUpdateReview = async (reviewID, data) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/reviews/${reviewID}`,
+    data
+  );
+  return res.data;
+};

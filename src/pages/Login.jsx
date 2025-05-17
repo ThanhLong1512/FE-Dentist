@@ -9,7 +9,6 @@ import Zoom from "@mui/material/Zoom";
 import Alert from "@mui/material/Alert";
 import { useForm } from "react-hook-form";
 import Typography from "@mui/material/Typography";
-import authorizedAxiosInstance from "./../utils/authorizedAxios";
 import { API_ROOT } from "./../utils/constants";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";

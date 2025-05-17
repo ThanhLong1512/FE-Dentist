@@ -7,7 +7,7 @@ function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [isCorrectCode, setIsCorrectCode] = useState(false);
   const [discount, setDiscount] = useState(0);
-  const { setCountCart, setTotalPrice } = useContext(RecoveryContext);
+  const { setTotalPrice } = useContext(RecoveryContext);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
@@ -30,7 +30,6 @@ function Cart() {
       (total, item) => total + item.quantity,
       0
     );
-    setCountCart(totalQuantity);
   };
 
   const removeItem = (itemId) => {
@@ -43,7 +42,6 @@ function Cart() {
       (total, item) => total + item.quantity,
       0
     );
-    setCountCart(totalQuantity);
   };
 
   const subTotal = cartItems.reduce(

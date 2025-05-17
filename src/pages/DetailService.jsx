@@ -1,15 +1,32 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { handleGetService } from "../apis";
 import Loading from "../components/Loading";
+import { RecoveryContext } from "../App";
+import {
+  handlePostReview,
+  handleDeleteReview,
+  handleUpdateReview,
+} from "../apis";
+import { toast } from "react-toastify";
 
 function DetailService() {
   const { ServiceID } = useParams();
   const [service, setService] = useState(null);
   const [review, setReview] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [activeTab, setActiveTab] = useState("description");
+  const [activeStar, setActiveStar] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const { setCountCart } = useContext(RecoveryContext);
+  const [error, setError] = useState(null);
+  const [reviewText, setReviewText] = useState("");
+  const [editReviewId, setEditReviewId] = useState(null);
+  const [editReviewText, setEditReviewText] = useState("");
+  const [editReviewRating, setEditReviewRating] = useState(0);
+
+  const userID = JSON.parse(localStorage.getItem("userInfo"))?.id;
+  const userEmail = JSON.parse(localStorage.getItem("userInfo"))?.email;
 
   useEffect(() => {
     async function callGetService() {
@@ -40,8 +57,172 @@ function DetailService() {
     setActiveTab(tab);
   };
 
+  const handleStarClick = (rating) => {
+    setActiveStar(rating);
+  };
+
+  const handleEditStarClick = (rating) => {
+    setEditReviewRating(rating);
+  };
+
+  const hasReviewed = review.some(
+    (r) => r.account._id === userID && r.service === service?._id
+  );
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "long",
+      day: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const incrementQuantity = () => {
+    setQuantity((prev) => prev + 1);
+  };
+
+  const decrementQuantity = () => {
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  };
+
+  const addToCart = () => {
+    if (!service) return;
+
+    const cartItem = {
+      id: service._id,
+      nameService: service.nameService,
+      photoService: service.photoService,
+      priceDiscount: service.priceDiscount,
+      priceService: service.priceService,
+      quantity: quantity,
+      unit: "Hour",
+      summary: service.summary,
+    };
+
+    let currentCart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const existingItemIndex = currentCart.findIndex(
+      (item) => item.id === service._id
+    );
+
+    if (existingItemIndex !== -1) {
+      currentCart[existingItemIndex].quantity += quantity;
+    } else {
+      currentCart.push(cartItem);
+      setCountCart(currentCart.length);
+    }
+
+    localStorage.setItem("cart", JSON.stringify(currentCart));
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    const data = {
+      rating: activeStar,
+      review: reviewText,
+      service: service._id,
+    };
+
+    try {
+      const response = await handlePostReview(data);
+      toast.success("Post review successfully");
+
+      const newReview = {
+        _id: response.data.data._id || Date.now().toString(),
+        rating: activeStar,
+        review: reviewText,
+        service: service._id,
+        createdAt: new Date().toISOString(),
+        account: {
+          _id: userID,
+          email: userEmail,
+        },
+      };
+
+      setReview((prevReviews) => [...prevReviews, newReview]);
+
+      setService((prevService) => ({
+        ...prevService,
+        ratingsQuantity: prevService.ratingsQuantity + 1,
+      }));
+
+      setReviewText("");
+      setActiveStar(0);
+      setActiveTab("review");
+    } catch (err) {
+      toast.error("Failed to post review. Please try again.");
+      console.error("Error posting review:", err);
+    }
+  };
+
+  const handleDeleteReviewClick = async (reviewId) => {
+    if (window.confirm("Are you sure you want to delete this review?")) {
+      try {
+        await handleDeleteReview(reviewId);
+
+        setReview((prevReviews) =>
+          prevReviews.filter((r) => r._id !== reviewId)
+        );
+
+        setService((prevService) => ({
+          ...prevService,
+          ratingsQuantity: prevService.ratingsQuantity - 1,
+        }));
+
+        toast.success("Review deleted successfully");
+      } catch (err) {
+        toast.error("Failed to delete review. Please try again.");
+        console.error("Error deleting review:", err);
+      }
+    }
+  };
+
+  const handleEditReviewClick = (r) => {
+    setEditReviewId(r._id);
+    setEditReviewText(r.review);
+    setEditReviewRating(r.rating);
+  };
+
+  const handleCancelEdit = () => {
+    setEditReviewId(null);
+    setEditReviewText("");
+    setEditReviewRating(0);
+  };
+
+  const handleUpdateReviewSubmit = async (e) => {
+    e.preventDefault();
+
+    const data = {
+      rating: editReviewRating,
+      review: editReviewText,
+    };
+
+    try {
+      await handleUpdateReview(editReviewId, data);
+
+      setReview((prevReviews) =>
+        prevReviews.map((r) =>
+          r._id === editReviewId
+            ? {
+                ...r,
+                review: editReviewText,
+                updatedAt: new Date().toISOString(),
+              }
+            : r
+        )
+      );
+
+      toast.success("Review updated successfully");
+      setEditReviewId(null);
+      setEditReviewText("");
+      setEditReviewRating(0);
+    } catch (err) {
+      toast.error("Failed to update review. Please try again.");
+    }
+  };
+
   if (loading) return <Loading />;
-  console.log(review);
 
   return (
     <div className="sidebar-page-container">
@@ -68,7 +249,14 @@ function DetailService() {
                         <h4>{service?.nameService || "Unnamed Service"}</h4>
                         <div className="rating">
                           {[...Array(5)].map((_, i) => (
-                            <span key={i} className="fa fa-star"></span>
+                            <span
+                              key={i}
+                              className={`fa fa-star ${
+                                i < service.ratingsAverage
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            ></span>
                           ))}
                         </div>
                         <a className="reviews" href="#">
@@ -102,7 +290,7 @@ function DetailService() {
                             <input
                               className="quantity-spinner form-control"
                               type="text"
-                              defaultValue="2"
+                              value={quantity}
                               name="quantity"
                               style={{ display: "block" }}
                               readOnly
@@ -115,12 +303,14 @@ function DetailService() {
                               <button
                                 className="btn btn-default bootstrap-touchspin-up"
                                 type="button"
+                                onClick={incrementQuantity}
                               >
                                 <i className="fa fa-chevron-up"></i>
                               </button>
                               <button
                                 className="btn btn-default bootstrap-touchspin-down"
                                 type="button"
+                                onClick={decrementQuantity}
                               >
                                 <i className="fa fa-chevron-down"></i>
                               </button>
@@ -130,6 +320,7 @@ function DetailService() {
                         <button
                           type="button"
                           className="theme-btn btn-style-one add-to-cart"
+                          onClick={addToCart}
                         >
                           <span className="btn-title">Add To Cart</span>
                           <span></span> <span></span> <span></span>{" "}
@@ -195,178 +386,247 @@ function DetailService() {
 
                         <div className="comments-area style-two">
                           <div className="comment-box">
-                            <div className="comment">
-                              <div className="author-thumb">
-                                <img
-                                  src="/images/resource/avatar-1.jpg"
-                                  alt=""
-                                />
-                              </div>
-                              <div className="comment-inner">
-                                <div className="comment-info">
-                                  <div className="name">Steven Rich</div>
-                                  <div className="date">May 29, 2020</div>
-                                </div>
-                                <div className="rating">
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star light"></span>
-                                </div>
-                                <div className="text">
-                                  Lorem Ipsum is simply dummy text of the
-                                  printing and typesetting industry. Lorem Ipsum
-                                  has been the industry.
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                            {review.length > 0 ? (
+                              review.map((r) => (
+                                <div className="comment" key={r._id}>
+                                  <div className="author-thumb">
+                                    <img
+                                      src="/images/resource/avatar-1.jpg"
+                                      alt=""
+                                    />
+                                  </div>
 
-                          <div className="comment-box reply-comment">
-                            <div className="comment">
-                              <div className="author-thumb">
-                                <img
-                                  src="/images/resource/avatar-2.jpg"
-                                  alt=""
-                                />
-                              </div>
-                              <div className="comment-inner">
-                                <div className="comment-info">
-                                  <div className="name">Cobus Besten</div>
-                                  <div className="date">June 01, 2020</div>
-                                </div>
-                                <div className="rating">
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                </div>
-                                <div className="text">
-                                  Lorem Ipsum is simply dummy text of the
-                                  printing{" "}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                  <div className="comment-inner">
+                                    <div
+                                      className="comment-info"
+                                      style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <div className="name">
+                                          {r.account.email}
+                                        </div>
+                                        <div
+                                          className="date"
+                                          style={{ marginLeft: "10px" }}
+                                        >
+                                          {formatDate(r.createdAt)}
+                                        </div>
+                                      </div>
 
-                          <div className="comment-box">
-                            <div className="comment">
-                              <div className="author-thumb">
-                                <img
-                                  src="/images/resource/avatar-3.jpg"
-                                  alt=""
-                                />
-                              </div>
-                              <div className="comment-inner">
-                                <div className="comment-info">
-                                  <div className="name">Magnus Hichki</div>
-                                  <div className="date">June 02, 2020</div>
+                                      {/* Edit and Delete icons - Only visible to the review owner */}
+                                      {r.account._id === userID && (
+                                        <div className="review-actions">
+                                          <button
+                                            onClick={() =>
+                                              handleEditReviewClick(r)
+                                            }
+                                            className="edit-review-btn"
+                                            style={{
+                                              background: "none",
+                                              border: "none",
+                                              cursor: "pointer",
+                                              marginRight: "10px",
+                                              color: "#3498db",
+                                            }}
+                                          >
+                                            <i className="fa fa-edit"></i>
+                                          </button>
+                                          <button
+                                            onClick={() =>
+                                              handleDeleteReviewClick(r._id)
+                                            }
+                                            className="delete-review-btn"
+                                            style={{
+                                              background: "none",
+                                              border: "none",
+                                              cursor: "pointer",
+                                              color: "#e74c3c",
+                                            }}
+                                          >
+                                            <i className="fa fa-trash"></i>
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="rating">
+                                      {[...Array(5)].map((_, i) => (
+                                        <span
+                                          key={i}
+                                          className={`fa fa-star ${
+                                            i < r.rating
+                                              ? "text-yellow-400"
+                                              : "text-gray-300"
+                                          }`}
+                                        ></span>
+                                      ))}
+                                    </div>
+
+                                    {/* Show edit form if this review is being edited */}
+                                    {editReviewId === r._id ? (
+                                      <form
+                                        onSubmit={handleUpdateReviewSubmit}
+                                        className="edit-review-form"
+                                      >
+                                        <div className="form-group">
+                                          <textarea
+                                            value={editReviewText}
+                                            onChange={(e) =>
+                                              setEditReviewText(e.target.value)
+                                            }
+                                            placeholder="Edit your review..."
+                                            required
+                                            style={{ marginTop: "10px" }}
+                                          ></textarea>
+                                        </div>
+                                        <div
+                                          className="form-group"
+                                          style={{
+                                            display: "flex",
+                                            gap: "10px",
+                                          }}
+                                        >
+                                          <button
+                                            type="submit"
+                                            className="theme-btn btn-style-one"
+                                          >
+                                            <span className="btn-title">
+                                              Update
+                                            </span>
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={handleCancelEdit}
+                                            className="theme-btn btn-style-two"
+                                          >
+                                            <span className="btn-title">
+                                              Cancel
+                                            </span>
+                                          </button>
+                                        </div>
+                                      </form>
+                                    ) : (
+                                      <div className="text">{r.review}</div>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="rating">
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                  <span className="fa fa-star"></span>
-                                </div>
-                                <div className="text">
-                                  Contrary to popular belief, Lorem Ipsum is not
-                                  simply random text. It has roots in a piece of
-                                  classNameical Latin literature from 45 BC,
-                                  making it over 2000 years old. Richard
-                                  McClintock,{" "}
-                                </div>
-                              </div>
-                            </div>
+                              ))
+                            ) : (
+                              <span>No review for this service</span>
+                            )}
                           </div>
                         </div>
 
-                        <div className="shop-comment-form">
-                          <h2>Add a Review</h2>
-                          <div className="mail-text">
-                            <span className="theme_color">
-                              Your email address will not be published.
-                            </span>{" "}
-                            Required fields are marked*
+                        {!hasReviewed && (
+                          <div className="shop-comment-form">
+                            <h2>Add a Review</h2>
+                            <div className="rating-box">
+                              <div className="text"> Your Rating:</div>
+                              <div className="star-ratings">
+                                <div className="rating">
+                                  <a
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleStarClick(1);
+                                    }}
+                                    className={activeStar >= 1 ? "active" : ""}
+                                  >
+                                    <span className="fa fa-star"></span>
+                                  </a>
+                                </div>
+                                <div className="rating">
+                                  <a
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleStarClick(2);
+                                    }}
+                                    className={activeStar >= 2 ? "active" : ""}
+                                  >
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                  </a>
+                                </div>
+                                <div className="rating">
+                                  <a
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleStarClick(3);
+                                    }}
+                                    className={activeStar >= 3 ? "active" : ""}
+                                  >
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                  </a>
+                                </div>
+                                <div className="rating">
+                                  <a
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleStarClick(4);
+                                    }}
+                                    className={activeStar >= 4 ? "active" : ""}
+                                  >
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                  </a>
+                                </div>
+                                <div className="rating">
+                                  <a
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleStarClick(5);
+                                    }}
+                                    className={activeStar >= 5 ? "active" : ""}
+                                  >
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                    <span className="fa fa-star"></span>
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                            <form method="post" onSubmit={handleReviewSubmit}>
+                              <div className="form-group">
+                                <textarea
+                                  name="message"
+                                  placeholder="Your Review*"
+                                  value={reviewText}
+                                  onChange={(e) =>
+                                    setReviewText(e.target.value)
+                                  }
+                                  required
+                                ></textarea>
+                              </div>
+                              <div className="form-group">
+                                <button
+                                  className="theme-btn btn-style-one"
+                                  type="submit"
+                                  name="submit-form"
+                                >
+                                  <span className="btn-title">SUBMIT</span>
+                                </button>
+                              </div>
+                            </form>
                           </div>
-                          <div className="rating-box">
-                            <div className="text"> Your Rating:</div>
-                            <div className="rating">
-                              <a href="#">
-                                <span className="fa fa-star"></span>
-                              </a>
-                            </div>
-                            <div className="rating">
-                              <a href="#">
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                              </a>
-                              <a href="#"></a>
-                            </div>
-                            <div className="rating">
-                              <a href="#">
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                              </a>
-                            </div>
-                            <div className="rating">
-                              <a href="#">
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                              </a>
-                            </div>
-                            <div className="rating">
-                              <a href="#">
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                                <span className="fa fa-star"></span>
-                              </a>
-                            </div>
-                          </div>
-                          <form
-                            method="post"
-                            action="https://skyethemes.com/html/2022/medicoz/contact.html"
-                          >
-                            <div className="form-group">
-                              <textarea
-                                name="message"
-                                placeholder="Your Review*"
-                              ></textarea>
-                            </div>
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                name="username"
-                                placeholder="Name"
-                                required
-                              />
-                            </div>
-                            <div className="form-group">
-                              <input
-                                type="text"
-                                name="number"
-                                placeholder="Email"
-                                required
-                              />
-                            </div>
-                            <div className="form-group">
-                              <button
-                                className="theme-btn btn-style-one"
-                                type="submit"
-                                name="submit-form"
-                              >
-                                <span className="btn-title">SUBMIT</span>
-                              </button>
-                            </div>
-                          </form>
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>

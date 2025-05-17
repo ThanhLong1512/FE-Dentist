@@ -1,56 +1,67 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { handleGetServices } from "../apis";
-import { useContext } from "react";
 import { RecoveryContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 
 function Shop() {
   const [services, setServices] = useState([]);
-  const [store, setStore] = useState(() => {
-    const cartData = localStorage.getItem("cart");
-    return cartData ? JSON.parse(cartData) : [];
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { setCountCart } = useContext(RecoveryContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(store));
-    const totalQuantity = store.reduce(
-      (total, item) => total + item.quantity,
-      0
-    );
-    setCountCart(totalQuantity);
-  }, [store, setCountCart]);
+    const cartData = localStorage.getItem("cart");
+    const cartItems = cartData ? JSON.parse(cartData) : [];
+    setCountCart(cartItems.length);
+  }, [setCountCart]);
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
+        setLoading(true);
         const res = await handleGetServices();
+        if (!res) {
+          throw new Error("No data received from API");
+        }
         setServices(res);
-      } catch (err) {}
+      } catch (err) {
+        setError(err.message || "Failed to load services");
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchServices();
   }, []);
 
   const addToCart = (service) => {
-    setStore((prevStore) => {
-      const existingItemIndex = prevStore.findIndex(
-        (item) => item._id === service._id
-      );
+    const cartData = localStorage.getItem("cart");
+    let currentCart = cartData ? JSON.parse(cartData) : [];
 
-      if (existingItemIndex > -1) {
-        const updatedStore = [...prevStore];
-        updatedStore[existingItemIndex] = {
-          ...updatedStore[existingItemIndex],
-          quantity: (updatedStore[existingItemIndex].quantity || 1) + 1,
-        };
-        return updatedStore;
-      } else {
-        return [...prevStore, { ...service, quantity: 1 }];
-      }
-    });
+    service = { ...service, Unit: "Hour" };
+
+    const existingItemIndex = currentCart.findIndex(
+      (item) => item._id === service._id
+    );
+
+    if (existingItemIndex > -1) {
+      currentCart[existingItemIndex] = {
+        ...currentCart[existingItemIndex],
+        quantity: (currentCart[existingItemIndex].quantity || 1) + 1,
+      };
+    } else {
+      currentCart.push({ ...service, quantity: 1 });
+    }
+    localStorage.setItem("cart", JSON.stringify(currentCart));
+    setCountCart(currentCart.length);
+    toast.success("Add successfully service ");
   };
+
+  if (loading) return <Loading />;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="sidebar-page-container">
@@ -61,18 +72,12 @@ function Shop() {
               <div className="shop-upper-box">
                 <div className="orderby">
                   <select name="orderby">
-                    <option defaultValue="default">Default Sorting</option>
-                    <option defaultValue="popularity">
-                      Sort by popularity
-                    </option>
-                    <option defaultValue="rating">
-                      Sort by average rating
-                    </option>
-                    <option defaultValue="date">Sort by newness</option>
-                    <option defaultValue="price">
-                      Sort by price: low to high
-                    </option>
-                    <option defaultValue="price-desc">
+                    <option value="default">Default Sorting</option>
+                    <option value="popularity">Sort by popularity</option>
+                    <option value="rating">Sort by average rating</option>
+                    <option value="date">Sort by newness</option>
+                    <option value="price">Sort by price: low to high</option>
+                    <option value="price-desc">
                       Sort by price: high to low
                     </option>
                   </select>
@@ -112,7 +117,9 @@ function Shop() {
                           })}
                         </div>
                         <div className="description">{service.description}</div>
-                        <div className="unit">Đơn vị: {service.Unit}</div>
+                        <div className="unit">
+                          Đơn vị: {service.Unit || "Hour"}
+                        </div>
                         <button
                           onClick={() => addToCart(service)}
                           className="theme-btn add-to-cart text-decoration-none"
