@@ -123,6 +123,7 @@ function Login() {
       id: res.data.id,
       email: res.data.email,
       role: res.data.role,
+      image: res.data.image,
       require_2FA: res.data.require_2FA,
       is_2fa_verified: res.data.is_2fa_verified,
       last_login: res.data.last_login,

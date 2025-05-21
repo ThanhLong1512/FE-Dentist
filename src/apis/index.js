@@ -53,7 +53,8 @@ export const handleResetPassword = async (data) => {
 };
 export const handleGetServices = async () => {
   const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/services`);
-  return res.data;
+  console.log(res);
+  return res.data.data.data;
 };
 
 export const handleGetProvince = async () => {
@@ -91,7 +92,7 @@ export const handleGetService = async (serviceID) => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/services/${serviceID}`
   );
-  return res.data;
+  return res.data.data.data;
 };
 
 export const handlePostReview = async (data) => {
@@ -115,4 +116,11 @@ export const handleUpdateReview = async (reviewID, data) => {
     data
   );
   return res.data;
+};
+
+export const handleGetMe = async () => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/accounts/me`
+  );
+  return res.data.data;
 };

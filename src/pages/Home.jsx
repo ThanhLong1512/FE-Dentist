@@ -1,9 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import authorizedAxiosInstance from "../utils/authorizedAxios";
-import { API_ROOT } from "../utils/constants";
 import { handleLogoutApi } from "../apis/index";
 import Setup2FA from "../components/setup-2fa";
 import Require2FA from "../components/require-2fa";
@@ -13,9 +10,15 @@ import HomeAbout from "../components/HomeAbout";
 import HomeServices from "../components/HomeServices";
 import HomeTeam from "../components/HomeTeam";
 import HomeAppointment from "../components/HomeAppointment";
+
 function Home() {
   const [openSetup2FA, setOpenSetup2FA] = useState(false);
   const [showRequire2FA, setShowRequire2FA] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState("vi");
+
+  const userMenuRef = useRef(null);
 
   let formatEmail,
     check2FA = false,
@@ -28,9 +31,20 @@ function Home() {
   useEffect(() => {
     const userInfo = getUserInfoFromStorage();
     if (userInfo) {
-      // Hiển thị modal Require2FA nếu đã bật 2FA nhưng chưa xác thực
       setShowRequire2FA(userInfo.require_2FA && !userInfo.is_2fa_verified);
     }
+
+    // Đóng menu khi click ra ngoài
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const getUserInfoFromStorage = () => {
@@ -40,13 +54,14 @@ function Home() {
     }
     return null;
   };
+
   const handleLogout = async () => {
     handleLogoutApi();
     navigate("/login");
   };
+
   const handleSuccessVerify2FA = (response) => {
     const { is_2fa_verified, last_login, user } = response.data;
-    console.log(is_2fa_verified);
     const newUserInfo = {
       email: user.email,
       id: user._id,
@@ -58,8 +73,8 @@ function Home() {
     localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
     setShowRequire2FA(false);
   };
+
   const handleSuccessSetup2FA = (response) => {
-    // console.log(response);
     const { is_2fa_verified, last_login, user } = response.data;
     const newUserInfo = {
       email: user.email,
@@ -73,13 +88,66 @@ function Home() {
     setOpenSetup2FA(false);
   };
 
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  const changeLanguage = (language) => {
+    setCurrentLanguage(language);
+  };
+
   const userInfo = getUserInfoFromStorage();
   if (userInfo) {
-    const { email, require_2FA, is_2fa_verified } = userInfo;
+    const { email, require_2FA, is_2fa_verified, image } = userInfo;
     formatEmail = email.split("@")[0];
     check2FA = require_2FA;
     checkVerify2FA = is_2fa_verified;
   }
+
+  const userMenuStyle = {
+    position: "absolute",
+    top: "100%",
+    right: "0",
+    backgroundColor: "#fff",
+    boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+    borderRadius: "4px",
+    width: "220px",
+    zIndex: "1000",
+    padding: "8px 0",
+    display: showUserMenu ? "block" : "none",
+  };
+
+  const menuItemStyle = {
+    padding: "10px 16px",
+    display: "block",
+    color: "#333",
+    textDecoration: "none",
+    transition: "background-color 0.2s",
+    cursor: "pointer",
+  };
+
+  const menuItemHoverStyle = {
+    backgroundColor: "#f5f5f5",
+  };
+
+  const dividerStyle = {
+    height: "1px",
+    margin: "8px 0",
+    backgroundColor: "#e0e0e0",
+  };
+
+  const avatarContainerStyle = {
+    position: "relative",
+    cursor: "pointer",
+  };
+
+  const avatarStyle = {
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "2px solid #fff",
+  };
 
   return (
     <>
@@ -139,6 +207,7 @@ function Home() {
         <div className="mm-page mm-slideout" id="mm-0">
           <div className="page-wrapper">
             <div className="preloader" style={{ display: "none" }}></div>
+
             <header className="main-header header-style-one">
               <div className="header-top">
                 <div className="auto-container">
@@ -238,17 +307,179 @@ function Home() {
                                   </span>
                                 </span>
                               </li>
-                              <li>
-                                <Button
-                                  variant="contained"
-                                  color="error"
-                                  sx={{ width: "100px" }}
-                                  onClick={() => {
-                                    handleLogout();
-                                  }}
-                                >
-                                  Log out
-                                </Button>
+                              <li
+                                ref={userMenuRef}
+                                style={avatarContainerStyle}
+                              >
+                                <img
+                                  src={
+                                    userInfo?.image ||
+                                    "/images/default-avatar.png"
+                                  }
+                                  alt="User"
+                                  style={avatarStyle}
+                                  onClick={() => setShowUserMenu(!showUserMenu)}
+                                />
+                                <div style={userMenuStyle}>
+                                  <Link
+                                    to="/account/profile"
+                                    style={menuItemStyle}
+                                  >
+                                    <i
+                                      className="fas fa-user"
+                                      style={{
+                                        marginRight: "10px",
+                                        width: "20px",
+                                      }}
+                                    ></i>
+                                    My Account
+                                  </Link>
+
+                                  <Link
+                                    to="/appointments"
+                                    style={menuItemStyle}
+                                  >
+                                    <i
+                                      className="fas fa-calendar-check"
+                                      style={{
+                                        marginRight: "10px",
+                                        width: "20px",
+                                      }}
+                                    ></i>
+                                    My Appointments
+                                  </Link>
+
+                                  <Link to="/orders" style={menuItemStyle}>
+                                    <i
+                                      className="fas fa-shopping-bag"
+                                      style={{
+                                        marginRight: "10px",
+                                        width: "20px",
+                                      }}
+                                    ></i>
+                                    My Orders
+                                  </Link>
+
+                                  <div style={dividerStyle}></div>
+
+                                  <div
+                                    style={menuItemStyle}
+                                    onClick={toggleDarkMode}
+                                  >
+                                    <i
+                                      className={
+                                        darkMode ? "fas fa-sun" : "fas fa-moon"
+                                      }
+                                      style={{
+                                        marginRight: "10px",
+                                        width: "20px",
+                                      }}
+                                    ></i>
+                                    {darkMode ? "Light Mode" : "Dark Mode"}
+                                    <span style={{ float: "right" }}>
+                                      <div
+                                        style={{
+                                          width: "40px",
+                                          height: "20px",
+                                          backgroundColor: darkMode
+                                            ? "#2196F3"
+                                            : "#ccc",
+                                          borderRadius: "10px",
+                                          position: "relative",
+                                          transition: "0.3s",
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            position: "absolute",
+                                            width: "16px",
+                                            height: "16px",
+                                            backgroundColor: "#fff",
+                                            borderRadius: "50%",
+                                            top: "2px",
+                                            left: darkMode ? "22px" : "2px",
+                                            transition: "0.3s",
+                                          }}
+                                        ></div>
+                                      </div>
+                                    </span>
+                                  </div>
+
+                                  <div style={dividerStyle}></div>
+
+                                  <div style={{ padding: "10px 16px" }}>
+                                    <span
+                                      style={{
+                                        marginRight: "10px",
+                                        width: "20px",
+                                        display: "inline-block",
+                                      }}
+                                    >
+                                      <i className="fas fa-language"></i>
+                                    </span>
+                                    Language:
+                                    <div style={{ marginTop: "5px" }}>
+                                      <button
+                                        onClick={() => changeLanguage("vi")}
+                                        style={{
+                                          padding: "2px 8px",
+                                          marginRight: "5px",
+                                          backgroundColor:
+                                            currentLanguage === "vi"
+                                              ? "#2196F3"
+                                              : "#e0e0e0",
+                                          color:
+                                            currentLanguage === "vi"
+                                              ? "#fff"
+                                              : "#333",
+                                          border: "none",
+                                          borderRadius: "4px",
+                                          cursor: "pointer",
+                                        }}
+                                      >
+                                        VI
+                                      </button>
+                                      <button
+                                        onClick={() => changeLanguage("en")}
+                                        style={{
+                                          padding: "2px 8px",
+                                          backgroundColor:
+                                            currentLanguage === "en"
+                                              ? "#2196F3"
+                                              : "#e0e0e0",
+                                          color:
+                                            currentLanguage === "en"
+                                              ? "#fff"
+                                              : "#333",
+                                          border: "none",
+                                          borderRadius: "4px",
+                                          cursor: "pointer",
+                                        }}
+                                      >
+                                        EN
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div style={dividerStyle}></div>
+
+                                  <div
+                                    style={{
+                                      ...menuItemStyle,
+                                      color: "#f44336",
+                                    }}
+                                    onClick={handleLogout}
+                                  >
+                                    <i
+                                      className="fas fa-sign-out-alt"
+                                      style={{
+                                        marginRight: "10px",
+                                        width: "20px",
+                                      }}
+                                    ></i>
+                                    Logout
+                                  </div>
+                                </div>
                               </li>
                             </>
                           ) : (

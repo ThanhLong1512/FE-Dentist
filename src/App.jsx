@@ -27,6 +27,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Product from "./pages/DetailService";
 import DetailService from "./pages/DetailService";
+import Account from "./pages/Account";
 
 export const RecoveryContext = createContext();
 function App() {
@@ -98,6 +99,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/shop/:ServiceID" element={<DetailService />} />
+            <Route path="/account/profile" element={<Account />} />
           </Route>
           <Route path="admin/*" element={<AdminRoutes />}>
             <Route index element={<Navigate replace to="dashboard" />} />
