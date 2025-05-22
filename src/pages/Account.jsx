@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import authorizedAxiosInstance from "../utils/authorizedAxios";
 import { API_ROOT } from "../utils/constants";
 import { toast } from "react-toastify";
-
-// Components
 import {
   Avatar,
   Button,
@@ -27,7 +25,6 @@ import {
   Tab,
 } from "@mui/material";
 
-// Icons
 import {
   Save as SaveIcon,
   Delete as DeleteIcon,
@@ -39,6 +36,8 @@ import {
   Security as SecurityIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
+import { handleGetMe, handleLogoutApi, handleUpdateMe } from "../apis";
+import { error } from "jquery";
 
 function Account() {
   const navigate = useNavigate();
@@ -78,31 +77,31 @@ function Account() {
 
   const fetchUserData = async () => {
     setLoading(true);
-    try {
-      const response = await authorizedAxiosInstance.get(
-        `${API_ROOT}/api/v1/accounts/me`
-      );
-      const userData = response.data.data.data;
-      setUserInfo({
-        name: userData.name,
-        email: userData.email,
-        photo: userData.photo,
-        role: userData.role,
-        require_2FA: userData.require_2FA || false,
-      });
 
-      setFormData({
-        name: userData.name,
-        email: userData.email,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+    await handleGetMe()
+      .then((userData) => {
+        setUserInfo({
+          name: userData.name,
+          email: userData.email,
+          photo: userData.photo,
+          role: userData.role,
+          require_2FA: userData.require_2FA || false,
+        });
+
+        setFormData({
+          name: userData.name,
+          email: userData.email,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      })
+      .catch((error) => {
+        toast.error("Không thể tải thông tin người dùng");
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    } catch (error) {
-      toast.error("Không thể tải thông tin người dùng");
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleTabChange = (event, newValue) => {
@@ -163,54 +162,47 @@ function Account() {
     setSubmitError("");
     setLoading(true);
 
-    try {
-      const formDataToSend = new FormData();
-      let hasChanges = false;
-      if (formData.name.trim() !== userInfo.name) {
-        formDataToSend.append("name", formData.name.trim());
-        hasChanges = true;
-      }
-      if (photoFile) {
-        formDataToSend.append("photo", photoFile);
-        hasChanges = true;
-      }
+    const formDataToSend = new FormData();
+    let hasChanges = false;
+    if (formData.name.trim() !== userInfo.name) {
+      formDataToSend.append("name", formData.name.trim());
+      hasChanges = true;
+    }
+    if (photoFile) {
+      formDataToSend.append("photo", photoFile);
+      hasChanges = true;
+    }
 
-      if (!hasChanges) {
-        toast.info("Không có thông tin nào được thay đổi");
-        setEditMode(false);
-        return;
-      }
+    if (!hasChanges) {
+      toast.info("Không có thông tin nào được thay đổi");
+      setEditMode(false);
+      return;
+    }
 
-      console.log("Sending profile update data:");
-      for (let [key, value] of formDataToSend.entries()) {
-        console.log(key, value);
-      }
+    for (let [key, value] of formDataToSend.entries()) {
+      console.log(key, value);
+    }
 
-      const response = await authorizedAxiosInstance.patch(
-        `${API_ROOT}/api/v1/accounts/updateMe`,
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.data.status === "Success") {
+    await handleUpdateMe(formDataToSend)
+      .then(async (res) => {
         toast.success("Cập nhật thông tin thành công");
         setEditMode(false);
         setPhotoPreview(null);
         setPhotoFile(null);
+        const existingUserInfo = JSON.parse(localStorage.getItem("userInfo"));
+        const updatedUserInfo = {
+          ...existingUserInfo,
+          image: res.photo,
+        };
+        localStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
         await fetchUserData();
-      }
-    } catch (error) {
-      setSubmitError(
-        error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật thông tin"
-      );
-      toast.error("Không thể cập nhật thông tin");
-    } finally {
-      setLoading(false);
-    }
+      })
+      .catch((error) => {
+        setSubmitError(
+          error.response?.data?.message ||
+            "Đã xảy ra lỗi khi cập nhật thông tin"
+        );
+      });
   };
 
   const handleUpdatePassword = async (e) => {
@@ -218,64 +210,52 @@ function Account() {
     setSubmitError("");
     setLoading(true);
 
-    try {
-      if (!formData.currentPassword) {
-        setSubmitError("Vui lòng nhập mật khẩu hiện tại");
-        setLoading(false);
-        return;
-      }
-
-      if (!formData.newPassword) {
-        setSubmitError("Vui lòng nhập mật khẩu mới");
-        setLoading(false);
-        return;
-      }
-
-      if (formData.newPassword.length < 8) {
-        setSubmitError("Mật khẩu mới phải có ít nhất 8 ký tự");
-        setLoading(false);
-        return;
-      }
-
-      if (formData.newPassword !== formData.confirmPassword) {
-        setSubmitError("Mật khẩu mới không khớp");
-        setLoading(false);
-        return;
-      }
-
-      const passwordData = {
-        currentPassword: formData.currentPassword,
-        password: formData.newPassword,
-        passwordConfirm: formData.confirmPassword,
-      };
-
-      console.log("Sending password update data:", passwordData);
-
-      const response = await authorizedAxiosInstance.patch(
-        `${API_ROOT}/api/v1/accounts/updateMe`,
-        passwordData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      toast.success("Cập nhật mật khẩu thành công");
-      setEditMode(false);
-      setFormData({
-        ...formData,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    } catch (error) {
-      setSubmitError(
-        error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật mật khẩu"
-      );
-      toast.error("Không thể cập nhật mật khẩu");
-    } finally {
+    if (!formData.currentPassword) {
+      setSubmitError("Vui lòng nhập mật khẩu hiện tại");
       setLoading(false);
+      return;
     }
+
+    if (!formData.newPassword) {
+      setSubmitError("Vui lòng nhập mật khẩu mới");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.newPassword.length < 8) {
+      setSubmitError("Mật khẩu mới phải có ít nhất 8 ký tự");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      setSubmitError("Mật khẩu mới không khớp");
+      setLoading(false);
+      return;
+    }
+
+    const passwordData = {
+      currentPassword: formData.currentPassword,
+      password: formData.newPassword,
+      passwordConfirm: formData.confirmPassword,
+    };
+
+    await handleUpdateMe(passwordData)
+      .then((res) => {
+        toast.success("Cập nhật mật khẩu thành công");
+        setEditMode(false);
+        setFormData({
+          ...formData,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      })
+      .catch((error) => {
+        setSubmitError(
+          error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật mật khẩu"
+        );
+      });
   };
 
   const handleDeleteAccount = async () => {
@@ -283,25 +263,15 @@ function Account() {
       toast.error("Vui lòng nhập 'DELETE' để xác nhận");
       return;
     }
-
     setLoading(true);
-    try {
-      const response = await authorizedAxiosInstance.delete(
-        `${API_ROOT}/api/v1/accounts/deleteMe`
-      );
-
-      if (response.data.status === "success") {
+    const data = { isLocked: true };
+    await handleUpdateMe(data)
+      .then(async (res) => {
         toast.success("Tài khoản đã được xóa thành công");
-        localStorage.removeItem("userInfo");
-        localStorage.removeItem("token");
+        await handleLogoutApi();
         navigate("/");
-      }
-    } catch (error) {
-      toast.error("Không thể xóa tài khoản");
-    } finally {
-      setLoading(false);
-      setOpenDeleteDialog(false);
-    }
+      })
+      .catch((error) => toast.error("Không thể xóa tài khoản"));
   };
 
   if (loading && !userInfo.name) {

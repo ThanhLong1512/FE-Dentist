@@ -122,5 +122,17 @@ export const handleGetMe = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/accounts/me`
   );
-  return res.data.data;
+  return res.data.data.data;
+};
+export const handleUpdateMe = async (formDataToSend) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/accounts/updateMe`,
+    formDataToSend,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return res.data.data.data;
 };

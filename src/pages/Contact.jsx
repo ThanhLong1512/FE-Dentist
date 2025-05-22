@@ -41,6 +41,7 @@ function Contact() {
           `${API_ROOT}/api/v1/shifts/${currentDayOfWeek}`,
           { withCredentials: true }
         );
+        console.log(shiftsRes.data.data);
         setShifts(shiftsRes.data.data);
       } catch (error) {
         toast.error(error.response?.data?.message || error?.message);
@@ -48,7 +49,6 @@ function Contact() {
     };
     fetchData();
   }, []);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -295,8 +295,8 @@ function Contact() {
                         {shifts.map((shift) => (
                           <option key={shift._id} value={shift._id}>
                             {shift.employee?.name || "Unknown Doctor"} -{" "}
-                            {shift.StartTime} to {shift.EndTime} (
-                            {shift.employee.service.nameService})
+                            {shift.StartTime} to {shift.EndTime}(
+                            {shift.employee?.service.nameService})
                           </option>
                         ))}
                       </select>
