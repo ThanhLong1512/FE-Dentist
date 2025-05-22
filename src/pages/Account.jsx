@@ -46,7 +46,7 @@ function Account() {
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
-    photo: "default.jpg",
+    photo: "",
     role: "",
     require_2FA: false,
   });
@@ -129,6 +129,8 @@ function Account() {
         confirmPassword: "",
       });
       setSubmitError("");
+      setPhotoPreview(null);
+      setPhotoFile(null);
     }
   };
 
@@ -156,53 +158,121 @@ function Account() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setSubmitError("");
     setLoading(true);
 
     try {
       const formDataToSend = new FormData();
-      if (formData.name !== userInfo.name) {
-        formDataToSend.append("name", formData.name);
+      let hasChanges = false;
+      if (formData.name.trim() !== userInfo.name) {
+        formDataToSend.append("name", formData.name.trim());
+        hasChanges = true;
       }
       if (photoFile) {
         formDataToSend.append("photo", photoFile);
+        hasChanges = true;
       }
-      if (formData.currentPassword && formData.newPassword) {
-        if (formData.newPassword !== formData.confirmPassword) {
-          setSubmitError("Mật khẩu mới không khớp");
-          setLoading(false);
-          return;
-        }
 
-        formDataToSend.append("currentPassword", formData.currentPassword);
-        formDataToSend.append("password", formData.newPassword);
-        formDataToSend.append("passwordConfirm", formData.confirmPassword);
-      }
-      if ([...formDataToSend.entries()].length > 0) {
-        console.log(formData);
-        const response = await authorizedAxiosInstance.patch(
-          `${API_ROOT}/api/v1/accounts/updateMe`,
-          formDataToSend,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        toast.success("Cập nhật thông tin thành công");
-        setEditMode(false);
-        fetchUserData();
-      } else {
+      if (!hasChanges) {
         toast.info("Không có thông tin nào được thay đổi");
         setEditMode(false);
+        return;
+      }
+
+      console.log("Sending profile update data:");
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await authorizedAxiosInstance.patch(
+        `${API_ROOT}/api/v1/accounts/updateMe`,
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.status === "Success") {
+        toast.success("Cập nhật thông tin thành công");
+        setEditMode(false);
+        setPhotoPreview(null);
+        setPhotoFile(null);
+        await fetchUserData();
       }
     } catch (error) {
       setSubmitError(
         error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật thông tin"
       );
       toast.error("Không thể cập nhật thông tin");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setSubmitError("");
+    setLoading(true);
+
+    try {
+      if (!formData.currentPassword) {
+        setSubmitError("Vui lòng nhập mật khẩu hiện tại");
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.newPassword) {
+        setSubmitError("Vui lòng nhập mật khẩu mới");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.newPassword.length < 8) {
+        setSubmitError("Mật khẩu mới phải có ít nhất 8 ký tự");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.newPassword !== formData.confirmPassword) {
+        setSubmitError("Mật khẩu mới không khớp");
+        setLoading(false);
+        return;
+      }
+
+      const passwordData = {
+        currentPassword: formData.currentPassword,
+        password: formData.newPassword,
+        passwordConfirm: formData.confirmPassword,
+      };
+
+      console.log("Sending password update data:", passwordData);
+
+      const response = await authorizedAxiosInstance.patch(
+        `${API_ROOT}/api/v1/accounts/updateMe`,
+        passwordData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      toast.success("Cập nhật mật khẩu thành công");
+      setEditMode(false);
+      setFormData({
+        ...formData,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      setSubmitError(
+        error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật mật khẩu"
+      );
+      toast.error("Không thể cập nhật mật khẩu");
     } finally {
       setLoading(false);
     }
@@ -217,14 +287,13 @@ function Account() {
     setLoading(true);
     try {
       const response = await authorizedAxiosInstance.delete(
-        `${API_ROOT}/api/users/deleteMe`
+        `${API_ROOT}/api/v1/accounts/deleteMe`
       );
 
       if (response.data.status === "success") {
         toast.success("Tài khoản đã được xóa thành công");
         localStorage.removeItem("userInfo");
         localStorage.removeItem("token");
-
         navigate("/");
       }
     } catch (error) {
@@ -272,18 +341,11 @@ function Account() {
             >
               <Box sx={{ position: "relative", mb: 2 }}>
                 <Avatar
-                  src={
-                    photoPreview ||
-                    (userInfo.photo && userInfo.photo !== "default.jpg"
-                      ? `${API_ROOT}/img/users/${userInfo.photo}`
-                      : undefined)
-                  }
+                  src={photoPreview || userInfo.photo}
                   alt={userInfo.name}
                   sx={{ width: 120, height: 120, mb: 1 }}
                 >
-                  {!photoPreview && userInfo.photo === "default.jpg" && (
-                    <AccountCircleIcon sx={{ fontSize: 120 }} />
-                  )}
+                  {!photoPreview && userInfo.photo}
                 </Avatar>
 
                 {editMode && (
@@ -441,7 +503,7 @@ function Account() {
             </Box>
 
             {activeTab === 0 && (
-              <Box component="form" onSubmit={handleSubmit} noValidate>
+              <Box component="form" onSubmit={handleUpdateProfile} noValidate>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
                   Thông tin cá nhân
                 </Typography>
@@ -502,7 +564,7 @@ function Account() {
             )}
 
             {activeTab === 1 && (
-              <Box component="form" onSubmit={handleSubmit} noValidate>
+              <Box component="form" onSubmit={handleUpdatePassword} noValidate>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
                   Thay đổi mật khẩu
                 </Typography>
@@ -617,7 +679,7 @@ function Account() {
                       {loading ? (
                         <CircularProgress size={24} />
                       ) : (
-                        "Lưu thay đổi"
+                        "Cập nhật mật khẩu"
                       )}
                     </Button>
                   </Box>

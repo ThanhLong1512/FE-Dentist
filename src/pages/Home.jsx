@@ -33,8 +33,6 @@ function Home() {
     if (userInfo) {
       setShowRequire2FA(userInfo.require_2FA && !userInfo.is_2fa_verified);
     }
-
-    // Đóng menu khi click ra ngoài
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
@@ -56,7 +54,7 @@ function Home() {
   };
 
   const handleLogout = async () => {
-    handleLogoutApi();
+    await handleLogoutApi();
     navigate("/login");
   };
 
