@@ -3,6 +3,7 @@ import axios from "axios";
 import { useContext } from "react";
 import { RecoveryContext } from "../App";
 import {
+  handlePayWithCOD,
   handlePayWithMoMo,
   handlePayWithVNPay,
   handlePayWithZaloPay,
@@ -58,11 +59,18 @@ function Checkout() {
             totalPrice,
             service: serviceID,
           }).then((res) => {
+            localStorage.removeItem("cart");
             window.location.href = res.data.paymentUrl;
           });
           break;
         case "cod":
-          location.href = "/home";
+          await handlePayWithCOD({
+            totalPrice,
+            service: serviceID,
+          }).then((res) => {
+            localStorage.removeItem("cart");
+            location.href = "/home";
+          });
           break;
         default:
           console.log("Invalid payment method");

@@ -88,6 +88,14 @@ export const handlePayWithVNPay = async (data) => {
   return res.data;
 };
 
+export const handlePayWithCOD = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/payments/paymentWithCOD`,
+    data
+  );
+  return res.data;
+};
+
 export const handleGetService = async (serviceID) => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/services/${serviceID}`
@@ -135,4 +143,18 @@ export const handleUpdateMe = async (formDataToSend) => {
     }
   );
   return res.data.data.data;
+};
+
+export const handleGetMyAppointment = async () => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/appointments/getMyAppointment`
+  );
+  return res.data.data.data;
+};
+
+export const handleGetNyOrder = async () => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/orders/getOrderByUser`
+  );
+  return res.data.data;
 };

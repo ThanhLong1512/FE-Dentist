@@ -4,6 +4,7 @@ import { RecoveryContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
+import Chat from "../components/Chat";
 
 function Shop() {
   const [services, setServices] = useState([]);
@@ -135,6 +136,8 @@ function Shop() {
           </div>
         </div>
       </div>
+
+
     </div>
   );
 }
