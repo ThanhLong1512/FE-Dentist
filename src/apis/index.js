@@ -10,7 +10,8 @@ export const handleLogoutApi = async () => {
 };
 export const handleRefreshTokenApi = async () => {
   return await authorizedAxiosInstance.put(
-    `${API_ROOT}/api/v1/users/refreshToken`
+    `${API_ROOT}/api/v1/users/refreshToken`,
+    {}
   );
 };
 
@@ -157,4 +158,18 @@ export const handleGetNyOrder = async () => {
     `${API_ROOT}/api/v1/orders/getOrderByUser`
   );
   return res.data.data;
+};
+
+export const handleGetMyConservation = async () => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/conservations/getConservationByMembers`
+  );
+  return res.data.data;
+};
+
+export const handleGetMessagesByConservation = async (conservationID) => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/messages/${conservationID}`
+  );
+  return res.data.data.messages;
 };

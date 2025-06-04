@@ -19,7 +19,6 @@ authorizedAxiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      console.log(error.response?.data?.message);
       toast.error(
         error.response?.data?.message ||
           "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!",
@@ -32,9 +31,8 @@ authorizedAxiosInstance.interceptors.response.use(
           draggable: true,
         }
       );
-      handleLogoutApi().then(() => {
-        location.href = "/login";
-      });
+      location.href = "/login";
+      return Promise.reject(error);
     }
     const originalRequest = error.config;
     if (error.response?.status === 410 && !originalRequest._retry) {

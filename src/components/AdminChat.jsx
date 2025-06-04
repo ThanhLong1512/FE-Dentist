@@ -1,115 +1,46 @@
 import { useState, useEffect, useRef } from "react";
+import {
+  handleGetMyConservation,
+  handleGetMessagesByConservation,
+} from "../apis";
+import { set } from "date-fns";
 
 function AdminChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedConservation, setSelectedConservation] = useState(null);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const [users] = useState([
-    {
-      id: 1,
-      name: "Nguyễn Văn A",
-      avatar: "https://via.placeholder.com/40/4CAF50/FFFFFF?text=A",
-      lastMessage: "Tôi muốn hỏi về dịch vụ...",
-      lastMessageTime: "2 phút trước",
-      unreadCount: 2,
-      isOnline: true,
-    },
-    {
-      id: 2,
-      name: "Trần Thị B",
-      avatar: "https://via.placeholder.com/40/2196F3/FFFFFF?text=B",
-      lastMessage: "Cảm ơn bạn đã hỗ trợ",
-      lastMessageTime: "5 phút trước",
-      unreadCount: 0,
-      isOnline: true,
-    },
-    {
-      id: 3,
-      name: "Lê Văn C",
-      avatar: "https://via.placeholder.com/40/FF9800/FFFFFF?text=C",
-      lastMessage: "Bao giờ có thể giao hàng?",
-      lastMessageTime: "10 phút trước",
-      unreadCount: 1,
-      isOnline: false,
-    },
-    {
-      id: 4,
-      name: "Phạm Thị D",
-      avatar: "https://via.placeholder.com/40/E91E63/FFFFFF?text=D",
-      lastMessage: "Giá cả như thế nào?",
-      lastMessageTime: "15 phút trước",
-      unreadCount: 3,
-      isOnline: true,
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [conservations, setConservations] = useState([]);
+  const [chatMessages, setChatMessages] = useState({});
 
-  const [chatMessages, setChatMessages] = useState({
-    1: [
-      {
-        id: 1,
-        text: "Xin chào! Tôi muốn hỏi về dịch vụ của bạn",
-        sender: "client",
-        timestamp: "14:30",
-      },
-      {
-        id: 2,
-        text: "Chào bạn! Chúng tôi có thể hỗ trợ gì cho bạn?",
-        sender: "admin",
-        timestamp: "14:31",
-      },
-      {
-        id: 3,
-        text: "Tôi muốn biết về giá cả và thời gian thực hiện",
-        sender: "client",
-        timestamp: "14:32",
-      },
-    ],
-    2: [
-      {
-        id: 1,
-        text: "Cảm ơn bạn đã hỗ trợ tôi hôm qua",
-        sender: "client",
-        timestamp: "13:45",
-      },
-      {
-        id: 2,
-        text: "Không có gì! Rất vui được hỗ trợ bạn",
-        sender: "admin",
-        timestamp: "13:46",
-      },
-    ],
-    3: [
-      {
-        id: 1,
-        text: "Bao giờ có thể giao hàng cho tôi?",
-        sender: "client",
-        timestamp: "12:30",
-      },
-    ],
-    4: [
-      {
-        id: 1,
-        text: "Giá cả của dịch vụ này như thế nào?",
-        sender: "client",
-        timestamp: "11:45",
-      },
-      {
-        id: 2,
-        text: "Bạn có thể xem bảng giá tại đây...",
-        sender: "admin",
-        timestamp: "11:50",
-      },
-      {
-        id: 3,
-        text: "Có thể giảm giá không?",
-        sender: "client",
-        timestamp: "11:55",
-      },
-    ],
-  });
+  const fetchConversations = async () => {
+    try {
+      const data = await handleGetMyConservation();
+      const userList = data.conservation.map((item) => item.member[0]);
+      setUsers(userList);
+      setConservations(data.conservation);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversations();
+  }, []);
+
+  const fetchMessages = async (conservationId) => {
+    try {
+      const data = await handleGetMessagesByConservation(conservationId);
+      return data;
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      return [];
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -143,32 +74,47 @@ function AdminChat() {
     setInputMessage("");
   };
 
-  const handleUserSelect = (user) => {
-    setSelectedUser(user);
+  const handleUserSelect = async (user) => {
+    const conservation = conservations.find((cons) =>
+      cons.member.some((member) => member._id === user._id)
+    );
+    if (conservation) {
+      setSelectedConservation(conservation);
+      setSelectedUser(user);
+      const messages = await fetchMessages(conservation._id);
+      const formattedMessages = messages.map((message) => ({
+        id: message._id,
+        text: message.content,
+        sender: message.senderID === user._id ? "user" : "admin",
+        timestamp: new Date(message.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }));
+
+      setChatMessages((prev) => ({
+        ...prev,
+        [user.id]: formattedMessages,
+      }));
+    }
   };
 
   const handleBackToUserList = () => {
     setSelectedUser(null);
+    setSelectedConservation(null);
   };
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
     if (!isOpen) {
       setSelectedUser(null);
+      setSelectedConservation(null);
     }
-  };
-
-  const getTotalUnreadCount = () => {
-    return users.reduce((total, user) => total + user.unreadCount, 0);
   };
 
   return (
     <>
-      {/* Admin Chat Icon */}
       <div className="admin-chat-icon" onClick={toggleChat}>
-        {getTotalUnreadCount() > 0 && (
-          <span className="admin-unread-badge">{getTotalUnreadCount()}</span>
-        )}
         <svg
           width="24"
           height="24"
@@ -186,11 +132,9 @@ function AdminChat() {
         </svg>
       </div>
 
-      {/* Admin Chat Window */}
       {isOpen && (
         <div className="admin-chat-window">
           {!selectedUser ? (
-            // User List View
             <>
               <div className="admin-chat-header">
                 <h4>Tin nhắn từ khách hàng</h4>
@@ -200,43 +144,46 @@ function AdminChat() {
               </div>
 
               <div className="admin-users-list">
-                {users.map((user) => (
+                {users.length === 0 ? (
                   <div
-                    key={user.id}
-                    className="admin-user-item"
-                    onClick={() => handleUserSelect(user)}
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
                   >
-                    <div className="admin-user-avatar">
-                      <img src={user.avatar} alt={user.name} />
-                      {user.isOnline && <span className="online-dot"></span>}
-                    </div>
-                    <div className="admin-user-info">
-                      <div className="admin-user-name">{user.name}</div>
-                      <div className="admin-last-message">
-                        {user.lastMessage}
-                      </div>
-                      <div className="admin-last-time">
-                        {user.lastMessageTime}
-                      </div>
-                    </div>
-                    {user.unreadCount > 0 && (
-                      <span className="admin-unread-count">
-                        {user.unreadCount}
-                      </span>
-                    )}
+                    Đang tải danh sách cuộc trò chuyện...
                   </div>
-                ))}
+                ) : (
+                  users.map((user) => (
+                    <div
+                      key={user.id}
+                      className="admin-user-item"
+                      onClick={() => handleUserSelect(user)}
+                    >
+                      <div className="admin-user-avatar">
+                        <img src={user.photo} alt={user.name} />
+                        {user.isOnline && <span className="online-dot"></span>}
+                      </div>
+                      <div className="admin-user-info">
+                        <div className="admin-user-name">{user.name}</div>
+                      </div>
+                      <div className="admin-user-info">
+                        <div className="admin-user-name">{user.email}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </>
           ) : (
-            // Chat View
             <>
               <div className="admin-chat-header">
                 <button className="back-btn" onClick={handleBackToUserList}>
                   ←
                 </button>
                 <div className="admin-chat-user-info">
-                  <img src={selectedUser.avatar} alt={selectedUser.name} />
+                  <img src={selectedUser.photo} alt={selectedUser.name} />
                   <div>
                     <div className="admin-chat-user-name">
                       {selectedUser.name}
@@ -252,23 +199,35 @@ function AdminChat() {
               </div>
 
               <div className="admin-chat-messages">
-                {(chatMessages[selectedUser.id] || []).map((message) => (
+                {(chatMessages[selectedUser.id] || []).length === 0 ? (
                   <div
-                    key={message.id}
-                    className={`admin-message ${
-                      message.sender === "admin"
-                        ? "admin-message-sent"
-                        : "admin-message-received"
-                    }`}
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
                   >
-                    <div className="admin-message-content">
-                      <p>{message.text}</p>
-                      <span className="admin-timestamp">
-                        {message.timestamp}
-                      </span>
-                    </div>
+                    Chưa có tin nhắn nào
                   </div>
-                ))}
+                ) : (
+                  (chatMessages[selectedUser.id] || []).map((message) => (
+                    <div
+                      key={message.id}
+                      className={`admin-message ${
+                        message.sender === "admin"
+                          ? "admin-message-sent"
+                          : "admin-message-received"
+                      }`}
+                    >
+                      <div className="admin-message-content">
+                        <p style={{ color: "black" }}>{message.text}</p>
+                        <span className="admin-timestamp">
+                          {message.timestamp}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
 
                 {isTyping && (
                   <div className="admin-message admin-message-received">
@@ -284,18 +243,20 @@ function AdminChat() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <form
-                className="admin-chat-input-form"
-                onSubmit={handleSendMessage}
-              >
+              <div className="admin-chat-input-form">
                 <input
                   type="text"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Nhập tin nhắn..."
                   className="admin-chat-input"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSendMessage(e);
+                    }
+                  }}
                 />
-                <button type="submit" className="admin-send-btn">
+                <button onClick={handleSendMessage} className="admin-send-btn">
                   <svg
                     width="20"
                     height="20"
@@ -309,7 +270,7 @@ function AdminChat() {
                     />
                   </svg>
                 </button>
-              </form>
+              </div>
             </>
           )}
         </div>
