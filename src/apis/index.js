@@ -173,3 +173,18 @@ export const handleGetMessagesByConservation = async (conservationID) => {
   );
   return res.data.data.messages;
 };
+
+export const handleCreateConservation = async () => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/conservations`
+  );
+  return res.data.data;
+};
+
+export const handleCreateMessage = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/messages`,
+    data
+  );
+  return res.data.data.data;
+};

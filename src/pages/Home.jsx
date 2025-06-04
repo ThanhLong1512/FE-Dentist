@@ -1415,7 +1415,7 @@ function Home() {
           </div>
         </div>
       </div>
-      <Chat />
+      {userInfo && userInfo.role === "user" && <Chat />}
       {showRequire2FA && (
         <Require2FA handleSuccessVerify2FA={handleSuccessVerify2FA} />
       )}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   handleGetMyConservation,
   handleGetMessagesByConservation,
+  handleCreateMessage,
 } from "../apis";
 import { set } from "date-fns";
 
@@ -52,26 +53,33 @@ function AdminChat() {
     }
   }, [chatMessages, selectedUser]);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (inputMessage.trim() === "" || !selectedUser) return;
-
-    const newMessage = {
-      id: Date.now(),
-      text: inputMessage,
-      sender: "admin",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+    const data = {
+      content: inputMessage,
+      conservationID: selectedConservation._id,
     };
+    try {
+      const newMessage = await handleCreateMessage(data);
+      const formattedMessage = {
+        id: newMessage._id,
+        text: newMessage.content,
+        sender: newMessage.senderID === selectedUser._id ? "user" : "admin",
+        timestamp: new Date(newMessage.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
 
-    setChatMessages((prev) => ({
-      ...prev,
-      [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage],
-    }));
-
-    setInputMessage("");
+      setChatMessages((prev) => ({
+        ...prev,
+        [selectedUser.id]: [...(prev[selectedUser.id] || []), formattedMessage],
+      }));
+      setInputMessage("");
+    } catch (error) {
+      console.error("Error sending message", error);
+    }
   };
 
   const handleUserSelect = async (user) => {
