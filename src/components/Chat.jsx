@@ -5,7 +5,7 @@ import {
   handleGetMessagesByConservation,
 } from "../apis";
 import { io } from "socket.io-client";
-import { SOCKET_URL } from "../utils/constants";
+import { SOCKET_URL, ADMIN_ID } from "../utils/constants";
 
 function Chat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,16 +15,14 @@ function Chat() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [socket, setSocket] = useState(null);
+  const socket = useRef(null);
   const [currentUserId, setCurrentUserId] = useState(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  useEffect(() => {
-    setSocket(io(`${SOCKET_URL}`));
-  }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -34,12 +32,45 @@ function Chat() {
     if (userInfo) {
       try {
         const parsedUserInfo = JSON.parse(userInfo);
-        setCurrentUserId(parsedUserInfo.id || parsedUserInfo._id);
+        setCurrentUserId(parsedUserInfo.id);
       } catch (error) {
         console.error("Error parsing userInfo from localStorage:", error);
       }
     }
+
+    socket.current = io(`${SOCKET_URL}`);
+
+    return () => {
+      if (socket.current) {
+        socket.current.disconnect();
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    if (currentUserId && socket.current) {
+      socket.current.emit("addUser", currentUserId);
+
+      socket.current.on("getMessage", ({ senderID, text }) => {
+        const newMessage = {
+          id: Date.now(),
+          text: text,
+          sender: "admin",
+          senderID: senderID,
+          timestamp: formatTime(new Date()),
+        };
+
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setIsTyping(false);
+      });
+    }
+    return () => {
+      if (socket.current) {
+        socket.current.off("getUsers");
+        socket.current.off("getMessage");
+      }
+    };
+  }, [currentUserId]);
 
   useEffect(() => {
     if (conservationId) {
@@ -89,7 +120,8 @@ function Chat() {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (inputMessage.trim() === "" || !conservationId) return;
+    if (inputMessage.trim() === "" || !conservationId || !currentUserId) return;
+
     const tempMessage = {
       id: Date.now(),
       text: inputMessage,
@@ -97,6 +129,13 @@ function Chat() {
       senderID: currentUserId,
       timestamp: formatTime(new Date()),
     };
+    if (socket.current && currentUserId) {
+      socket.current.emit("sendMessage", {
+        senderID: currentUserId,
+        receiverID: ADMIN_ID,
+        text: inputMessage,
+      });
+    }
 
     setMessages((prevMessages) => [...prevMessages, tempMessage]);
     const currentMessage = inputMessage;
@@ -109,23 +148,17 @@ function Chat() {
       };
 
       const response = await handleCreateMessage(messageData);
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === tempMessage.id ? { ...msg, id: response._id } : msg
+        )
+      );
     } catch (error) {
       setMessages((prevMessages) =>
         prevMessages.filter((msg) => msg.id !== tempMessage.id)
       );
+      console.error("Error sending message:", error);
     }
-    setIsTyping(true);
-    setTimeout(() => {
-      const adminResponse = {
-        id: Date.now() + 1,
-        text: "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.",
-        sender: "admin",
-        senderID: "admin",
-        timestamp: formatTime(new Date()),
-      };
-      setMessages((prevMessages) => [...prevMessages, adminResponse]);
-      setIsTyping(false);
-    }, 20000);
   };
 
   const toggleChat = async () => {
@@ -238,7 +271,7 @@ function Chat() {
                   : "Đang tạo cuộc trò chuyện..."
               }
               className="chat-input"
-              disabled={!conservationId || isLoadingMessages}
+              disabled={!conservationId || isLoadingMessages || !currentUserId}
             />
             <button
               type="submit"
@@ -246,7 +279,8 @@ function Chat() {
               disabled={
                 !conservationId ||
                 inputMessage.trim() === "" ||
-                isLoadingMessages
+                isLoadingMessages ||
+                !currentUserId
               }
             >
               <svg

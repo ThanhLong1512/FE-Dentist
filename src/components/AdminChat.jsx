@@ -5,6 +5,8 @@ import {
   handleCreateMessage,
 } from "../apis";
 import { set } from "date-fns";
+import { io } from "socket.io-client";
+import { SOCKET_URL } from "../utils/constants";
 
 function AdminChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,10 +15,11 @@ function AdminChat() {
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
-
+  const socket = useRef(null);
   const [users, setUsers] = useState([]);
   const [conservations, setConservations] = useState([]);
   const [chatMessages, setChatMessages] = useState({});
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const fetchConversations = async () => {
     try {
@@ -28,6 +31,57 @@ function AdminChat() {
       console.error("Error fetching conversations:", error);
     }
   };
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (userInfo) {
+      try {
+        const parsedUserInfo = JSON.parse(userInfo);
+        setCurrentUserId(parsedUserInfo.id);
+      } catch (error) {
+        console.error("Error parsing userInfo from localStorage:", error);
+      }
+    }
+
+    socket.current = io(`${SOCKET_URL}`);
+
+    return () => {
+      if (socket.current) {
+        socket.current.disconnect();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentUserId && socket.current) {
+      socket.current.emit("addUser", currentUserId);
+
+      socket.current.on("getMessage", ({ senderID, text }) => {
+        const senderUser = users.find((user) => user._id === senderID);
+        if (senderUser) {
+          const newMessage = {
+            id: Date.now(),
+            text: text,
+            sender: "user",
+            timestamp: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+          setChatMessages((prev) => ({
+            ...prev,
+            [senderUser.id]: [...(prev[senderUser.id] || []), newMessage],
+          }));
+        }
+      });
+    }
+    return () => {
+      if (socket.current) {
+        socket.current.off("getUsers");
+        socket.current.off("getMessage");
+      }
+    };
+  }, [currentUserId, users]);
 
   useEffect(() => {
     fetchConversations();
@@ -55,30 +109,57 @@ function AdminChat() {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (inputMessage.trim() === "" || !selectedUser) return;
+    if (inputMessage.trim() === "" || !selectedUser || !currentUserId) return;
+
+    const tempMessage = {
+      id: Date.now(),
+      text: inputMessage,
+      sender: "admin",
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    if (socket.current && currentUserId) {
+      socket.current.emit("sendMessage", {
+        senderID: currentUserId,
+        receiverID: selectedUser._id,
+        text: inputMessage,
+      });
+    }
+
+    setChatMessages((prev) => ({
+      ...prev,
+      [selectedUser.id]: [...(prev[selectedUser.id] || []), tempMessage],
+    }));
+
+    const currentMessage = inputMessage;
+    setInputMessage("");
+
     const data = {
-      content: inputMessage,
+      content: currentMessage,
       conservationID: selectedConservation._id,
     };
+
     try {
       const newMessage = await handleCreateMessage(data);
-      const formattedMessage = {
-        id: newMessage._id,
-        text: newMessage.content,
-        sender: newMessage.senderID === selectedUser._id ? "user" : "admin",
-        timestamp: new Date(newMessage.createdAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
 
       setChatMessages((prev) => ({
         ...prev,
-        [selectedUser.id]: [...(prev[selectedUser.id] || []), formattedMessage],
+        [selectedUser.id]: prev[selectedUser.id].map((msg) =>
+          msg.id === tempMessage.id ? { ...msg, id: newMessage._id } : msg
+        ),
       }));
-      setInputMessage("");
     } catch (error) {
       console.error("Error sending message", error);
+
+      setChatMessages((prev) => ({
+        ...prev,
+        [selectedUser.id]: prev[selectedUser.id].filter(
+          (msg) => msg.id !== tempMessage.id
+        ),
+      }));
     }
   };
 
@@ -258,13 +339,18 @@ function AdminChat() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   placeholder="Nhập tin nhắn..."
                   className="admin-chat-input"
+                  disabled={!currentUserId}
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
                       handleSendMessage(e);
                     }
                   }}
                 />
-                <button onClick={handleSendMessage} className="admin-send-btn">
+                <button
+                  onClick={handleSendMessage}
+                  className="admin-send-btn"
+                  disabled={!currentUserId || inputMessage.trim() === ""}
+                >
                   <svg
                     width="20"
                     height="20"
