@@ -8,7 +8,7 @@ import {
 import { createContext } from "react";
 import { useState } from "react";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import GlobalStyles from "../styles/GlobalStyles";
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -17,19 +17,25 @@ import NotFound from "./pages/NotFound";
 import AppLayout from "./components/AppLayout";
 import Blog from "./pages/Blog";
 import ProtectedRoute from "./components/ProtectRoute";
-import AdminLayout from "./components/AdminLayout";
+import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
-import FormsAdmin from "./pages/admin/Accounts";
-import TableAdmin from "./pages/admin/Employees";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import Product from "./pages/DetailService";
 import DetailService from "./pages/DetailService";
 import Account from "./pages/Account";
 import Appointment from "./pages/Appointment";
 import Order from "./pages/Order";
+import Patient from "./pages/admin/Patient";
+import Service from "./pages/admin/Service";
+import Shift from "./pages/admin/Shift";
+import Employee from "./pages/admin/Employee";
+import Booking from "./pages/admin/Booking";
+import User from "./pages/admin/User";
+import Setting from "./pages/admin/Setting";
+import Facility from "./pages/admin/Facility";
+import Orders from "./pages/admin/Orders";
 
 export const RecoveryContext = createContext();
 function App() {
@@ -70,62 +76,75 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <RecoveryContext.Provider
-        value={{
-          email,
-          setEmail,
-          otp,
-          setOTP,
-          showOTPInput,
-          setShowOTPInput,
-          countCart,
-          setCountCart,
-          totalPrice,
-          setTotalPrice,
-        }}
-      >
-        <Routes>
-          <Route index element={<Navigate replace to="home" />} />
-          <Route path="home" element={<Home />} />
-          <Route element={<AppLayout />}>
-            <Route path="blog" element={<Blog />} />
-            <Route path="contact" element={<Contact />} />
-            <Route element={<UnauthorizedRoutes />}>
-              <Route path="login" element={<Login />} />
+    <>
+      <GlobalStyles />
+      <BrowserRouter>
+        <RecoveryContext.Provider
+          value={{
+            email,
+            setEmail,
+            otp,
+            setOTP,
+            showOTPInput,
+            setShowOTPInput,
+            countCart,
+            setCountCart,
+            totalPrice,
+            setTotalPrice,
+          }}
+        >
+          <Routes>
+            <Route index element={<Navigate replace to="home" />} />
+            <Route path="home" element={<Home />} />
+            <Route element={<AppLayout />}>
+              <Route path="blog" element={<Blog />} />
+              <Route path="contact" element={<Contact />} />
+              <Route element={<UnauthorizedRoutes />}>
+                <Route path="login" element={<Login />} />
+              </Route>
+              <Route path="shop" element={<Shop />} />
+              <Route path="*" element={<NotFound />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/shop/:ServiceID" element={<DetailService />} />
+              <Route path="/account/profile" element={<Account />} />
+              <Route path="/account/appointments" element={<Appointment />} />
+              <Route path="/account/orders" element={<Order />} />
             </Route>
-            <Route path="shop" element={<Shop />} />
-            <Route path="*" element={<NotFound />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/shop/:ServiceID" element={<DetailService />} />
-            <Route path="/account/profile" element={<Account />} />
-            <Route path="/account/appointments" element={<Appointment />} />
-            <Route path="/account/orders" element={<Order />} />
-          </Route>
-          <Route path="admin/*" element={<AdminRoutes />}>
-            <Route index element={<Navigate replace to="dashboard" />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="users" element={<FormsAdmin />} />
-            <Route path="employees" element={<TableAdmin />} />
-          </Route>
-        </Routes>
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </RecoveryContext.Provider>
-    </BrowserRouter>
+            <Route element={<AdminLayout />}>
+              <Route
+                index
+                element={<Navigate replace to="admin/dashboard" />}
+              />
+              <Route path="admin/dashboard" element={<Dashboard />} />
+              <Route path="admin/patients" element={<Patient />} />
+              <Route path="admin/services" element={<Service />} />
+              <Route path="admin/shifts" element={<Shift />} />
+              <Route path="admin/appointments" element={<Booking />} />
+              <Route path="admin/orders" element={<Orders />} />
+              <Route path="admin/users" element={<User />} />
+              <Route path="admin/facilities" element={<Facility />} />
+              <Route path="admin/employees" element={<Employee />} />
+              <Route path="admin/settings" element={<Setting />} />
+            </Route>
+          </Routes>
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </RecoveryContext.Provider>
+      </BrowserRouter>
+    </>
   );
 }
 

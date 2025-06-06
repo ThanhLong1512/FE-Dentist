@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { API_ROOT } from "../utils/constants";
+import { API_ROOT, GOOGLE_MAP_API_KEY } from "../utils/constants";
 import Select from "react-select";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { setHours, setMinutes } from "date-fns";
+import GoogleMapReact from "google-map-react";
 import "react-toastify/dist/ReactToastify.css";
 
 function Contact() {
@@ -21,9 +22,15 @@ function Contact() {
     appointmentDate: null,
     shift: "",
   });
+  const [coordinates, setCoordinates] = useState(null);
   const navigate = useNavigate();
-
   useEffect(() => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      setCoordinates({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+    });
     const fetchData = async () => {
       try {
         const today = new Date();
@@ -328,6 +335,20 @@ function Contact() {
                 </div>
               </form>
             </div>
+          </div>
+          <div style={{ height: "500px", width: "100%" }}>
+            <GoogleMapReact
+              bootstrapURLKeys={{ key: GOOGLE_MAP_API_KEY }}
+              defaultCenter={coordinates}
+              defaultZoom={11}
+              center={coordinates}
+            >
+              {/* <AnyReactComponent
+                lat={59.955413}
+                lng={30.337844}
+                text="My Marker"
+              /> */}
+            </GoogleMapReact>
           </div>
         </div>
       </section>

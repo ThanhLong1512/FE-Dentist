@@ -3,10 +3,10 @@ import {
   handleGetMyConservation,
   handleGetMessagesByConservation,
   handleCreateMessage,
-} from "../apis";
+} from "../../apis";
 import { set } from "date-fns";
 import { io } from "socket.io-client";
-import { SOCKET_URL } from "../utils/constants";
+import { SOCKET_URL } from "../../utils/constants";
 
 function AdminChat() {
   const [isOpen, setIsOpen] = useState(false);

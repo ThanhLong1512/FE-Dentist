@@ -1,12 +1,12 @@
 import Heading from "../../components/admin/Heading";
 import Row from "../../components/admin/Row";
-function Shift() {
+function User() {
   return (
     <Row type="horizontal">
-      <Heading as="h1">Shift</Heading>
+      <Heading as="h1">Users</Heading>
       <p>TEST</p>
     </Row>
   );
 }
 
-export default Shift;
+export default User;
