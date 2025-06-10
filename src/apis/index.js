@@ -1,3 +1,4 @@
+import { data } from "jquery";
 import authorizedAxiosInstance from "../utils/authorizedAxios";
 import { API_ROOT } from "../utils/constants";
 
@@ -54,7 +55,6 @@ export const handleResetPassword = async (data) => {
 };
 export const handleGetServices = async () => {
   const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/services`);
-  console.log(res);
   return res.data.data.data;
 };
 
@@ -104,6 +104,42 @@ export const handleGetService = async (serviceID) => {
   return res.data.data.data;
 };
 
+export const handleAddService = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/services`,
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return res.data.data;
+};
+export const handleUpdateService = async (data, serviceID) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/services/${serviceID}`,
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return res.data.data.data;
+};
+export const handleDeleteService = async (serviceID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/services/${serviceID}`
+  );
+  return res.data;
+};
+export const handleDuplicateService = async (serviceID) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/services/duplicate/${serviceID}`
+  );
+  return res.data.data.data;
+};
 export const handlePostReview = async (data) => {
   const res = await authorizedAxiosInstance.post(
     `${API_ROOT}/api/v1/reviews`,

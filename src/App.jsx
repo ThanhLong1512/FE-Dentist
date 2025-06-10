@@ -8,6 +8,7 @@ import {
 import { createContext } from "react";
 import { useState } from "react";
 import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 import GlobalStyles from "../styles/GlobalStyles";
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
@@ -36,8 +37,22 @@ import User from "./pages/admin/User";
 import Setting from "./pages/admin/Setting";
 import Facility from "./pages/admin/Facility";
 import Orders from "./pages/admin/Orders";
-
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 export const RecoveryContext = createContext();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+    },
+  },
+});
 function App() {
   const [email, setEmail] = useState("");
   const [otp, setOTP] = useState("");
@@ -76,7 +91,8 @@ function App() {
   };
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       <GlobalStyles />
       <BrowserRouter>
         <RecoveryContext.Provider
@@ -144,7 +160,27 @@ function App() {
           />
         </RecoveryContext.Provider>
       </BrowserRouter>
-    </>
+      <Toaster
+        position="top-center"
+        gutter={12}
+        containerStyle={{ margin: "8px" }}
+        toastOptions={{
+          success: {
+            duration: 3000,
+          },
+          error: {
+            duration: 5000,
+          },
+          style: {
+            fontSize: "16px",
+            maxWidth: "500px",
+            padding: "16px 24px",
+            backgroundColor: "var(--color-grey-0)",
+            color: "var(--color-grey-700)",
+          },
+        }}
+      />
+    </QueryClientProvider>
   );
 }
 
