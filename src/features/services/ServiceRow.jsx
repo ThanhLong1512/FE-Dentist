@@ -10,6 +10,7 @@ import { useDuplicateService } from "./useDuplicateService";
 import Modal from "../../components/admin/Modal";
 import ConfirmDelete from "../../components/admin/ConfirmDelete";
 import Table from "../../components/admin/Table";
+import Menus from "../../components/admin/Menus";
 
 const Img = styled.img`
   display: block;
@@ -68,30 +69,34 @@ function ServiceRow({ service }) {
           <span>&mdash;</span>
         )}
         <div>
-          <button disabled={isDuplicating} onClick={handleDuplicate}>
-            <HiSquare2Stack />
-          </button>
           <Modal>
-            <Modal.Open opens="edit-service">
-              <button>
-                <HiPencil />
-              </button>
-            </Modal.Open>
-            <Modal.Window name="edit-service">
-              <CreateServiceForm serviceToEdit={service} />
-            </Modal.Window>
-            <Modal.Open opens="delete-service">
-              <button disabled={isDeleting}>
-                <HiTrash />
-              </button>
-            </Modal.Open>
-            <Modal.Window name="delete-service">
-              <ConfirmDelete
-                resource="services"
-                onConfirm={() => deleteService(serviceId)}
-                disabled={isDeleting}
-              />
-            </Modal.Window>
+            <Menus.Menu>
+              <Menus.Toggle id={serviceId} />
+              <Menus.List id={serviceId}>
+                <Menus.Button
+                  icon={<HiSquare2Stack />}
+                  onClick={handleDuplicate}
+                >
+                  Duplicate
+                </Menus.Button>
+                <Modal.Open opens="edit-service">
+                  <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
+                </Modal.Open>
+                <Modal.Open opens="delete-service">
+                  <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
+                </Modal.Open>
+              </Menus.List>
+              <Modal.Window name="edit-service">
+                <CreateServiceForm serviceToEdit={service} />
+              </Modal.Window>
+              <Modal.Window name="delete-service">
+                <ConfirmDelete
+                  resource="services"
+                  onConfirm={() => deleteService(serviceId)}
+                  disabled={isDeleting}
+                />
+              </Modal.Window>
+            </Menus.Menu>
           </Modal>
         </div>
       </Table.Row>

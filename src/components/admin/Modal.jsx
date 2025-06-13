@@ -1,4 +1,4 @@
-import { cloneElement, createContext, useContext } from "react";
+import { cloneElement, createContext, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 import { HiXMark } from "react-icons/hi2";
 import styled from "styled-components";
@@ -46,9 +46,6 @@ const Button = styled.button`
   & svg {
     width: 2.4rem;
     height: 2.4rem;
-    /* Sometimes we need both */
-    /* fill: var(--color-grey-500);
-    stroke: var(--color-grey-500); */
     color: var(--color-grey-500);
   }
 `;
@@ -87,4 +84,5 @@ function Window({ children, name }) {
 }
 Modal.Open = Open;
 Modal.Window = Window;
+
 export default Modal;
