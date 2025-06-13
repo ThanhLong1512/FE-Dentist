@@ -3,15 +3,7 @@ import styled from "styled-components";
 import Spinner from "../../components/admin/Spinner";
 import ServiceRow from "./ServiceRow";
 import { useServices } from "./useServices";
-
-const Table = styled.div`
-  border: 1px solid var(--color-grey-200);
-
-  font-size: 1.4rem;
-  background-color: var(--color-grey-0);
-  border-radius: 7px;
-  overflow: hidden;
-`;
+import Table from "../../components/admin/Table";
 
 const TableHeader = styled.header`
   display: grid;
@@ -35,18 +27,19 @@ function ServiceTable() {
   if (isLoading) return <Spinner />;
 
   return (
-    <Table role="table">
-      <TableHeader role="row">
+    <Table columns="0.6fr 1.8fr 2.2fr 1fr 1fr 1fr">
+      <Table.Header>
         <div></div>
         <div>Service</div>
         <div>Unit</div>
         <div>Price</div>
         <div>Discount</div>
         <div></div>
-      </TableHeader>
-      {services.map((service) => (
-        <ServiceRow service={service} key={service._id} />
-      ))}
+      </Table.Header>
+      <Table.Body
+        data={services}
+        render={(service) => <ServiceRow service={service} key={service._id} />}
+      />
     </Table>
   );
 }

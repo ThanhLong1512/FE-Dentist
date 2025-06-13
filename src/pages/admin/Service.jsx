@@ -4,9 +4,9 @@ import Row from "../../components/admin/Row";
 import ServiceTable from "../../features/services/ServiceTable";
 import Button from "../../components/admin/Button";
 import CreateServiceForm from "../../features/services/CreateServiceForm";
+import CreateService from "../../features/services/CreateService";
 
 function Service() {
-  const [showForm, setShowForm] = useState(false);
   return (
     <>
       <Row type="horizontal">
@@ -16,10 +16,7 @@ function Service() {
       <Row>
         <ServiceTable />
 
-        <Button onClick={() => setShowForm((show) => !show)}>
-          Add new service
-        </Button>
-        {showForm && <CreateServiceForm />}
+        <CreateService />
       </Row>
     </>
   );

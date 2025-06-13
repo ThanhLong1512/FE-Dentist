@@ -9,7 +9,7 @@ import FormRow from "../../components/admin/FormRow";
 import { useCreateService } from "./useCreateService";
 import { useEditService } from "./useEditService";
 
-function CreateServiceForm({ serviceToEdit = {} }) {
+function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
   const { isCreating, createService } = useCreateService();
   const { isEditing, editService } = useEditService();
   const isWorking = isCreating || isEditing;
@@ -65,16 +65,12 @@ function CreateServiceForm({ serviceToEdit = {} }) {
     formData.append("priceDiscount", String(data.priceDiscount || 0));
     formData.append("summary", data.summary || "");
     formData.append("description", data.description || "");
-
-    // Only append file if it exists (for edit) or is required (for create)
     if (selectedFile) {
       formData.append("photoService", selectedFile);
     } else if (!isEditSession) {
       toast.error("Please select a service photo");
       return;
     }
-
-    // Debug: Log FormData contents
     for (let [key, value] of formData.entries()) {
       console.log(key, value);
     }
@@ -88,6 +84,7 @@ function CreateServiceForm({ serviceToEdit = {} }) {
         {
           onSuccess: () => {
             handleReset();
+            onCloseModal?.();
           },
         }
       );
@@ -95,6 +92,7 @@ function CreateServiceForm({ serviceToEdit = {} }) {
       createService(formData, {
         onSuccess: () => {
           handleReset();
+          onCloseModal?.();
         },
       });
     }
@@ -185,7 +183,10 @@ function CreateServiceForm({ serviceToEdit = {} }) {
   }
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit, onError)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      type={onCloseModal ? "modal" : "regular"}
+    >
       <FormRow label="Service name" error={errors?.nameService?.message}>
         <Input
           type="text"
@@ -285,7 +286,6 @@ function CreateServiceForm({ serviceToEdit = {} }) {
 
       <FormRow label="Service photo" error={errors?.photoService?.message}>
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {/* Image Preview */}
           {imagePreview && (
             <div
               style={{
@@ -334,7 +334,6 @@ function CreateServiceForm({ serviceToEdit = {} }) {
             </div>
           )}
 
-          {/* File Input (Hidden) */}
           <input
             ref={fileInputRef}
             type="file"
@@ -344,7 +343,6 @@ function CreateServiceForm({ serviceToEdit = {} }) {
             disabled={isWorking}
           />
 
-          {/* Upload Controls */}
           <div
             style={{
               display: "flex",
@@ -353,7 +351,7 @@ function CreateServiceForm({ serviceToEdit = {} }) {
               flexWrap: "wrap",
             }}
           >
-            <button
+            <span
               type="button"
               onClick={openFileDialog}
               disabled={isWorking}
@@ -405,7 +403,7 @@ function CreateServiceForm({ serviceToEdit = {} }) {
                 : imagePreview
                 ? "Photo Selected"
                 : "Choose Photo"}
-            </button>
+            </span>
 
             {selectedFile && (
               <span
@@ -425,8 +423,6 @@ function CreateServiceForm({ serviceToEdit = {} }) {
               </span>
             )}
           </div>
-
-          {/* Validation Input */}
           <input
             type="hidden"
             {...register("photoService", {
@@ -458,10 +454,11 @@ function CreateServiceForm({ serviceToEdit = {} }) {
         <Button
           variation="secondary"
           type="button"
-          onClick={handleReset}
-          disabled={isWorking}
+          onClick={() => {
+            onCloseModal?.();
+          }}
         >
-          {isWorking ? "Processing..." : "Reset"}
+          Cancel
         </Button>
         <Button type="submit" disabled={isWorking}>
           {isWorking
