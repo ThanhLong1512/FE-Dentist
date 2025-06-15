@@ -58,6 +58,38 @@ export const handleGetServices = async () => {
   return res.data.data.data;
 };
 
+export const handleGetPatients = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/patients`);
+  return res.data.data.data;
+};
+export const handleAddPatient = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/patients`,
+    data
+  );
+  return res.data.data.data;
+};
+export const handleDuplicatePatient = async (patientID) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/patients/duplicate/${patientID}`
+  );
+  return res.data.data.data;
+};
+export const handleUpdatePatient = async (data, patientID) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/patients/${patientID}`,
+    data
+  );
+  return res.data.data.data;
+};
+
+export const handleDeletePatient = async (patientID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/patients/${patientID}`
+  );
+  return res.data;
+};
+
 export const handleGetProvince = async () => {
   const res = await authorizedAxiosInstance.get(
     `https://provinces.open-api.vn/api/`

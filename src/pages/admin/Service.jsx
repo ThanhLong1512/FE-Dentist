@@ -5,13 +5,14 @@ import ServiceTable from "../../features/services/ServiceTable";
 import Button from "../../components/admin/Button";
 import CreateServiceForm from "../../features/services/CreateServiceForm";
 import CreateService from "../../features/services/CreateService";
+import ServiceOperations from "../../features/services/ServiceOperations";
 
 function Service() {
   return (
     <>
       <Row type="horizontal">
         <Heading as="h1">Service</Heading>
-        <p>Filter / Sort</p>
+        <ServiceOperations />
       </Row>
       <Row>
         <ServiceTable />

@@ -3,8 +3,6 @@ import { RecoveryContext } from "../App";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function OTPInput() {
   const { email, otp, setShowOTPInput } = useContext(RecoveryContext);
