@@ -12,21 +12,21 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
   const { isCreating, createPatient } = useCreatePatient();
   const { isEditing, editPatient } = useEditPatient();
   const isWorking = isCreating || isEditing;
-
+  // Determine if we are in an edit session or creating a new patient
   const { _id: editId, ...editValues } = patientToEdit;
   const isEditSession = Boolean(editId);
 
   const defaultValues = isEditSession
     ? {
         name: editValues.name || "",
-        gender: editValues.gender || true, // true = male, false = female
+        gender: editValues.gender || true,
         yearOfBirth: editValues.yearOfBirth || "",
         phoneNumber: editValues.phoneNumber || "",
         address: editValues.address || "",
       }
     : {
         name: "",
-        gender: true, // true = male, false = female
+        gender: true,
         yearOfBirth: "",
         phoneNumber: "",
         address: "",
