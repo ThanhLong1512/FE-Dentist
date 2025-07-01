@@ -1,5 +1,5 @@
 import Spinner from "../../components/admin/Spinner";
-import PatientRow from "./AppointmentRow";
+import AppointmentRow from "./AppointmentRow";
 import { useAppointments } from "./useAppointments";
 import Table from "../../components/admin/Table";
 import Menus from "../../components/admin/Menus";
@@ -13,23 +13,40 @@ function AppointmentTable() {
 
   if (isLoading) return <Spinner />;
 
-  let filteredAppointment;
+  let filteredAppointments;
 
+  // Filter by patient gender
   const filterValue = searchParams.get("gender") || "all";
-  if (filterValue === "all") filteredAppointment = appointments;
+  if (filterValue === "all") filteredAppointments = appointments;
   if (filterValue === "male")
-    filteredPatients = patients.filter((patient) => patient.gender === true);
+    filteredAppointments = appointments.filter(
+      (appointment) => appointment.patient.gender === true
+    );
   if (filterValue === "female")
-    filteredPatients = patients.filter((patient) => patient.gender === false);
+    filteredAppointments = appointments.filter(
+      (appointment) => appointment.patient.gender === false
+    );
 
   // 2) SORT
-  const sortBy = searchParams.get("sortBy") || "yearOfBirth-asc";
+  const sortBy = searchParams.get("sortBy") || "Date-desc";
   const [field, direction] = sortBy.split("-");
   const modifier = direction === "asc" ? 1 : -1;
 
-  const sortedPatients = filteredPatients?.sort((a, b) => {
-    if (field === "name") {
-      return a[field].localeCompare(b[field]) * modifier;
+  const sortedAppointments = filteredAppointments?.sort((a, b) => {
+    if (field === "patientName") {
+      return a.patient.name.localeCompare(b.patient.name) * modifier;
+    } else if (field === "doctorName") {
+      return (
+        a.shift.employee.name.localeCompare(b.shift.employee.name) * modifier
+      );
+    } else if (field === "Date") {
+      return (new Date(a.Date) - new Date(b.Date)) * modifier;
+    } else if (field === "service") {
+      return (
+        a.shift.employee.service.nameService.localeCompare(
+          b.shift.employee.service.nameService
+        ) * modifier
+      );
     } else {
       return (a[field] - b[field]) * modifier;
     }
@@ -41,26 +58,28 @@ function AppointmentTable() {
 
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
-  const paginatedPatients = sortedPatients.slice(startIndex, endIndex);
+  const paginatedAppointments = sortedAppointments.slice(startIndex, endIndex);
+
   return (
     <Menus>
-      <Table columns="1fr 0.5fr 1fr 1fr 1fr 2fr">
+      <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr">
         <Table.Header>
           <div>Patient</div>
-          <div>Gender</div>
-          <div>Year of Birth</div>
-          <div>Phone</div>
-          <div>Address</div>
+          <div>Doctor</div>
+          <div>Service</div>
+          <div>Date</div>
+          <div>Time</div>
+          <div>Price</div>
           <div></div>
         </Table.Header>
         <Table.Body
-          data={sortedPatients}
-          render={(patient) => (
-            <PatientRow patient={patient} key={patient._id} />
+          data={paginatedAppointments}
+          render={(appointment) => (
+            <AppointmentRow appointment={appointment} key={appointment._id} />
           )}
         />
         <Table.Footer>
-          <Pagination count={patients.length} />
+          <Pagination count={sortedAppointments?.length || 0} />
         </Table.Footer>
       </Table>
     </Menus>

@@ -36,7 +36,6 @@ authorizedAxiosInstance.interceptors.response.use(
     const originalRequest = error.config;
     if (error.response?.status === 410 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       return handleRefreshTokenApi()
         .then((res) => {
           return authorizedAxiosInstance(originalRequest);

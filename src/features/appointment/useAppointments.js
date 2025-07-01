@@ -11,5 +11,5 @@ export function useAppointments() {
     queryFn: handleGetAppointments,
   });
 
-  return { isLoading, error, patients };
+  return { isLoading, error, appointments };
 }

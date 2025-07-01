@@ -1,6 +1,7 @@
 import Filter from "../../components/admin/Filter";
 import SortBy from "../../components/admin/SortBy";
 import TableOperations from "../../components/admin/TableOperations";
+
 function AppointmentOperations() {
   return (
     <TableOperations>
@@ -14,10 +15,14 @@ function AppointmentOperations() {
       />
       <SortBy
         options={[
-          { value: "name-asc", label: "Sort by name (A-Z)" },
-          { value: "name-desc", label: "Sort by name (Z-A)" },
-          { value: "yearOfBirth-asc", label: "Sort by year (low first)" },
-          { value: "yearOfBirth-desc", label: "Sort by year (high first)" },
+          { value: "Date-desc", label: "Sort by date (newest first)" },
+          { value: "Date-asc", label: "Sort by date (oldest first)" },
+          { value: "patientName-asc", label: "Sort by patient name (A-Z)" },
+          { value: "patientName-desc", label: "Sort by patient name (Z-A)" },
+          { value: "doctorName-asc", label: "Sort by doctor name (A-Z)" },
+          { value: "doctorName-desc", label: "Sort by doctor name (Z-A)" },
+          { value: "service-asc", label: "Sort by service (A-Z)" },
+          { value: "service-desc", label: "Sort by service (Z-A)" },
         ]}
       />
     </TableOperations>
