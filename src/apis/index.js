@@ -233,6 +233,11 @@ export const handleGetNyOrder = async () => {
   return res.data.data;
 };
 
+export const handleGetOrders = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/orders`);
+  return res.data.data.data;
+};
+
 export const handleGetMyConservation = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/conservations/getConservationByMembers`
