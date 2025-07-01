@@ -1,22 +1,22 @@
 import Spinner from "../../components/admin/Spinner";
-import PatientRow from "./PatientRow";
-import { usePatients } from "./usePatients";
+import PatientRow from "./AppointmentRow";
+import { useAppointments } from "./useAppointments";
 import Table from "../../components/admin/Table";
 import Menus from "../../components/admin/Menus";
 import { useSearchParams } from "react-router-dom";
 import Pagination from "../../components/admin/Pagination";
 import { PAGE_SIZE } from "../../utils/constants";
 
-function PatientTable() {
-  const { isLoading, patients } = usePatients();
+function AppointmentTable() {
+  const { isLoading, appointments } = useAppointments();
   const [searchParams] = useSearchParams();
 
   if (isLoading) return <Spinner />;
 
-  let filteredPatients;
+  let filteredAppointment;
 
   const filterValue = searchParams.get("gender") || "all";
-  if (filterValue === "all") filteredPatients = patients;
+  if (filterValue === "all") filteredAppointment = appointments;
   if (filterValue === "male")
     filteredPatients = patients.filter((patient) => patient.gender === true);
   if (filterValue === "female")
@@ -67,4 +67,4 @@ function PatientTable() {
   );
 }
 
-export default PatientTable;
+export default AppointmentTable;

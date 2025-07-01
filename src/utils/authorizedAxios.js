@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { handleLogoutApi, handleRefreshTokenApi } from "../apis/index";
 let authorizedAxiosInstance = axios.create();
 authorizedAxiosInstance.defaults.timeout = 1000 * 60 * 60;
-// withCredentials: Sẽ cho phép axios tự động đính kèm và gửi cookie trong mỗi request lên BE phục vụ trường hợp nếu chúng ta sử dụng JWT
 authorizedAxiosInstance.defaults.withCredentials = true;
 authorizedAxiosInstance.interceptors.request.use(
   (config) => {
@@ -36,7 +35,6 @@ authorizedAxiosInstance.interceptors.response.use(
     }
     const originalRequest = error.config;
     if (error.response?.status === 410 && !originalRequest._retry) {
-      // Gán thêm một giá trị _retry luôn = true trong khoảng thời gian chờ, để việc refresh token này chỉ luôn gọi 1 lần tại 1 thời điểm
       originalRequest._retry = true;
 
       return handleRefreshTokenApi()

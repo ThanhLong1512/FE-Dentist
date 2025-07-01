@@ -5,15 +5,19 @@ import { useServices } from "./useServices";
 import Table from "../../components/admin/Table";
 import Menus from "../../components/admin/Menus";
 import { useSearchParams } from "react-router-dom";
+import Pagination from "../../components/admin/Pagination";
+import { PAGE_SIZE } from "../../utils/constants";
 
 function ServiceTable() {
   const { isLoading, services } = useServices();
-  console.log("services", services);
   const [searchParams] = useSearchParams();
-  if (isLoading) return <Spinner />;
-  let filteredServices;
 
+  if (isLoading) return <Spinner />;
+
+  // 1) FILTER
+  let filteredServices;
   const filterValue = searchParams.get("discount") || "all";
+
   if (filterValue === "all") filteredServices = services;
   if (filterValue === "no-discount")
     filteredServices = services.filter((service) => !service.priceDiscount);
@@ -22,12 +26,21 @@ function ServiceTable() {
 
   // 2) SORT
   const sortBy = searchParams.get("sortBy") || "nameService-asc";
-  console.log("sortBy", sortBy);
   const [field, direction] = sortBy.split("-");
   const modifier = direction === "asc" ? 1 : -1;
   const sortedServices = filteredServices.sort(
     (a, b) => (a[field] - b[field]) * modifier
   );
+
+  // 3) PAGINATION
+  const currentPage = !searchParams.get("page")
+    ? 1
+    : Number(searchParams.get("page"));
+
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const endIndex = startIndex + PAGE_SIZE;
+  const paginatedServices = sortedServices.slice(startIndex, endIndex);
+
   return (
     <Menus>
       <Table columns="0.6fr 1.8fr 2.2fr 1fr 1fr 1fr">
@@ -40,11 +53,14 @@ function ServiceTable() {
           <div></div>
         </Table.Header>
         <Table.Body
-          data={sortedServices}
+          data={paginatedServices}
           render={(service) => (
             <ServiceRow service={service} key={service._id} />
           )}
         />
+        <Table.Footer>
+          <Pagination count={sortedServices.length} />
+        </Table.Footer>
       </Table>
     </Menus>
   );

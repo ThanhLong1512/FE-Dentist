@@ -220,7 +220,12 @@ export const handleGetMyAppointment = async () => {
   );
   return res.data.data.data;
 };
-
+export const handleGetAppointments = async () => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/appointments`
+  );
+  return res.data.data.data;
+};
 export const handleGetNyOrder = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/orders/getOrderByUser`
