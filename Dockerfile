@@ -1,43 +1,37 @@
 # Build stage
-FROM node:alpine3.18 AS build
+FROM node:18 AS build
 
 # Declare build time environment variables
 ARG REACT_APP_NODE_ENV
 ARG REACT_APP_SERVER_BASE_URL
 
-# Set default values for environment variables
+# Set environment variables
 ENV REACT_APP_NODE_ENV=$REACT_APP_NODE_ENV
 ENV REACT_APP_SERVER_BASE_URL=$REACT_APP_SERVER_BASE_URL
 
-# Build App
 WORKDIR /app
 
-# Copy package files first (better caching)
+# Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --silent
+# Clean npm cache and install with legacy peer deps
+RUN npm cache clean --force
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
-# Build the app
+# Build with Vite
 RUN npm run build
 
-# Production stage
+# Production stage with Nginx
 FROM nginx:1.23-alpine
 
-WORKDIR /usr/share/nginx/html
+# Copy built files from Vite (dist folder, not build)
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Remove default nginx files
-RUN rm -rf ./*
-
-# Copy built app from build stage
-COPY --from=build /app/build .
-
-# Copy custom nginx config if you have one (optional)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Optional: Copy custom nginx config
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
