@@ -1,4 +1,5 @@
-FROM node:alpine3.18 as build
+# Build stage
+FROM node:alpine3.18 AS build
 
 # Declare build time environment variables
 ARG REACT_APP_NODE_ENV
@@ -10,15 +11,33 @@ ENV REACT_APP_SERVER_BASE_URL=$REACT_APP_SERVER_BASE_URL
 
 # Build App
 WORKDIR /app
-COPY package.json .
-RUN npm install
+
+# Copy package files first (better caching)
+COPY package*.json ./
+
+# Use npm ci for faster, reliable, reproducible builds
+RUN npm ci --only=production --silent
+
+# Copy source code
 COPY . .
+
+# Build the app
 RUN npm run build
 
-# Serve with Nginx
+# Production stage
 FROM nginx:1.23-alpine
+
 WORKDIR /usr/share/nginx/html
-RUN rm -rf *
+
+# Remove default nginx files
+RUN rm -rf ./*
+
+# Copy built app from build stage
 COPY --from=build /app/build .
+
+# Copy custom nginx config if you have one (optional)
+# COPY nginx.conf /etc/nginx/nginx.conf
+
 EXPOSE 80
-ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
