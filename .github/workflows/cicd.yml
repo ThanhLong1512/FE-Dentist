@@ -7,22 +7,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
+      - name: Checkout Source
         uses: actions/checkout@v4
-      - name: Login to DockerHub
+      - name: Login to docker hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build Docker image
-        run: docker build -t thanhlep/reactjs-web --build-arg REACT_APP_NODE_ENV='production' --build-arg REACT_APP_SERVER_URL='${{ secrets.REACT_APP_SERVER_URL }}' .
-      - name: Push Docker image
-        run: docker push thanhlep/reactjs-web
-
+      - name: Build Docker Image
+        run: docker build -t thanhlep/reactjs-web --build-arg REACT_APP_NODE_ENV='production' --build-arg REACT_APP_SERVER_BASE_URL='${{ secrets.REACT_APP_SERVER_BASE_URL }}' .
+      - name: Publish Image to docker hub
+        run: docker push thanhlep/reactjs-web:latest
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Pull image from DockerHub
+      - name: Pull image from docker hub
         run: docker pull thanhlep/reactjs-web:latest
       - name: Delete old container
         run: docker rm -f reactjs-web-container
-      - name: Run Docker container
-        run: docker run -d -p 5173:80 --name reactjs-web-container thanhlep/reactjs-web
+      - name: Run Docker Container
+        run: docker run -d -p 3000:80 --name reactjs-web-container thanhlep/reactjs-web
