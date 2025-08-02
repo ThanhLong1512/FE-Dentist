@@ -14,24 +14,20 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Clean npm cache and install with legacy peer deps
-RUN npm cache clean --force
+# Install dependencies
 RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
-# Build with Vite
+# Build the app
 RUN npm run build
 
-# Production stage with Nginx
+# Production stage
 FROM nginx:1.23-alpine
 
-# Copy built files from Vite (dist folder, not build)
+# Copy built files from Vite
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Optional: Copy custom nginx config
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
