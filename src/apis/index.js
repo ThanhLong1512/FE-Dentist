@@ -266,3 +266,28 @@ export const handleCreateMessage = async (data) => {
   );
   return res.data.data.data;
 };
+
+export const handleGetShifts = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/shifts`);
+  return res.data.data.data;
+};
+export const handleCreateShift = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/shifts`,
+    data
+  );
+  return res.data.data.data;
+};
+export const handleUpdateShift = async (data, shiftID) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/shifts/${shiftID}`,
+    data
+  );
+  return res.data.data.data;
+};
+export const handleDeleteShift = async (shiftID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/shifts/${shiftID}`
+  );
+  return res.data;
+};
