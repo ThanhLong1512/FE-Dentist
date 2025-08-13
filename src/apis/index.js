@@ -291,3 +291,38 @@ export const handleDeleteShift = async (shiftID) => {
   );
   return res.data;
 };
+
+export const handleGetEmployees = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/employees`);
+  return res.data.data.data;
+};
+
+export const handleCreateEmployee = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/employees`,
+    data
+  );
+  return res.data.data.data;
+};
+
+export const handleUpdateEmployee = async (data, employeeID) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/employees/${employeeID}`,
+    data
+  );
+  return res.data.data.data;
+};
+
+export const handleDeleteEmployee = async (employeeID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/employees/${employeeID}`
+  );
+  return res.data;
+};
+
+export const handleDuplicateEmployee = async (employeeID) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/employees/${employeeID}`
+  );
+  return res.data.data.data;
+};

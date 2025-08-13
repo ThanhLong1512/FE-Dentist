@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { GoogleLogin } from "@react-oauth/google";
-// import FacebookLogin from "react-facebook-login";
+import FacebookLogin from "react-facebook-login";
 import { Card as MuiCard } from "@mui/material";
 import CardActions from "@mui/material/CardActions";
 import TextField from "@mui/material/TextField";
@@ -373,7 +373,7 @@ function Login() {
                           )}
                         />
 
-                        {/* <FacebookLogin
+                        <FacebookLogin
                           appId="2441728712860238"
                           autoLoad={false}
                           fields="name,email,picture"
@@ -416,7 +416,7 @@ function Login() {
                               Sign in with Facebook
                             </Button>
                           )}
-                        /> */}
+                        />
                       </CardActions>
                     </MuiCard>
                   </Zoom>
