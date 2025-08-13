@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { handleCreateShift } from "../../apis";
 
-export function useCreatePatient() {
+export function useCreateShift() {
   const queryClient = useQueryClient();
 
   const { mutate: createShift, isLoading: isCreating } = useMutation({

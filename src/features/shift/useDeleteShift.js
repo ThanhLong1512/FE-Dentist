@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { handleDeleteShift } from "../../apis";
 
-export function useDeletePatient() {
+export function useDeleteShift() {
   const queryClient = useQueryClient();
 
   const { isLoading: isDeleting, mutate: deleteShift } = useMutation({

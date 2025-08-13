@@ -1,55 +1,61 @@
 import { useForm } from "react-hook-form";
-
+import toast from "react-hot-toast";
 import Input from "../../components/admin/Input";
 import Form from "../../components/admin/Form";
 import Button from "../../components/admin/Button";
-import { Textarea } from "../../components/admin/Textarea";
 import FormRow from "../../components/admin/FormRow";
-import { useCreatePatient } from "./useCreateShift";
-import { useEditPatient } from "./useEditShift";
+import { useCreateShift } from "./useCreateShift";
+import { useEditShift } from "./useEditShift";
+import { useEmployees } from "../employee/useEmployees";
 
-function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
-  const { isCreating, createPatient } = useCreatePatient();
-  const { isEditing, editPatient } = useEditPatient();
+function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
+  const { isCreating, createShift } = useCreateShift();
+  const { isEditing, editShift } = useEditShift();
+  const { employees = [] } = useEmployees();
   const isWorking = isCreating || isEditing;
-  const { _id: editId, ...editValues } = patientToEdit;
+
+  const { _id: editId, ...editValues } = shiftToEdit;
   const isEditSession = Boolean(editId);
 
   const defaultValues = isEditSession
     ? {
-        name: editValues.name || "",
-        gender: editValues.gender || true,
-        yearOfBirth: editValues.yearOfBirth || "",
-        phoneNumber: editValues.phoneNumber || "",
-        address: editValues.address || "",
+        employee: editValues.employee?._id || "",
+        DayOfWeek: editValues.DayOfWeek || "Monday",
+        StartTime: editValues.StartTime || "",
+        EndTime: editValues.EndTime || "",
+        isBooked: editValues.isBooked || false,
       }
     : {
-        name: "",
-        gender: true,
-        yearOfBirth: "",
-        phoneNumber: "",
-        address: "",
+        employee: "",
+        DayOfWeek: "Monday",
+        StartTime: "",
+        EndTime: "",
+        isBooked: false,
       };
 
-  const { register, handleSubmit, reset, formState } = useForm({
+  const { register, handleSubmit, reset, watch, formState } = useForm({
     defaultValues,
   });
   const { errors } = formState;
 
+  const startTime = watch("StartTime");
+  const endTime = watch("EndTime");
+
   function onSubmit(data) {
-    // Convert gender to boolean: true = male, false = female
-    const patientData = {
-      ...data,
-      gender: data.gender === "true" || data.gender === true,
-      yearOfBirth: Number(data.yearOfBirth),
+    const shiftData = {
+      employee: data.employee,
+      DayOfWeek: data.DayOfWeek,
+      StartTime: data.StartTime,
+      EndTime: data.EndTime,
+      isBooked: data.isBooked === "true" || data.isBooked === true,
     };
 
-    console.log("Submitting patient data:", patientData);
+    console.log("Submitting shift data:", shiftData);
 
     if (isEditSession) {
-      editPatient(
+      editShift(
         {
-          newPatientData: patientData,
+          newShiftData: shiftData,
           id: editId,
         },
         {
@@ -60,7 +66,7 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
         }
       );
     } else {
-      createPatient(patientData, {
+      createShift(shiftData, {
         onSuccess: () => {
           reset();
           onCloseModal?.();
@@ -70,105 +76,165 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
   }
 
   function onError(errors) {
+    console.log("Form errors:", errors);
     const firstError = Object.values(errors)[0];
     if (firstError?.message) {
-      alert(firstError.message);
+      toast.error(firstError.message);
     }
   }
 
-  const currentYear = new Date().getFullYear();
+  // Validate time logic
+  function validateEndTime(value) {
+    if (!startTime || !value) return true;
+
+    const startMinutes = timeToMinutes(startTime);
+    const endMinutes = timeToMinutes(value);
+
+    if (endMinutes <= startMinutes) {
+      return "End time must be after start time";
+    }
+
+    const duration = endMinutes - startMinutes;
+    if (duration < 30) {
+      return "Shift must be at least 30 minutes long";
+    }
+
+    if (duration > 480) {
+      // 8 hours
+      return "Shift cannot be longer than 8 hours";
+    }
+
+    return true;
+  }
+
+  function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    return hours * 60 + minutes;
+  }
 
   return (
     <Form
       onSubmit={handleSubmit(onSubmit, onError)}
       type={onCloseModal ? "modal" : "regular"}
     >
-      <FormRow label="Patient name" error={errors?.name?.message}>
-        <Input
-          type="text"
-          id="name"
-          disabled={isWorking}
-          {...register("name", {
-            required: "This field is required",
-            minLength: {
-              value: 2,
-              message: "Patient name must be at least 2 characters",
-            },
-          })}
-        />
-      </FormRow>
-
-      <FormRow label="Gender" error={errors?.gender?.message}>
+      <FormRow label="Employee" error={errors?.employee?.message}>
         <select
-          id="gender"
+          id="employee"
           disabled={isWorking}
-          {...register("gender", {
-            required: "This field is required",
-          })}
           style={{
             width: "100%",
             padding: "0.8rem 1.2rem",
             border: "1px solid #d1d5db",
             borderRadius: "0.5rem",
             fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f3f4f6" : "white",
+            backgroundColor: isWorking ? "#f9fafb" : "white",
+            cursor: isWorking ? "not-allowed" : "pointer",
           }}
+          {...register("employee", {
+            required: "Please select an employee",
+          })}
         >
-          <option value={true}>Nam</option>
-          <option value={false}>Nữ</option>
+          <option value="">Select an employee...</option>
+          {employees.map((employee) => (
+            <option key={employee._id} value={employee._id}>
+              {employee.name} - {employee.service?.nameService || "No Service"}
+            </option>
+          ))}
         </select>
       </FormRow>
 
-      <FormRow label="Year of Birth" error={errors?.yearOfBirth?.message}>
-        <Input
-          type="number"
-          id="yearOfBirth"
+      <FormRow label="Day of Week" error={errors?.DayOfWeek?.message}>
+        <select
+          id="DayOfWeek"
           disabled={isWorking}
-          {...register("yearOfBirth", {
+          style={{
+            width: "100%",
+            padding: "0.8rem 1.2rem",
+            border: "1px solid #d1d5db",
+            borderRadius: "0.5rem",
+            fontSize: "1.4rem",
+            backgroundColor: isWorking ? "#f9fafb" : "white",
+            cursor: isWorking ? "not-allowed" : "pointer",
+          }}
+          {...register("DayOfWeek", {
+            required: "Please select a day",
+          })}
+        >
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+          <option value="Sunday">Sunday</option>
+        </select>
+      </FormRow>
+
+      <FormRow label="Start Time" error={errors?.StartTime?.message}>
+        <Input
+          type="time"
+          id="StartTime"
+          disabled={isWorking}
+          {...register("StartTime", {
             required: "This field is required",
-            min: {
-              value: 1900,
-              message: "Year of birth cannot be before 1900",
+            validate: {
+              businessHours: (value) => {
+                const minutes = timeToMinutes(value);
+                const startBusiness = 7 * 60; // 7:00 AM
+                const endBusiness = 22 * 60; // 10:00 PM
+
+                if (minutes < startBusiness || minutes > endBusiness) {
+                  return "Start time must be between 07:00 and 22:00";
+                }
+                return true;
+              },
             },
-            max: {
-              value: currentYear,
-              message: `Year of birth cannot be after ${currentYear}`,
-            },
-            valueAsNumber: true,
           })}
         />
       </FormRow>
 
-      <FormRow label="Phone number" error={errors?.phoneNumber?.message}>
+      <FormRow label="End Time" error={errors?.EndTime?.message}>
         <Input
-          type="tel"
-          id="phoneNumber"
+          type="time"
+          id="EndTime"
           disabled={isWorking}
-          placeholder="e.g., 0123 456 789"
-          {...register("phoneNumber", {
+          {...register("EndTime", {
             required: "This field is required",
-            pattern: {
-              value: /^[\d\s\-\+\(\)]+$/,
-              message: "Invalid phone number format",
+            validate: {
+              businessHours: (value) => {
+                const minutes = timeToMinutes(value);
+                const startBusiness = 7 * 60; // 7:00 AM
+                const endBusiness = 22 * 60; // 10:00 PM
+
+                if (minutes < startBusiness || minutes > endBusiness) {
+                  return "End time must be between 07:00 and 22:00";
+                }
+                return true;
+              },
+              afterStartTime: validateEndTime,
             },
           })}
         />
       </FormRow>
 
-      <FormRow label="Address" error={errors?.address?.message}>
-        <Textarea
-          id="address"
+      <FormRow label="Booking Status" error={errors?.isBooked?.message}>
+        <select
+          id="isBooked"
           disabled={isWorking}
-          placeholder="Patient's address"
-          rows={3}
-          {...register("address", {
-            required: "This field is required",
-            maxLength: {
-              value: 300,
-              message: "Address cannot exceed 300 characters",
-            },
-          })}
-        />
+          style={{
+            width: "100%",
+            padding: "0.8rem 1.2rem",
+            border: "1px solid #d1d5db",
+            borderRadius: "0.5rem",
+            fontSize: "1.4rem",
+            backgroundColor: isWorking ? "#f9fafb" : "white",
+            cursor: isWorking ? "not-allowed" : "pointer",
+          }}
+          {...register("isBooked")}
+        >
+          <option value={false}>Available</option>
+          <option value={true}>Booked</option>
+        </select>
       </FormRow>
 
       <FormRow>
@@ -187,12 +253,12 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
               ? "Updating..."
               : "Creating..."
             : isEditSession
-            ? "Update Patient"
-            : "Create Patient"}
+            ? "Update Shift"
+            : "Create Shift"}
         </Button>
       </FormRow>
     </Form>
   );
 }
 
-export default CreatePatientForm;
+export default CreateShiftForm;

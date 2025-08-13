@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { handleUpdateShift } from "../../apis";
 import { toast } from "react-hot-toast";
 
-export function useEditPatient() {
+export function useEditShift() {
   const queryClient = useQueryClient();
 
   const { mutate: editShift, isLoading: isEditing } = useMutation({

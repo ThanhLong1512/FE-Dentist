@@ -1,17 +1,16 @@
 import Button from "../../components/admin/Button";
-import CreatePatientForm from "./CreatePatientForm";
 import Modal from "../../components/admin/Modal";
-import { useState } from "react";
+import CreateShiftForm from "./CreateShiftForm";
 
 function CreatePatient() {
   return (
     <div>
       <Modal>
-        <Modal.Open opens="create-patient">
-          <Button>Add new patient</Button>
+        <Modal.Open opens="create-shift">
+          <Button>Add new Shift</Button>
         </Modal.Open>
-        <Modal.Window name="create-patient">
-          <CreatePatientForm />
+        <Modal.Window name="create-shift">
+          <CreateShiftForm />
         </Modal.Window>
       </Modal>
     </div>
