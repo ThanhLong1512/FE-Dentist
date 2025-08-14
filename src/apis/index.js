@@ -326,3 +326,16 @@ export const handleDuplicateEmployee = async (employeeID) => {
   );
   return res.data.data.data;
 };
+
+export const handleGetAccounts = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/accounts`);
+  return res.data.data.data;
+};
+
+export const handleUpdateAccount = async (data, accountID) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/accounts/${accountID}`,
+    data
+  );
+  return res.data.data.data;
+};
