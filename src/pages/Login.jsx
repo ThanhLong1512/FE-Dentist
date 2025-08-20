@@ -53,6 +53,7 @@ function Login() {
       if (res.data) {
         const userInfo = {
           id: res.data.id,
+          name: res.data.name,
           email: res.data.email,
           role: res.data.role,
           require_2FA: res.data.require_2FA,
@@ -122,6 +123,7 @@ function Login() {
     const userInfo = {
       id: res.data.id,
       email: res.data.email,
+      name: res.data.name,
       role: res.data.role,
       image: res.data.image,
       require_2FA: res.data.require_2FA,
@@ -138,6 +140,7 @@ function Login() {
         const userInfo = {
           id: res.id,
           email: res.email,
+          name: res.name,
           role: res.role,
           require_2FA: res.require_2FA,
           is_2fa_verified: res.is_2fa_verified,

@@ -38,6 +38,7 @@ import Facility from "./pages/admin/Facility";
 import Orders from "./pages/admin/Orders";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { DarkModeProvider } from "./context/DarkModeContext";
 
 export const RecoveryContext = createContext();
 const queryClient = new QueryClient({
@@ -62,97 +63,103 @@ function App() {
 
   return (
     <>
-      <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools
-          initialIsOpen={false}
-          buttonPosition="bottom-left"
-        />
-        <GlobalStyles />
-        <BrowserRouter>
-          <RecoveryContext.Provider
-            value={{
-              email,
-              setEmail,
-              otp,
-              setOTP,
-              showOTPInput,
-              setShowOTPInput,
-              countCart,
-              setCountCart,
-              totalPrice,
-              setTotalPrice,
-            }}
-          >
-            <Routes>
-              <Route index element={<Navigate replace to="home" />} />
-              <Route path="home" element={<Home />} />
-              {/* Client */}
-              <Route element={<AppLayout />}>
-                <Route path="blog" element={<Blog />} />
-                <Route path="contact" element={<Contact />} />
-                <Route element={<UnauthorizedRoutes />}>
-                  <Route path="login" element={<Login />} />
+      <DarkModeProvider>
+        {" "}
+        <QueryClientProvider client={queryClient}>
+          <ReactQueryDevtools
+            initialIsOpen={false}
+            buttonPosition="bottom-left"
+          />
+          <GlobalStyles />
+          <BrowserRouter>
+            <RecoveryContext.Provider
+              value={{
+                email,
+                setEmail,
+                otp,
+                setOTP,
+                showOTPInput,
+                setShowOTPInput,
+                countCart,
+                setCountCart,
+                totalPrice,
+                setTotalPrice,
+              }}
+            >
+              <Routes>
+                <Route index element={<Navigate replace to="home" />} />
+                <Route path="home" element={<Home />} />
+                {/* Client */}
+                <Route element={<AppLayout />}>
+                  <Route path="blog" element={<Blog />} />
+                  <Route path="contact" element={<Contact />} />
+                  <Route element={<UnauthorizedRoutes />}>
+                    <Route path="login" element={<Login />} />
+                  </Route>
+                  <Route path="shop" element={<Shop />} />
+                  <Route path="*" element={<NotFound />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/shop/:ServiceID" element={<DetailService />} />
+                  <Route path="/account/profile" element={<Account />} />
+                  <Route
+                    path="/account/appointments"
+                    element={<Appointment />}
+                  />
+                  <Route path="/account/orders" element={<Order />} />
                 </Route>
-                <Route path="shop" element={<Shop />} />
-                <Route path="*" element={<NotFound />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/shop/:ServiceID" element={<DetailService />} />
-                <Route path="/account/profile" element={<Account />} />
-                <Route path="/account/appointments" element={<Appointment />} />
-                <Route path="/account/orders" element={<Order />} />
-              </Route>
-              {/* Admin */}
-              <Route element={<AdminLayout />}>
-                <Route path="admin/dashboard" element={<Dashboard />} />
-                <Route path="admin/patients" element={<Patient />} />
-                <Route path="admin/services" element={<Service />} />
-                <Route path="admin/shifts" element={<Shift />} />
-                <Route path="admin/appointments" element={<Booking />} />
-                <Route path="admin/orders" element={<Orders />} />
-                <Route path="admin/users" element={<User />} />
-                <Route path="admin/facilities" element={<Facility />} />
-                <Route path="admin/employees" element={<Employee />} />
-                <Route path="admin/settings" element={<Setting />} />
-              </Route>
-            </Routes>
-            <ToastContainer
-              position="top-right"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-            />
-          </RecoveryContext.Provider>
-        </BrowserRouter>
-        <Toaster
-          position="top-center"
-          gutter={12}
-          containerStyle={{ margin: "8px" }}
-          toastOptions={{
-            success: {
-              duration: 3000,
-            },
-            error: {
-              duration: 5000,
-            },
-            style: {
-              fontSize: "16px",
-              maxWidth: "500px",
-              padding: "16px 24px",
-              backgroundColor: "var(--color-grey-0)",
-              color: "var(--color-grey-700)",
-            },
-          }}
-        />
-      </QueryClientProvider>
+                {/* Admin */}
+                <Route element={<AdminLayout />}>
+                  <Route path="admin/dashboard" element={<Dashboard />} />
+                  <Route path="admin/patients" element={<Patient />} />
+                  <Route path="admin/services" element={<Service />} />
+                  <Route path="admin/shifts" element={<Shift />} />
+                  <Route path="admin/appointments" element={<Booking />} />
+                  <Route path="admin/orders" element={<Orders />} />
+                  <Route path="admin/users" element={<User />} />
+                  <Route path="admin/facilities" element={<Facility />} />
+                  <Route path="admin/employees" element={<Employee />} />
+                  <Route path="admin/settings" element={<Setting />} />
+                </Route>
+              </Routes>
+              <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+              />
+            </RecoveryContext.Provider>
+          </BrowserRouter>
+          <Toaster
+            position="top-center"
+            gutter={12}
+            containerStyle={{ margin: "8px" }}
+            toastOptions={{
+              success: {
+                duration: 3000,
+              },
+              error: {
+                duration: 5000,
+              },
+              style: {
+                fontSize: "16px",
+                maxWidth: "500px",
+                padding: "16px 24px",
+                backgroundColor: "var(--color-grey-0)",
+                color: "var(--color-grey-700)",
+              },
+            }}
+          />
+        </QueryClientProvider>
+      </DarkModeProvider>
     </>
   );
 }
