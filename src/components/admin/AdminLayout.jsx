@@ -19,14 +19,16 @@ const Main = styled.main`
 
 function AdminLayout() {
   return (
-    <StyledAppLayout>
-      <Header />
-      <Sidebar />
-      <Main>
-        <Outlet />
-      </Main>
+    <>
+      <StyledAppLayout>
+        <Header />
+        <Sidebar />
+        <Main>
+          <Outlet />
+        </Main>
+      </StyledAppLayout>
       <AdminChat />
-    </StyledAppLayout>
+    </>
   );
 }
 
