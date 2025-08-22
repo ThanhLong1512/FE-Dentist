@@ -12,6 +12,7 @@ import {
 import styled from "styled-components";
 import Heading from "../../components/admin/Heading";
 import DashboardBox from "./DashboardBox";
+import { formatCurrency } from "../../utils/helpers";
 
 const StyledSalesChart = styled(DashboardBox)`
   grid-column: 1 / -1;
@@ -71,17 +72,13 @@ function SalesChart({ orders, numDays }) {
         background: "#fff",
       };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
-
   return (
     <StyledSalesChart>
-      <Heading as="h2">Sales Chart</Heading>
+      <Heading as="h2">
+        {" "}
+        Sales from {format(allDates.at(0), "MMM dd yyyy")} &mdash;{" "}
+        {format(allDates.at(-1), "MMM dd yyyy")}{" "}
+      </Heading>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
           <XAxis

@@ -5,6 +5,7 @@ import { useRecentOrder } from "./useRecentOrder";
 import { useRecentReview } from "./useRecentReview";
 import Spinner from "../../components/admin/Spinner";
 import SalesChart from "./SalesChart";
+import ServiceChart from "./ServiceChart";
 
 const StyledDashboardLayout = styled.div`
   display: grid;
@@ -28,8 +29,8 @@ function DashboardLayout() {
         averageRating={reviews.averageRating}
         reviewCount={reviews.totalReviews}
       />
-      {/* <TodayActivity />
-      <DurationChart confirmedStays={confirmedStays} /> */}
+      {/* <TodayActivity /> */}
+      <ServiceChart confirmedOrder={orders} />
       <SalesChart orders={orders} numDays={numDays} />
     </StyledDashboardLayout>
   );
