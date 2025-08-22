@@ -339,3 +339,24 @@ export const handleUpdateAccount = async (data, accountID) => {
   );
   return res.data.data.data;
 };
+
+export const handleGetAppointmentByPeriod = async (period) => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/appointments/getByPeriod/${period}`
+  );
+  return res.data.data;
+};
+
+export const handleGetRevenueByPeriod = async (period) => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/orders/getRevenueByPeriod/${period}`
+  );
+  return res.data.data;
+};
+
+export const handleGetReviewsByPeriod = async (period) => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/reviews/getReviewStatsByPeriod/${period}`
+  );
+  return res.data.data;
+};
