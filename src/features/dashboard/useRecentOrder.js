@@ -12,5 +12,5 @@ export function useRecentOrder() {
     queryFn: () => handleGetRevenueByPeriod(numDays),
     queryKey: ["orders", `last-${numDays}`],
   });
-  return { isLoading, orders };
+  return { isLoading, orders, numDays };
 }

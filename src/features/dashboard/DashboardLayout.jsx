@@ -4,6 +4,7 @@ import Stats from "./Stats";
 import { useRecentOrder } from "./useRecentOrder";
 import { useRecentReview } from "./useRecentReview";
 import Spinner from "../../components/admin/Spinner";
+import SalesChart from "./SalesChart";
 
 const StyledDashboardLayout = styled.div`
   display: grid;
@@ -14,7 +15,7 @@ const StyledDashboardLayout = styled.div`
 
 function DashboardLayout() {
   const { isLoading, bookings } = useRecentBookings();
-  const { isLoading: isLoadingOrder, orders } = useRecentOrder();
+  const { isLoading: isLoadingOrder, orders, numDays } = useRecentOrder();
   const { isLoading: isLoadingReview, reviews } = useRecentReview();
 
   if (isLoading || isLoadingOrder || isLoadingReview) return <Spinner />;
@@ -28,8 +29,8 @@ function DashboardLayout() {
         reviewCount={reviews.totalReviews}
       />
       {/* <TodayActivity />
-      <DurationChart confirmedStays={confirmedStays} />
-      <SalesChart bookings={bookings} numDays={numDays} /> */}
+      <DurationChart confirmedStays={confirmedStays} /> */}
+      <SalesChart orders={orders} numDays={numDays} />
     </StyledDashboardLayout>
   );
 }
