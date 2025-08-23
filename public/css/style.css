@@ -378,6 +378,7 @@ h6 {
   outline: none;
   font-size: 14px;
   transition: border-color 0.2s;
+  color: black;
 }
 
 .chat-input:focus {

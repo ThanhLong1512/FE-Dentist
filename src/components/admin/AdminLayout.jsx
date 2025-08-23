@@ -26,8 +26,8 @@ function AdminLayout() {
         <Main>
           <Outlet />
         </Main>
+        <AdminChat />
       </StyledAppLayout>
-      <AdminChat />
     </>
   );
 }
