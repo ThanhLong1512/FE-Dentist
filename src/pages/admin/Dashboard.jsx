@@ -1,7 +1,13 @@
-import Heading from "../../components/admin/Heading";
-import Row from "../../components/admin/Row";
-import DashboardFilter from "../../features/dashboard/DashboardFilter";
-import DashboardLayout from "../../features/dashboard/DashboardLayout";
+import { lazy } from "react";
+
+const Heading = lazy(() => import("../../components/admin/Heading"));
+const Row = lazy(() => import("../../components/admin/Row"));
+const DashboardFilter = lazy(() =>
+  import("../../features/dashboard/DashboardFilter")
+);
+const DashboardLayout = lazy(() =>
+  import("../../features/dashboard/DashboardLayout")
+);
 
 function Dashboard() {
   return (

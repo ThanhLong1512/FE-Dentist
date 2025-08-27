@@ -1,7 +1,6 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, lazy } from "react";
 import { handleGetService } from "../apis";
-import Loading from "../components/Loading";
 import { RecoveryContext } from "../App";
 import {
   handlePostReview,
@@ -9,6 +8,8 @@ import {
   handleUpdateReview,
 } from "../apis";
 import { toast } from "react-toastify";
+
+const Loading = lazy(() => import("../components/Loading"));
 
 function DetailService() {
   const { ServiceID } = useParams();

@@ -1,8 +1,9 @@
-import { useState, useContext } from "react";
+import { useState, useContext, lazy } from "react";
 import { Mail } from "lucide-react";
-import OTPInput from "../components/OTPInput";
 import { RecoveryContext } from "../App";
 import { handleSendRecoveryEmail } from "../apis";
+
+const OTPInput = lazy(() => import("../components/OTPInput"));
 
 function ForgotPassword() {
   const { setEmail, email, showOTPInput, setShowOTPInput, setOTP } =

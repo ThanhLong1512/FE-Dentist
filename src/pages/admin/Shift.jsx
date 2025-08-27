@@ -1,8 +1,13 @@
-import Heading from "../../components/admin/Heading";
-import Row from "../../components/admin/Row";
-import ShiftTable from "../../features/shift/ShiftTable";
-import ShiftOperations from "../../features/shift/ShiftOperations";
-import CreateShift from "../../features/shift/CreateShift";
+import { lazy } from "react";
+
+const Heading = lazy(() => import("../../components/admin/Heading"));
+const Row = lazy(() => import("../../components/admin/Row"));
+const ShiftTable = lazy(() => import("../../features/shift/ShiftTable"));
+const ShiftOperations = lazy(() =>
+  import("../../features/shift/ShiftOperations")
+);
+const CreateShift = lazy(() => import("../../features/shift/CreateShift"));
+
 function Shift() {
   return (
     <>

@@ -110,7 +110,6 @@ function Login() {
         alert("Login with Facebook failed!");
       }
     } catch (error) {
-      // Xử lý lỗi khi gọi API
       toast.error(
         error.response?.data?.message ||
           "Login with Facebook failed. Please try again."
@@ -155,34 +154,6 @@ function Login() {
         );
       });
   };
-
-  // Custom render props cho nút Google
-  const renderGoogleButton = ({ onClick }) => (
-    <Button
-      onClick={onClick}
-      variant="outlined"
-      fullWidth
-      sx={{
-        mt: 2,
-        py: 1,
-        color: "#757575",
-        borderColor: "#dadce0",
-        textTransform: "none",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      startIcon={
-        <Google
-          sx={{
-            color: "#4285F4",
-          }}
-        />
-      }
-    >
-      Sign in with Google
-    </Button>
-  );
 
   return (
     <>

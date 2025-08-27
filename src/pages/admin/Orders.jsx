@@ -1,7 +1,10 @@
-import Heading from "../../components/admin/Heading";
-import Row from "../../components/admin/Row";
-import OrderOperations from "../../features/order/OrderOperations";
-import OrderTable from "../../features/order/OrderTable";
+import { lazy } from "react";
+const Heading = lazy(() => import("../../components/admin/Heading"));
+const Row = lazy(() => import("../../components/admin/Row"));
+const OrderOperations = lazy(() =>
+  import("../../features/order/OrderOperations")
+);
+const OrderTable = lazy(() => import("../../features/order/OrderTable"));
 function Orders() {
   return (
     <>

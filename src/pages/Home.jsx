@@ -1,19 +1,21 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { handleLogoutApi } from "../apis/index";
-import Setup2FA from "../components/setup-2fa";
-import Require2FA from "../components/require-2fa";
-import HomeFooter from "../components/HomeFooter";
-import HomeFeatures from "../components/HomeFeatures";
-import HomeAbout from "../components/HomeAbout";
-import HomeServices from "../components/HomeServices";
-import HomeTeam from "../components/HomeTeam";
-import HomeAppointment from "../components/HomeAppointment";
-import HomePricing from "../components/HomePricing";
-import HomeNews from "../components/HomeNews";
-import HomeClients from "../components/HomeClients";
-import Chat from "../components/Chat";
+
+const Setup2FA = lazy(() => import("../components/setup-2fa"));
+const Require2FA = lazy(() => import("../components/require-2fa"));
+const HomeFooter = lazy(() => import("../components/HomeFooter"));
+const HomeFeatures = lazy(() => import("../components/HomeFeatures"));
+const HomeAbout = lazy(() => import("../components/HomeAbout"));
+const HomeServices = lazy(() => import("../components/HomeServices"));
+const HomeTeam = lazy(() => import("../components/HomeTeam"));
+const HomeAppointment = lazy(() => import("../components/HomeAppointment"));
+const HomePricing = lazy(() => import("../components/HomePricing"));
+const HomeNews = lazy(() => import("../components/HomeNews"));
+const HomeClients = lazy(() => import("../components/HomeClients"));
+const Chat = lazy(() => import("../components/Chat"));
+const Spinner = lazy(() => import("../components/admin/Spinner"));
 
 function Home() {
   const [openSetup2FA, setOpenSetup2FA] = useState(false);
@@ -21,7 +23,6 @@ function Home() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState("vi");
-
   const userMenuRef = useRef(null);
 
   let formatEmail,
@@ -58,8 +59,7 @@ function Home() {
   };
 
   const handleLogout = async () => {
-    await handleLogoutApi();
-    navigate("/login");
+    await handleLogoutApi().then(() => navigate("/login"));
   };
 
   const handleSuccessVerify2FA = (response) => {
@@ -128,10 +128,6 @@ function Home() {
     cursor: "pointer",
   };
 
-  const menuItemHoverStyle = {
-    backgroundColor: "#f5f5f5",
-  };
-
   const dividerStyle = {
     height: "1px",
     margin: "8px 0",
@@ -163,11 +159,9 @@ function Home() {
             margin: "5px 0",
           }}
         >
-          <span style={{ fontWeight: "500" }}>
-            Tình trạng bảo mật tài khoản:
-          </span>{" "}
+          <span style={{ fontWeight: "500" }}>Account security status:</span>{" "}
           <span style={{ color: "#2e7d32" }}>
-            Đã bật xác thực 2 lớp - Two-Factor Authentication (2FA)
+            Two-Factor Authentication (2FA) enabled
           </span>
         </div>
       ) : (
@@ -181,10 +175,10 @@ function Home() {
           }}
         >
           <span style={{ color: "#ff9800", fontWeight: "500" }}>
-            Lời khuyên bảo mật:
+            Security advice:
           </span>
           <span style={{ color: "#5f5f5f" }}>
-            Bật xác thực 2 bước để bảo vệ tài khoản tốt hơn.
+            Enable 2-step authentication to better protect your account.
             <Link
               to="#"
               onClick={() => setOpenSetup2FA(true)}
@@ -195,7 +189,7 @@ function Home() {
                 cursor: "pointer",
               }}
             >
-              Bật ngay
+              Turn it on now
             </Link>
           </span>
         </div>
@@ -217,8 +211,8 @@ function Home() {
                     <div className="top-left">
                       <ul className="contact-list clearfix">
                         <li>
-                          <i className="flaticon-hospital-1"></i>234 Triumph,
-                          Los Angeles, California, US{" "}
+                          <i className="flaticon-hospital-1"></i>66 Hùng Vương,
+                          Hue, Vietnam{" "}
                         </li>
                         <li>
                           <i className="flaticon-back-in-time"></i>Mon - Sat
@@ -951,467 +945,492 @@ function Home() {
                 </div>
               </div>
             </section>
-            <HomeFeatures />
-            <HomeAbout />
-            <HomeServices />
-            <HomeTeam />
-            <HomeAppointment />
-            <section className="testimonial-section">
-              <div className="auto-container">
-                <div className="sec-title text-center">
-                  <span className="title">HAPPY Patient</span>
-                  <h2>What Says Our Patients</h2>
-                  <span className="divider">
-                    <svg viewBox="0 0 300.08 300.08">
-                      <path d="m293.26 184.14h-82.877l-12.692-76.138c-.546-3.287-3.396-5.701-6.718-5.701-.034 0-.061 0-.089 0-3.369.027-6.199 2.523-6.677 5.845l-12.507 87.602-14.874-148.69c-.355-3.43-3.205-6.056-6.643-6.138-.048 0-.096 0-.143 0-3.39 0-6.274 2.489-6.752 5.852l-19.621 137.368h-9.405l-12.221-42.782c-.866-3.028-3.812-5.149-6.8-4.944-3.13.109-5.777 2.332-6.431 5.395l-8.941 42.332h-73.049c-3.771 0-6.82 3.049-6.82 6.82 0 3.778 3.049 6.82 6.82 6.82h78.566c3.219 0 6.002-2.251 6.67-5.408l4.406-20.856 6.09 21.313c.839 2.939 3.526 4.951 6.568 4.951h20.46c3.396 0 6.274-2.489 6.752-5.845l12.508-87.596 14.874 148.683c.355 3.437 3.205 6.056 6.643 6.138h.143c3.39 0 6.274-2.489 6.752-5.845l14.227-99.599 6.397 38.362c.546 3.287 3.396 5.702 6.725 5.702h88.66c3.771 0 6.82-3.049 6.82-6.82-.001-3.772-3.05-6.821-6.821-6.821z"></path>
-                    </svg>
-                  </span>
-                </div>
-
-                <div className="testimonial-outer">
-                  <div className="client-testimonial-carousel owl-carousel owl-theme owl-loaded owl-drag">
-                    <div className="owl-stage-outer">
-                      <div
-                        className="owl-stage"
-                        style={{
-                          transform: "translate3d(-3200px, 0px, 0px)",
-                          transition: "0.5s",
-                          width: "8800px",
-                        }}
-                      >
-                        <div
-                          className="owl-item cloned"
-                          style={{ width: "800px" }}
-                        >
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="owl-item cloned"
-                          style={{ width: "800px" }}
-                        >
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="owl-item cloned"
-                          style={{ width: "800px" }}
-                        >
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="owl-item" style={{ width: "800px" }}>
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="owl-item active"
-                          style={{ width: "800px" }}
-                        >
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="owl-item" style={{ width: "800px" }}>
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="owl-item" style={{ width: "800px" }}>
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="owl-item" style={{ width: "800px" }}>
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="owl-item cloned"
-                          style={{ width: "800px" }}
-                        >
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="owl-item cloned"
-                          style={{ width: "800px" }}
-                        >
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="owl-item cloned"
-                          style={{ width: "800px" }}
-                        >
-                          <div className="testimonial-block">
-                            <div className="inner-box">
-                              <div className="text">
-                                Medical Centre is a great place to get all of
-                                your medical needs. I came in for a check up and
-                                did not wait more than 5 minutes before I was
-                                seen. I can only imagine the type of service you
-                                get for more serious issues. Thanks!
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="owl-nav">
-                      <div className="owl-prev">
-                        <span className="fa fa-angle-left"></span>
-                      </div>
-                      <div className="owl-next">
-                        <span className="fa fa-angle-right"></span>
-                      </div>
-                    </div>
-                    <div className="owl-dots">
-                      <div className="owl-dot">
-                        <span></span>
-                      </div>
-                      <div className="owl-dot active">
-                        <span></span>
-                      </div>
-                      <div className="owl-dot">
-                        <span></span>
-                      </div>
-                      <div className="owl-dot">
-                        <span></span>
-                      </div>
-                      <div className="owl-dot">
-                        <span></span>
-                      </div>
-                    </div>
+            <Suspense fallback={<Spinner />}>
+              <HomeFeatures />
+              <HomeAbout />
+              <HomeServices />
+              <HomeTeam />
+              <HomeAppointment />
+              <section className="testimonial-section">
+                <div className="auto-container">
+                  <div className="sec-title text-center">
+                    <span className="title">HAPPY Patient</span>
+                    <h2>What Says Our Patients</h2>
+                    <span className="divider">
+                      <svg viewBox="0 0 300.08 300.08">
+                        <path d="m293.26 184.14h-82.877l-12.692-76.138c-.546-3.287-3.396-5.701-6.718-5.701-.034 0-.061 0-.089 0-3.369.027-6.199 2.523-6.677 5.845l-12.507 87.602-14.874-148.69c-.355-3.43-3.205-6.056-6.643-6.138-.048 0-.096 0-.143 0-3.39 0-6.274 2.489-6.752 5.852l-19.621 137.368h-9.405l-12.221-42.782c-.866-3.028-3.812-5.149-6.8-4.944-3.13.109-5.777 2.332-6.431 5.395l-8.941 42.332h-73.049c-3.771 0-6.82 3.049-6.82 6.82 0 3.778 3.049 6.82 6.82 6.82h78.566c3.219 0 6.002-2.251 6.67-5.408l4.406-20.856 6.09 21.313c.839 2.939 3.526 4.951 6.568 4.951h20.46c3.396 0 6.274-2.489 6.752-5.845l12.508-87.596 14.874 148.683c.355 3.437 3.205 6.056 6.643 6.138h.143c3.39 0 6.274-2.489 6.752-5.845l14.227-99.599 6.397 38.362c.546 3.287 3.396 5.702 6.725 5.702h88.66c3.771 0 6.82-3.049 6.82-6.82-.001-3.772-3.05-6.821-6.821-6.821z"></path>
+                      </svg>
+                    </span>
                   </div>
 
-                  <div className="client-thumb-outer">
-                    <div className="client-thumbs-carousel owl-carousel owl-theme owl-loaded owl-drag">
+                  <div className="testimonial-outer">
+                    <div className="client-testimonial-carousel owl-carousel owl-theme owl-loaded owl-drag">
                       <div className="owl-stage-outer">
                         <div
                           className="owl-stage"
                           style={{
-                            transition: "0.25s",
-                            width: "1430px",
-                            transform: "translate3d(-780px, 0px, 0px)",
+                            transform: "translate3d(-3200px, 0px, 0px)",
+                            transition: "0.5s",
+                            width: "8800px",
                           }}
                         >
                           <div
                             className="owl-item cloned"
-                            style={{ width: "130px" }}
+                            style={{ width: "800px" }}
                           >
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-3.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div
                             className="owl-item cloned"
-                            style={{ width: "130px" }}
+                            style={{ width: "800px" }}
                           >
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-2.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div
                             className="owl-item cloned"
-                            style={{ width: "130px" }}
+                            style={{ width: "800px" }}
                           >
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-3.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="owl-item" style={{ width: "130px" }}>
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-1.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="owl-item" style={{ width: "130px" }}>
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-2.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="owl-item" style={{ width: "130px" }}>
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-3.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                          <div className="owl-item" style={{ width: "800px" }}>
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div
-                            className="owl-item active center"
-                            style={{ width: "130px" }}
+                            className="owl-item active"
+                            style={{ width: "800px" }}
                           >
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-2.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="owl-item" style={{ width: "130px" }}>
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-3.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                          <div className="owl-item" style={{ width: "800px" }}>
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="owl-item" style={{ width: "800px" }}>
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="owl-item" style={{ width: "800px" }}>
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div
                             className="owl-item cloned"
-                            style={{ width: "130px" }}
+                            style={{ width: "800px" }}
                           >
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-1.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div
                             className="owl-item cloned"
-                            style={{ width: "130px" }}
+                            style={{ width: "800px" }}
                           >
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-2.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
                           <div
                             className="owl-item cloned"
-                            style={{ width: "130px" }}
+                            style={{ width: "800px" }}
                           >
-                            <div className="thumb-item">
-                              <figure className="thumb-box">
-                                <img
-                                  src="/images/resource/testi-thumb-3.jpg"
-                                  alt=""
-                                />
-                              </figure>
-                              <div className="author-info">
-                                <span className="icon fa fa-quote-left"></span>
-                                <div className="author-name">Lara Croft</div>
-                                <div className="designation">
-                                  Restaurant Owner
+                            <div className="testimonial-block">
+                              <div className="inner-box">
+                                <div className="text">
+                                  Medical Centre is a great place to get all of
+                                  your medical needs. I came in for a check up
+                                  and did not wait more than 5 minutes before I
+                                  was seen. I can only imagine the type of
+                                  service you get for more serious issues.
+                                  Thanks!
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className="owl-nav disabled">
+                      <div className="owl-nav">
                         <div className="owl-prev">
-                          <span className="icon flaticon-left-arrow-2"></span>
+                          <span className="fa fa-angle-left"></span>
                         </div>
                         <div className="owl-next">
-                          <span className="icon flaticon-right-arrow-1"></span>
+                          <span className="fa fa-angle-right"></span>
                         </div>
                       </div>
-                      <div className="owl-dots disabled"></div>
+                      <div className="owl-dots">
+                        <div className="owl-dot">
+                          <span></span>
+                        </div>
+                        <div className="owl-dot active">
+                          <span></span>
+                        </div>
+                        <div className="owl-dot">
+                          <span></span>
+                        </div>
+                        <div className="owl-dot">
+                          <span></span>
+                        </div>
+                        <div className="owl-dot">
+                          <span></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="client-thumb-outer">
+                      <div className="client-thumbs-carousel owl-carousel owl-theme owl-loaded owl-drag">
+                        <div className="owl-stage-outer">
+                          <div
+                            className="owl-stage"
+                            style={{
+                              transition: "0.25s",
+                              width: "1430px",
+                              transform: "translate3d(-780px, 0px, 0px)",
+                            }}
+                          >
+                            <div
+                              className="owl-item cloned"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-3.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item cloned"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-2.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item cloned"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-3.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-1.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-2.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-3.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item active center"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-2.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-3.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item cloned"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-1.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item cloned"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-2.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className="owl-item cloned"
+                              style={{ width: "130px" }}
+                            >
+                              <div className="thumb-item">
+                                <figure className="thumb-box">
+                                  <img
+                                    src="/images/resource/testi-thumb-3.jpg"
+                                    alt=""
+                                  />
+                                </figure>
+                                <div className="author-info">
+                                  <span className="icon fa fa-quote-left"></span>
+                                  <div className="author-name">Lara Croft</div>
+                                  <div className="designation">
+                                    Restaurant Owner
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="owl-nav disabled">
+                          <div className="owl-prev">
+                            <span className="icon flaticon-left-arrow-2"></span>
+                          </div>
+                          <div className="owl-next">
+                            <span className="icon flaticon-right-arrow-1"></span>
+                          </div>
+                        </div>
+                        <div className="owl-dots disabled"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </section>
-            <HomePricing />
-            <HomeNews />
-            <HomeClients />
+              </section>
+              <HomePricing />
+              <HomeNews />
+              <HomeClients />
 
-            <HomeFooter />
+              <HomeFooter />
+            </Suspense>
           </div>
         </div>
       </div>

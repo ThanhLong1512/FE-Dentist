@@ -1,8 +1,16 @@
-import Heading from "../../components/admin/Heading";
-import Row from "../../components/admin/Row";
-import EmployeeTable from "../../features/employee/EmployeeTable";
-import CreateEmployee from "../../features/employee/CreateEmployee";
-import EmployeeOperations from "../../features/employee/EmployeeOperations";
+import { lazy } from "react";
+
+const Heading = lazy(() => import("../../components/admin/Heading"));
+const Row = lazy(() => import("../../components/admin/Row"));
+const EmployeeTable = lazy(() =>
+  import("../../features/employee/EmployeeTable")
+);
+const CreateEmployee = lazy(() =>
+  import("../../features/employee/CreateEmployee")
+);
+const EmployeeOperations = lazy(() =>
+  import("../../features/employee/EmployeeOperations")
+);
 
 function Employee() {
   return (

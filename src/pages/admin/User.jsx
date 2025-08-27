@@ -1,8 +1,15 @@
-import Heading from "../../components/admin/Heading";
-import Row from "../../components/admin/Row";
-import AccountOperations from "../../features/account/AccountOperations";
-import AccountTable from "../../features/account/AccountTable";
-import CreateAccount from "../../features/account/CreateAccount";
+import { lazy } from "react";
+
+const Heading = lazy(() => import("../../components/admin/Heading"));
+const Row = lazy(() => import("../../components/admin/Row"));
+const AccountOperations = lazy(() =>
+  import("../../features/account/AccountOperations")
+);
+const AccountTable = lazy(() => import("../../features/account/AccountTable"));
+const CreateAccount = lazy(() =>
+  import("../../features/account/CreateAccount")
+);
+
 function User() {
   return (
     <>

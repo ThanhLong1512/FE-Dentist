@@ -1,8 +1,11 @@
-import Heading from "../../components/admin/Heading";
-import Row from "../../components/admin/Row";
-import CreatePatient from "../../features/patient/CreatePatient";
-import PatientOperations from "../../features/patient/PatientOperations";
-import PatientTable from "../../features/patient/PatientTable";
+import { lazy } from "react";
+
+const Heading = lazy(() => import("../../components/admin/Heading"));
+const Row = lazy(() => import("../../components/admin/Row"));
+const PatientOperations = lazy(() =>
+  import("../../features/patient/PatientOperations")
+);
+const PatientTable = lazy(() => import("../../features/patient/PatientTable"));
 
 function Patient() {
   return (

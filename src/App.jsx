@@ -5,37 +5,41 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import { createContext } from "react";
+import { createContext, Suspense } from "react";
 import { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import { Toaster } from "react-hot-toast";
 import GlobalStyles from "../styles/GlobalStyles";
-import Home from "./pages/Home";
-import Contact from "./pages/Contact";
-import Login from "./pages/Login";
-import Shop from "./pages/Shop";
-import NotFound from "./pages/NotFound";
-import AppLayout from "./components/AppLayout";
-import Blog from "./pages/Blog";
-import AdminLayout from "./components/admin/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
-import ResetPassword from "./pages/ResetPassword";
-import ForgotPassword from "./pages/ForgotPassword";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import DetailService from "./pages/DetailService";
-import Account from "./pages/Account";
-import Appointment from "./pages/Appointment";
-import Order from "./pages/Order";
-import Patient from "./pages/admin/Patient";
-import Service from "./pages/admin/Service";
-import Shift from "./pages/admin/Shift";
-import Employee from "./pages/admin/Employee";
-import Booking from "./pages/admin/Booking";
-import User from "./pages/admin/User";
-import Setting from "./pages/admin/Setting";
-import Facility from "./pages/admin/Facility";
-import Orders from "./pages/admin/Orders";
+import { lazy } from "react";
+
+const Home = lazy(() => import("./pages/Home"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Login = lazy(() => import("./pages/Login"));
+const Shop = lazy(() => import("./pages/Shop"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AppLayout = lazy(() => import("./components/AppLayout"));
+const Blog = lazy(() => import("./pages/Blog"));
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const DetailService = lazy(() => import("./pages/DetailService"));
+const Account = lazy(() => import("./pages/Account"));
+const Appointment = lazy(() => import("./pages/Appointment"));
+const Order = lazy(() => import("./pages/Appointment"));
+const Patient = lazy(() => import("./pages/admin/Patient"));
+const Service = lazy(() => import("./pages/admin/Service"));
+const Shift = lazy(() => import("./pages/admin/Shift"));
+const Employee = lazy(() => import("./pages/admin/Employee"));
+const Booking = lazy(() => import("./pages/admin/Booking"));
+const User = lazy(() => import("./pages/admin/User"));
+const Setting = lazy(() => import("./pages/admin/Setting"));
+const Facility = lazy(() => import("./pages/admin/Facility"));
+const Orders = lazy(() => import("./pages/admin/Orders"));
+const Spinner = lazy(() => import("./components/admin/Spinner"));
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { DarkModeProvider } from "./context/DarkModeContext";
@@ -86,44 +90,52 @@ function App() {
                 setTotalPrice,
               }}
             >
-              <Routes>
-                <Route index element={<Navigate replace to="home" />} />
-                <Route path="home" element={<Home />} />
-                {/* Client */}
-                <Route element={<AppLayout />}>
-                  <Route path="blog" element={<Blog />} />
-                  <Route path="contact" element={<Contact />} />
-                  <Route element={<UnauthorizedRoutes />}>
-                    <Route path="login" element={<Login />} />
+              <Suspense fallback={<Spinner />}>
+                <Routes>
+                  <Route index element={<Navigate replace to="home" />} />
+                  <Route path="home" element={<Home />} />
+                  {/* Client */}
+                  <Route element={<AppLayout />}>
+                    <Route path="blog" element={<Blog />} />
+                    <Route path="contact" element={<Contact />} />
+                    <Route element={<UnauthorizedRoutes />}>
+                      <Route path="login" element={<Login />} />
+                    </Route>
+                    <Route path="shop" element={<Shop />} />
+                    <Route path="*" element={<NotFound />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route
+                      path="/shop/:ServiceID"
+                      element={<DetailService />}
+                    />
+                    <Route path="/account/profile" element={<Account />} />
+                    <Route
+                      path="/account/appointments"
+                      element={<Appointment />}
+                    />
+                    <Route path="/account/orders" element={<Order />} />
                   </Route>
-                  <Route path="shop" element={<Shop />} />
-                  <Route path="*" element={<NotFound />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/shop/:ServiceID" element={<DetailService />} />
-                  <Route path="/account/profile" element={<Account />} />
-                  <Route
-                    path="/account/appointments"
-                    element={<Appointment />}
-                  />
-                  <Route path="/account/orders" element={<Order />} />
-                </Route>
-                {/* Admin */}
-                <Route element={<AdminLayout />}>
-                  <Route path="admin/dashboard" element={<Dashboard />} />
-                  <Route path="admin/patients" element={<Patient />} />
-                  <Route path="admin/services" element={<Service />} />
-                  <Route path="admin/shifts" element={<Shift />} />
-                  <Route path="admin/appointments" element={<Booking />} />
-                  <Route path="admin/orders" element={<Orders />} />
-                  <Route path="admin/users" element={<User />} />
-                  <Route path="admin/facilities" element={<Facility />} />
-                  <Route path="admin/employees" element={<Employee />} />
-                  <Route path="admin/settings" element={<Setting />} />
-                </Route>
-              </Routes>
+                  {/* Admin */}
+                  <Route element={<AdminLayout />}>
+                    <Route path="admin/dashboard" element={<Dashboard />} />
+                    <Route path="admin/patients" element={<Patient />} />
+                    <Route path="admin/services" element={<Service />} />
+                    <Route path="admin/shifts" element={<Shift />} />
+                    <Route path="admin/appointments" element={<Booking />} />
+                    <Route path="admin/orders" element={<Orders />} />
+                    <Route path="admin/users" element={<User />} />
+                    <Route path="admin/facilities" element={<Facility />} />
+                    <Route path="admin/employees" element={<Employee />} />
+                    <Route path="admin/settings" element={<Setting />} />
+                  </Route>
+                </Routes>
+              </Suspense>
               <ToastContainer
                 position="top-right"
                 autoClose={3000}

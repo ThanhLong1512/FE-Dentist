@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import authorizedAxiosInstance from "../utils/authorizedAxios";
-import { API_ROOT } from "../utils/constants";
 import { toast } from "react-toastify";
 import {
   Avatar,
@@ -49,7 +47,6 @@ function Account() {
     role: "",
     require_2FA: false,
   });
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -57,7 +54,6 @@ function Account() {
     newPassword: "",
     confirmPassword: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showPassword, setShowPassword] = useState({
@@ -96,11 +92,8 @@ function Account() {
           confirmPassword: "",
         });
       })
-      .catch((error) => {
+      .catch(() => {
         toast.error("Không thể tải thông tin người dùng");
-      })
-      .finally(() => {
-        setLoading(false);
       });
   };
 
@@ -800,7 +793,6 @@ function Account() {
         </Grid>
       </Paper>
 
-      {/* Delete Account Confirmation Dialog */}
       <Dialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}

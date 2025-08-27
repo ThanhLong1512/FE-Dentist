@@ -1,8 +1,14 @@
-import Heading from "../../components/admin/Heading";
-import Row from "../../components/admin/Row";
-import ServiceTable from "../../features/services/ServiceTable";
-import CreateService from "../../features/services/CreateService";
-import ServiceOperations from "../../features/services/ServiceOperations";
+import { lazy } from "react";
+
+const Heading = lazy(() => import("../../components/admin/Heading"));
+const Row = lazy(() => import("../../components/admin/Row"));
+const ServiceTable = lazy(() => import("../../features/services/ServiceTable"));
+const CreateService = lazy(() =>
+  import("../../features/services/CreateService")
+);
+const ServiceOperations = lazy(() =>
+  import("../../features/services/ServiceOperations")
+);
 
 function Service() {
   return (
