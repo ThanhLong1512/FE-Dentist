@@ -28,7 +28,8 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const DetailService = lazy(() => import("./pages/DetailService"));
 const Account = lazy(() => import("./pages/Account"));
 const Appointment = lazy(() => import("./pages/Appointment"));
-const Order = lazy(() => import("./pages/Appointment"));
+const Order = lazy(() => import("./pages/Order"));
+const AppointmentCheckout = lazy(() => import("./pages/AppointmentCheckout"));
 const Patient = lazy(() => import("./pages/admin/Patient"));
 const Service = lazy(() => import("./pages/admin/Service"));
 const Shift = lazy(() => import("./pages/admin/Shift"));
@@ -110,6 +111,10 @@ function App() {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/checkout" element={<Checkout />} />
+                    <Route
+                      path="/appointment/checkout"
+                      element={<AppointmentCheckout />}
+                    />
                     <Route
                       path="/shop/:ServiceID"
                       element={<DetailService />}

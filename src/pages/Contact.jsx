@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
-import { API_ROOT } from "../utils/constants";
+import {
+  handleGetShiftsByDayAndDate,
+  handleHoldAppointment,
+} from "../apis";
 import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { setHours, setMinutes } from "date-fns";
 import { useLanguage } from "../context/LanguageContext";
 import {
   MapPin,
@@ -30,33 +31,39 @@ function Contact() {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
+  const dayNames = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
   useEffect(() => {
     const fetchShifts = async () => {
+      if (!formData.appointmentDate) {
+        setShifts([]);
+        return;
+      }
+
       try {
-        const days = [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ];
-        const today = new Date();
-        const currentDayOfWeek = days[today.getDay()];
-        const shiftsRes = await axios.get(
-          `${API_ROOT}/api/v1/shifts/${currentDayOfWeek}`,
-          { withCredentials: true }
+        const dayOfWeek = dayNames[formData.appointmentDate.getDay()];
+        const availableShifts = await handleGetShiftsByDayAndDate(
+          dayOfWeek,
+          formData.appointmentDate
         );
-        setShifts(shiftsRes.data.data || []);
+        setShifts(availableShifts || []);
       } catch (error) {
         toast.error(
           error.response?.data?.message || error?.message || "Không thể tải ca khám"
         );
       }
     };
+
     fetchShifts();
-  }, []);
+  }, [formData.appointmentDate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,19 +74,20 @@ function Contact() {
     setFormData((prev) => ({ ...prev, shift: e.target.value }));
   };
 
-  const filterPassedTime = (time) => {
-    const currentDate = new Date();
-    const selectedDate = new Date(time);
-    return currentDate.getTime() < selectedDate.getTime();
-  };
-
   const handleDateChange = (date) => {
-    setFormData((prev) => ({ ...prev, appointmentDate: date }));
+    setFormData((prev) => ({ ...prev, appointmentDate: date, shift: "" }));
   };
 
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
     try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "null");
+      if (!userInfo) {
+        toast.error("Vui lòng đăng nhập để đặt lịch");
+        navigate("/login");
+        return;
+      }
+
       if (
         !formData.fullName ||
         !formData.email ||
@@ -91,33 +99,37 @@ function Contact() {
         return;
       }
 
-      const appointmentData = {
-        Date: formData.appointmentDate.toISOString(),
-        shift: formData.shift,
-        patient: {
-          name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-        },
-      };
-
-      const response = await axios.post(
-        `${API_ROOT}/api/v1/appointments`,
-        appointmentData,
-        { withCredentials: true }
-      );
-
-      if (response.data) {
-        toast.success("Đặt lịch thành công!");
-        setFormData({
-          fullName: "",
-          email: "",
-          phone: "",
-          message: "",
-          appointmentDate: null,
-          shift: "",
-        });
+      const selectedShift = shifts.find((shift) => shift._id === formData.shift);
+      if (!selectedShift) {
+        toast.error("Ca khám không hợp lệ. Vui lòng chọn lại.");
+        return;
       }
+
+      const holdResponse = await handleHoldAppointment({
+        shift: formData.shift,
+        Date: formData.appointmentDate.toISOString(),
+      });
+
+      const holdData = holdResponse.data;
+
+      toast.success("Giữ chỗ thành công! Vui lòng thanh toán trong 5 phút.");
+
+      navigate("/appointment/checkout", {
+        state: {
+          reservation: {
+            reservationId: holdData.reservationId,
+            expiresAt: holdData.expiresAt,
+            holdSeconds: holdData.holdSeconds,
+            appointmentDate: formData.appointmentDate.toISOString(),
+            doctorName: selectedShift.employee?.name || "Bác sĩ",
+            serviceName:
+              selectedShift.employee?.service?.nameService || "Khám tổng quát",
+            serviceId: selectedShift.employee?.service?._id,
+            totalPrice: selectedShift.employee?.service?.priceService || 0,
+            shiftTime: `${selectedShift.StartTime} - ${selectedShift.EndTime}`,
+          },
+        },
+      });
     } catch (error) {
       if (error.response?.status === 401) {
         toast.error("Vui lòng đăng nhập để đặt lịch");
@@ -125,7 +137,7 @@ function Contact() {
         return;
       }
       toast.error(
-        error.response?.data?.message || "Đặt lịch thất bại. Vui lòng thử lại."
+        error.response?.data?.message || "Giữ chỗ thất bại. Vui lòng thử lại."
       );
     }
   };
@@ -185,12 +197,8 @@ function Contact() {
                       id="appointmentDate"
                       selected={formData.appointmentDate}
                       onChange={handleDateChange}
-                      showTimeSelect
-                      filterTime={filterPassedTime}
-                      dateFormat="dd/MM/yyyy HH:mm"
+                      dateFormat="dd/MM/yyyy"
                       minDate={new Date()}
-                      minTime={setHours(setMinutes(new Date(), 0), 8)}
-                      maxTime={setHours(setMinutes(new Date(), 0), 17)}
                       placeholderText={t("contact.datePlaceholder")}
                       className="contact-datepicker"
                       required

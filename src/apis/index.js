@@ -115,10 +115,33 @@ export const handlePayWithZaloPay = async (data) => {
 
 export const handlePayWithVNPay = async (data) => {
   const res = await authorizedAxiosInstance.post(
-    `${API_ROOT}/api/v1/payments/paymentWithVNPay`,
+    `${API_ROOT}/api/v1/payments/paymentWithVnPay`,
     data
   );
   return res.data;
+};
+
+export const handleHoldAppointment = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/appointments/hold`,
+    data
+  );
+  return res.data;
+};
+
+export const handleCancelReservation = async (reservationId) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/appointments/reservations/${reservationId}/cancel`
+  );
+  return res.data;
+};
+
+export const handleGetShiftsByDayAndDate = async (dayOfWeek, date) => {
+  const dateKey = date.toISOString().slice(0, 10);
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/shifts/${dayOfWeek}?date=${dateKey}`
+  );
+  return res.data.data;
 };
 
 export const handlePayWithCOD = async (data) => {
