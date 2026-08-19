@@ -3,9 +3,11 @@ import { RecoveryContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useServices } from "../features/services/useServices";
+import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "../context/LanguageContext";
 import Loading from "../components/Loading";
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
+import { handleSearchServices } from "../apis";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -30,6 +32,14 @@ function Shop() {
   const [sortBy, setSortBy] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const searchEnabled = Boolean(searchQuery.trim());
+  const { data: searchedServices = [], isLoading: isSearching } = useQuery({
+    queryKey: ["search-services", searchQuery],
+    queryFn: () =>
+      handleSearchServices({ q: searchQuery.trim(), limit: 200 }),
+    enabled: searchEnabled,
+  });
+
   useEffect(() => {
     const cartData = localStorage.getItem("cart");
     const cartItems = cartData ? JSON.parse(cartData) : [];
@@ -37,16 +47,7 @@ function Shop() {
   }, [setCountCart]);
 
   const filteredAndSortedServices = useMemo(() => {
-    let result = [...(services || [])];
-
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (s) =>
-          (s.nameService || "").toLowerCase().includes(query) ||
-          (s.description || "").toLowerCase().includes(query)
-      );
-    }
+    let result = searchEnabled ? [...(searchedServices || [])] : [...(services || [])];
 
     switch (sortBy) {
       case "name-asc":
@@ -70,7 +71,7 @@ function Shop() {
     }
 
     return result;
-  }, [services, searchQuery, sortBy]);
+  }, [services, searchedServices, searchEnabled, sortBy]);
 
   const totalPages = Math.ceil(
     filteredAndSortedServices.length / ITEMS_PER_PAGE
@@ -111,6 +112,7 @@ function Shop() {
     });
 
   if (isLoading) return <Loading />;
+  if (searchEnabled && isSearching) return <Loading />;
   if (error)
     return (
       <div className="shop-error">

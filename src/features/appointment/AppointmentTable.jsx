@@ -6,10 +6,21 @@ import Menus from "../../components/admin/Menus";
 import { useSearchParams } from "react-router-dom";
 import Pagination from "../../components/admin/Pagination";
 import { PAGE_SIZE } from "../../utils/constants";
+import styled from "styled-components";
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--border-radius-sm);
+  background: transparent;
+  color: inherit;
+`;
 
 function AppointmentTable() {
-  const { isLoading, error, appointments } = useAppointments();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get("q") || "";
+  const { isLoading, error, appointments } = useAppointments({ q });
 
   if (isLoading) return <Spinner />;
   if (error)
@@ -22,7 +33,7 @@ function AppointmentTable() {
   let filteredAppointments;
 
   // Filter by patient gender
-  const filterValue = searchParams.get("gender") || "all";
+  const filterValue = q && q.trim() ? "all" : searchParams.get("gender") || "all";
   const safeAppointments = appointments || [];
   if (filterValue === "all") filteredAppointments = safeAppointments;
   else if (filterValue === "male")
@@ -70,6 +81,19 @@ function AppointmentTable() {
 
   return (
     <Menus>
+      <div style={{ marginBottom: 12 }}>
+        <SearchInput
+          placeholder="Tìm theo bệnh nhân / ghi chú / bác sĩ..."
+          value={q}
+          onChange={(e) => {
+            const next = e.target.value;
+            if (!next) searchParams.delete("q");
+            else searchParams.set("q", next);
+            searchParams.set("page", "1");
+            setSearchParams(searchParams);
+          }}
+        />
+      </div>
       <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr">
         <Table.Header>
           <div>Patient</div>

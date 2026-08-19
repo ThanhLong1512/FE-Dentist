@@ -158,6 +158,47 @@ export const handleGetAvailableSlots = async ({ date, serviceId, employeeId }) =
   return res.data.data;
 };
 
+export const handleSearchPatients = async ({ q, limit = 10 }) => {
+  const params = new URLSearchParams({
+    q: String(q),
+    limit: String(limit),
+  });
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/search/patients?${params.toString()}`
+  );
+  return res.data.data;
+};
+
+export const handleSearchAppointments = async ({
+  q,
+  patientId,
+  from,
+  to,
+  limit = 10,
+}) => {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (q) params.set("q", String(q));
+  if (patientId) params.set("patientId", String(patientId));
+  if (from) params.set("from", String(from));
+  if (to) params.set("to", String(to));
+
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/search/appointments?${params.toString()}`
+  );
+  return res.data.data;
+};
+
+export const handleSearchServices = async ({ q, limit = 10 }) => {
+  const params = new URLSearchParams({
+    q: String(q),
+    limit: String(limit),
+  });
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/search/services?${params.toString()}`
+  );
+  return res.data.data;
+};
+
 export const handlePayWithCOD = async (data) => {
   const res = await authorizedAxiosInstance.post(
     `${API_ROOT}/api/v1/payments/paymentWithCOD`,

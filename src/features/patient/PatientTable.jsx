@@ -6,10 +6,21 @@ import Menus from "../../components/admin/Menus";
 import { useSearchParams } from "react-router-dom";
 import Pagination from "../../components/admin/Pagination";
 import { PAGE_SIZE } from "../../utils/constants";
+import styled from "styled-components";
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--border-radius-sm);
+  background: transparent;
+  color: inherit;
+`;
 
 function PatientTable() {
-  const { isLoading, patients } = usePatients();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get("q") || "";
+  const { isLoading, patients } = usePatients({ q });
 
   if (isLoading) return <Spinner />;
 
@@ -44,6 +55,19 @@ function PatientTable() {
   const paginatedPatients = sortedPatients.slice(startIndex, endIndex);
   return (
     <Menus>
+      <div style={{ marginBottom: 12 }}>
+        <SearchInput
+          placeholder="Tìm theo tên/sđt/địa chỉ..."
+          value={q}
+          onChange={(e) => {
+            const next = e.target.value;
+            if (!next) searchParams.delete("q");
+            else searchParams.set("q", next);
+            searchParams.set("page", "1");
+            setSearchParams(searchParams);
+          }}
+        />
+      </div>
       <Table columns="1fr 0.5fr 1fr 1fr 1fr 2fr">
         <Table.Header>
           <div>Patient</div>
