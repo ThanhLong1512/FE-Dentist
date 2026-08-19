@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { handleLogoutApi } from "../apis/index";
+import { useDarkMode } from "../context/DarkModeContext";
 
 const Setup2FA = lazy(() => import("../components/setup-2fa"));
 const Require2FA = lazy(() => import("../components/require-2fa"));
@@ -21,8 +22,8 @@ function Home() {
   const [openSetup2FA, setOpenSetup2FA] = useState(false);
   const [showRequire2FA, setShowRequire2FA] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState("vi");
+  const { isDarkMode: darkMode, toggleDarkMode } = useDarkMode();
   const userMenuRef = useRef(null);
 
   let formatEmail,
@@ -90,10 +91,6 @@ function Home() {
     setOpenSetup2FA(false);
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
   const changeLanguage = (language) => {
     setCurrentLanguage(language);
   };
@@ -110,19 +107,21 @@ function Home() {
     position: "absolute",
     top: "100%",
     right: "0",
-    backgroundColor: "#fff",
-    boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
-    borderRadius: "4px",
+    backgroundColor: darkMode ? "#1e293b" : "#fff",
+    color: darkMode ? "#e2e8f0" : "#1e293b",
+    boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
+    borderRadius: "8px",
     width: "220px",
     zIndex: "1000",
     padding: "8px 0",
     display: showUserMenu ? "block" : "none",
+    border: darkMode ? "1px solid #334155" : "1px solid #e2e8f0",
   };
 
   const menuItemStyle = {
     padding: "10px 16px",
     display: "block",
-    color: "#333",
+    color: darkMode ? "#e2e8f0" : "#1e293b",
     textDecoration: "none",
     transition: "background-color 0.2s",
     cursor: "pointer",
@@ -131,7 +130,7 @@ function Home() {
   const dividerStyle = {
     height: "1px",
     margin: "8px 0",
-    backgroundColor: "#e0e0e0",
+    backgroundColor: darkMode ? "#334155" : "#e2e8f0",
   };
 
   const avatarContainerStyle = {
@@ -159,7 +158,9 @@ function Home() {
             margin: "5px 0",
           }}
         >
-          <span style={{ fontWeight: "500" }}>Account security status:</span>{" "}
+          <span style={{ fontWeight: "500", color: "black" }}>
+            Account security status:
+          </span>{" "}
           <span style={{ color: "#2e7d32" }}>
             Two-Factor Authentication (2FA) enabled
           </span>
@@ -254,7 +255,12 @@ function Home() {
                     <div className="logo-box">
                       <div className="logo">
                         <Link to="/home">
-                          <img src="/images/logo.png" alt="" title="" />
+                          <img
+                            src="/images/logo.png"
+                            alt=""
+                            title=""
+                            loading="lazy"
+                          />
                         </Link>
                       </div>
                     </div>
@@ -310,9 +316,10 @@ function Home() {
                                 <img
                                   src={
                                     userInfo?.image ||
-                                    "/images/default-avatar.png"
+                                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle fill='%23e2e8f0' cx='50' cy='50' r='50'/%3E%3Ccircle fill='%2394a3b8' cx='50' cy='38' r='18'/%3E%3Cellipse fill='%2394a3b8' cx='50' cy='88' rx='28' ry='24'/%3E%3C/svg%3E"
                                   }
                                   alt="User"
+                                  loading="lazy"
                                   style={avatarStyle}
                                   onClick={() => setShowUserMenu(!showUserMenu)}
                                 />
@@ -406,7 +413,12 @@ function Home() {
 
                                   <div style={dividerStyle}></div>
 
-                                  <div style={{ padding: "10px 16px" }}>
+                                  <div
+                                    style={{
+                                      padding: "10px 16px",
+                                      color: darkMode ? "#e2e8f0" : "#1e293b",
+                                    }}
+                                  >
                                     <span
                                       style={{
                                         marginRight: "10px",
@@ -513,7 +525,12 @@ function Home() {
                     <div className="logo-box">
                       <div className="logo">
                         <a href="index.html">
-                          <img src="/images/logo.png" alt="" title="" />
+                          <img
+                            src="/images/logo.png"
+                            alt=""
+                            title=""
+                            loading="lazy"
+                          />
                         </a>
                       </div>
                     </div>
@@ -558,7 +575,12 @@ function Home() {
               <div className="mobile-header">
                 <div className="logo">
                   <a href="index.html">
-                    <img src="/images/logo.png" alt="" title="" />
+                    <img
+                      src="/images/logo.png"
+                      alt=""
+                      title=""
+                      loading="lazy"
+                    />
                   </a>
                 </div>
 
@@ -1198,6 +1220,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-3.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1218,6 +1241,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-2.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1238,6 +1262,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-3.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1258,6 +1283,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-1.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1278,6 +1304,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-2.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1298,6 +1325,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-3.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1318,6 +1346,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-2.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1338,6 +1367,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-3.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1358,6 +1388,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-1.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1378,6 +1409,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-2.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">
@@ -1398,6 +1430,7 @@ function Home() {
                                   <img
                                     src="/images/resource/testi-thumb-3.jpg"
                                     alt=""
+                                    loading="lazy"
                                   />
                                 </figure>
                                 <div className="author-info">

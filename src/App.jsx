@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { createContext, Suspense } from "react";
 import { useState } from "react";
-import { ToastContainer } from "react-toastify";
+import ThemedToastContainer from "./components/ThemedToastContainer";
 import { Toaster } from "react-hot-toast";
 import GlobalStyles from "../styles/GlobalStyles";
 import { lazy } from "react";
@@ -43,6 +43,7 @@ const Spinner = lazy(() => import("./components/admin/Spinner"));
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { DarkModeProvider } from "./context/DarkModeContext";
+import { LanguageProvider } from "./context/LanguageContext";
 
 export const RecoveryContext = createContext();
 const queryClient = new QueryClient({
@@ -68,7 +69,7 @@ function App() {
   return (
     <>
       <DarkModeProvider>
-        {" "}
+        <LanguageProvider>
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools
             initialIsOpen={false}
@@ -102,7 +103,6 @@ function App() {
                       <Route path="login" element={<Login />} />
                     </Route>
                     <Route path="shop" element={<Shop />} />
-                    <Route path="*" element={<NotFound />} />
                     <Route
                       path="/forgot-password"
                       element={<ForgotPassword />}
@@ -120,6 +120,7 @@ function App() {
                       element={<Appointment />}
                     />
                     <Route path="/account/orders" element={<Order />} />
+                    <Route path="*" element={<NotFound />} />
                   </Route>
                   {/* Admin */}
                   <Route element={<AdminLayout />}>
@@ -136,18 +137,7 @@ function App() {
                   </Route>
                 </Routes>
               </Suspense>
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-              />
+              <ThemedToastContainer />
             </RecoveryContext.Provider>
           </BrowserRouter>
           <Toaster
@@ -171,6 +161,7 @@ function App() {
             }}
           />
         </QueryClientProvider>
+        </LanguageProvider>
       </DarkModeProvider>
     </>
   );

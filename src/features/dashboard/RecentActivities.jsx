@@ -14,6 +14,26 @@ const ActivityList = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-grey-100);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-grey-300);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--color-grey-400);
+  }
 `;
 
 const ActivityItem = styled.li`
@@ -71,7 +91,6 @@ const ActivityTime = styled.span`
 function RecentActivities({ orders, reviews }) {
   const activities = [];
 
-  // Thêm activities từ orders
   if (orders?.orders) {
     orders.orders.forEach((order) => {
       activities.push({
@@ -84,7 +103,6 @@ function RecentActivities({ orders, reviews }) {
     });
   }
 
-  // Thêm activities từ reviews (nếu có)
   if (reviews?.reviews) {
     reviews.reviews.forEach((review) => {
       activities.push({
@@ -97,14 +115,14 @@ function RecentActivities({ orders, reviews }) {
     });
   }
 
-  // Sort by time (newest first)
   activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+  console.log(activities);
 
   return (
     <ActivityBox>
       <Heading as="h2">Recent Activities</Heading>
       <ActivityList>
-        {activities.slice(0, 5).map((activity) => (
+        {activities.slice(0, 8).map((activity) => (
           <ActivityItem key={activity.id}>
             <ActivityIcon className={activity.type}>
               {activity.icon}

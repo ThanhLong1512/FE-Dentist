@@ -2,9 +2,20 @@
 <html lang="en" class="mdl-js">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function() {
+        var stored = localStorage.getItem("isDarkMode");
+        var isDark = stored ? JSON.parse(stored) : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (isDark) document.documentElement.classList.add("dark-mode");
+        else document.documentElement.classList.add("light-mode");
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dental Clinic</title>
     <link rel="icon" href="/images/favicon.png" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Stylesheets CLIENT START -->
     <link href="/css/bootstrap.css" rel="stylesheet" />
@@ -16,6 +27,9 @@
       rel="stylesheet"
     />
     <link href="/css/color-switcher-design.css" rel="stylesheet" />
+    <link href="/css/dark-mode.css" rel="stylesheet" />
+    <link href="/css/home-header-fixes.css" rel="stylesheet" />
+    <link href="/css/login-page.css" rel="stylesheet" />
     <link rel="shortcut icon" href="/images/favicon.png" type="image/x-icon" />
     <link rel="icon" href="/images/favicon.png" type="image/x-icon" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>

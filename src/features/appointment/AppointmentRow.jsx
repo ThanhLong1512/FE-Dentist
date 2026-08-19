@@ -9,35 +9,35 @@ const PatientName = styled.div`
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-grey-600);
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 `;
 
 const AppointmentInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-grey-500);
 `;
 
 const DoctorInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 600;
   color: var(--color-blue-700);
 `;
 
 const ServiceInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-green-700);
 `;
 
 const PriceInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 600;
   color: var(--color-red-700);
 `;
 
 const TimeInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-purple-700);
 `;
@@ -45,10 +45,12 @@ const TimeInfo = styled.div`
 function AppointmentRow({ appointment }) {
   const {
     _id: appointmentID,
-    patient,
+    patient = {},
     Date: appointmentDate,
-    shift,
-  } = appointment;
+    shift = {},
+  } = appointment || {};
+
+  if (!appointmentID) return null;
 
   // Format date
   const formatDate = (dateString) => {
@@ -67,28 +69,29 @@ function AppointmentRow({ appointment }) {
     <>
       <Table.Row>
         <div>
-          <PatientName>{patient.name}</PatientName>
+          <PatientName>{patient?.name || "-"}</PatientName>
           <AppointmentInfo>
-            {patient.gender === true ? "Nam" : "Nữ"} - {patient.yearOfBirth}
+            {patient?.gender === true ? "Nam" : patient?.gender === false ? "Nữ" : "-"} - {patient?.yearOfBirth ?? "-"}
           </AppointmentInfo>
         </div>
 
-        <DoctorInfo>{shift.employee.name}</DoctorInfo>
+        <DoctorInfo>{shift?.employee?.name || "-"}</DoctorInfo>
 
-        <ServiceInfo>{shift.employee.service.nameService}</ServiceInfo>
+        <ServiceInfo>{shift?.employee?.service?.nameService || "-"}</ServiceInfo>
 
         <AppointmentInfo>{formatDate(appointmentDate)}</AppointmentInfo>
 
         <TimeInfo>
-          {shift.StartTime} - {shift.EndTime}
+          {shift?.StartTime || "-"} - {shift?.EndTime || "-"}
           <br />
-          <small>{shift.DayOfWeek}</small>
+          <small>{shift?.DayOfWeek || ""}</small>
         </TimeInfo>
 
         <PriceInfo>
           {formatPrice(
-            shift.employee.service.priceDiscount ||
-              shift.employee.service.priceService
+            shift?.employee?.service?.priceDiscount ||
+              shift?.employee?.service?.priceService ||
+              0
           )}
         </PriceInfo>
 
@@ -105,29 +108,30 @@ function AppointmentRow({ appointment }) {
                 <div>
                   <h3>Appointment Details</h3>
                   <p>
-                    <strong>Patient:</strong> {patient.name}
+                    <strong>Patient:</strong> {patient?.name || "-"}
                   </p>
                   <p>
-                    <strong>Phone:</strong> {patient.phoneNumber}
+                    <strong>Phone:</strong> {patient?.phoneNumber || "-"}
                   </p>
                   <p>
-                    <strong>Doctor:</strong> {shift.employee.name}
+                    <strong>Doctor:</strong> {shift?.employee?.name || "-"}
                   </p>
                   <p>
                     <strong>Service:</strong>{" "}
-                    {shift.employee.service.nameService}
+                    {shift?.employee?.service?.nameService || "-"}
                   </p>
                   <p>
                     <strong>Date:</strong> {formatDate(appointmentDate)}
                   </p>
                   <p>
-                    <strong>Time:</strong> {shift.StartTime} - {shift.EndTime}
+                    <strong>Time:</strong> {shift?.StartTime || "-"} - {shift?.EndTime || "-"}
                   </p>
                   <p>
                     <strong>Price:</strong>{" "}
                     {formatPrice(
-                      shift.employee.service.priceDiscount ||
-                        shift.employee.service.priceService
+                      shift?.employee?.service?.priceDiscount ||
+                        shift?.employee?.service?.priceService ||
+                        0
                     )}
                   </p>
                 </div>

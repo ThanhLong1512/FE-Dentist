@@ -1,0 +1,36 @@
+/**
+ * Home page header - ensure text contrast in light mode
+ * Fixes navigation links being too light on light background
+ * Only applies when NOT in dark mode
+ */
+
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li > a,
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li > a span,
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li > span {
+  color: #1e293b !important;
+}
+
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li.current > a,
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li.current > a span,
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li.current > span {
+  color: #1370b5 !important;
+}
+
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li.dropdown > span:after {
+  color: #1e293b !important;
+}
+
+html:not(.dark-mode) .main-header.header-style-one .main-menu .navigation > li.current.dropdown > span:after {
+  color: #1370b5 !important;
+}
+
+/* Sticky header - same contrast in light mode */
+html:not(.dark-mode) .main-header .sticky-header .main-menu .navigation > li > a,
+html:not(.dark-mode) .main-header .sticky-header .main-menu .navigation > li > span {
+  color: #1e293b !important;
+}
+
+html:not(.dark-mode) .main-header .sticky-header .main-menu .navigation > li.current > a,
+html:not(.dark-mode) .main-header .sticky-header .main-menu .navigation > li.current > span {
+  color: #1370b5 !important;
+}

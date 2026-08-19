@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
-import { useEffect, useState, useContext, lazy } from "react";
-import { handleGetService } from "../apis";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useContext, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { RecoveryContext } from "../App";
 import {
   handlePostReview,
@@ -8,831 +8,537 @@ import {
   handleUpdateReview,
 } from "../apis";
 import { toast } from "react-toastify";
+import { useService } from "../features/services/useService";
+import { useServices } from "../features/services/useServices";
+import { useLanguage } from "../context/LanguageContext";
+import Loading from "../components/Loading";
+import {
+  Star,
+  ShoppingCart,
+  Minus,
+  Plus,
+  FileText,
+  MessageCircle,
+  Pencil,
+  Trash2,
+  ArrowLeft,
+} from "lucide-react";
 
-const Loading = lazy(() => import("../components/Loading"));
+const PLACEHOLDER_IMG =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect fill='%23f1f5f9' width='400' height='300'/%3E%3Ctext fill='%2394a3b8' font-family='sans-serif' font-size='18' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EDịch vụ%3C/text%3E%3C/svg%3E";
 
 function DetailService() {
   const { ServiceID } = useParams();
-  const [service, setService] = useState(null);
-  const [review, setReview] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+  const queryClient = useQueryClient();
+  const { service, isLoading, error } = useService(ServiceID);
+  const { services = [] } = useServices();
+  const { setCountCart } = useContext(RecoveryContext);
+
   const [activeTab, setActiveTab] = useState("description");
   const [activeStar, setActiveStar] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const { setCountCart } = useContext(RecoveryContext);
-  const [error, setError] = useState(null);
   const [reviewText, setReviewText] = useState("");
   const [editReviewId, setEditReviewId] = useState(null);
   const [editReviewText, setEditReviewText] = useState("");
   const [editReviewRating, setEditReviewRating] = useState(0);
 
   const userID = JSON.parse(localStorage.getItem("userInfo"))?.id;
-  const userEmail = JSON.parse(localStorage.getItem("userInfo"))?.email;
 
   useEffect(() => {
-    async function callGetService() {
-      try {
-        setLoading(true);
-        const res = await handleGetService(ServiceID);
-        if (!res) {
-          throw new Error("No data received from API");
-        }
-        setReview(res.reviews);
-        setService(res);
-      } catch (err) {
-        setError(err.message || "Failed to load service details");
-      } finally {
-        setLoading(false);
-      }
-    }
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCountCart(cart.length);
+  }, [setCountCart]);
 
-    if (ServiceID) {
-      callGetService();
-    } else {
-      setError("Missing Service ID");
-      setLoading(false);
-    }
-  }, [ServiceID]);
-
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
-  };
-
-  const handleStarClick = (rating) => {
-    setActiveStar(rating);
-  };
-
-  const handleEditStarClick = (rating) => {
-    setEditReviewRating(rating);
-  };
-
+  const review = service?.reviews || [];
   const hasReviewed = review.some(
-    (r) => r.account._id === userID && r.service === service?._id
+    (r) => r.account?._id === userID && r.service === service?._id
   );
 
+  const relatedServices = (services || []).filter(
+    (s) => s._id !== ServiceID
+  ).slice(0, 3);
+
+  const formatPrice = (price) =>
+    (price || 0).toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "long",
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("vi-VN", {
       day: "2-digit",
+      month: "2-digit",
       year: "numeric",
     });
   };
 
-  const incrementQuantity = () => {
-    setQuantity((prev) => prev + 1);
-  };
-
-  const decrementQuantity = () => {
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-  };
+  const incrementQuantity = () => setQuantity((p) => p + 1);
+  const decrementQuantity = () =>
+    setQuantity((p) => (p > 1 ? p - 1 : 1));
 
   const addToCart = () => {
     if (!service) return;
-
     const cartItem = {
+      _id: service._id,
       id: service._id,
       nameService: service.nameService,
       photoService: service.photoService,
       priceDiscount: service.priceDiscount,
       priceService: service.priceService,
-      quantity: quantity,
+      quantity,
       unit: "Hour",
       summary: service.summary,
     };
-
     let currentCart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    const existingItemIndex = currentCart.findIndex(
-      (item) => item.id === service._id
-    );
-
-    if (existingItemIndex !== -1) {
-      currentCart[existingItemIndex].quantity += quantity;
+    const idx = currentCart.findIndex((item) => item._id === service._id);
+    if (idx !== -1) {
+      currentCart[idx].quantity += quantity;
     } else {
       currentCart.push(cartItem);
-      setCountCart(currentCart.length);
     }
-
     localStorage.setItem("cart", JSON.stringify(currentCart));
+    setCountCart(currentCart.length);
+    toast.success(t("toast.addToCartSuccess"));
   };
 
-  const handleReviewSubmit = async (e) => {
-    e.preventDefault();
-    const data = {
-      rating: activeStar,
-      review: reviewText,
-      service: service._id,
-    };
-
-    try {
-      const response = await handlePostReview(data);
-      toast.success("Post review successfully");
-
-      const newReview = {
-        _id: response.data.data._id || Date.now().toString(),
-        rating: activeStar,
-        review: reviewText,
-        service: service._id,
-        createdAt: new Date().toISOString(),
-        account: {
-          _id: userID,
-          email: userEmail,
-        },
-      };
-
-      setReview((prevReviews) => [...prevReviews, newReview]);
-
-      setService((prevService) => ({
-        ...prevService,
-        ratingsQuantity: prevService.ratingsQuantity + 1,
-      }));
-
+  const postReviewMutation = useMutation({
+    mutationFn: (data) => handlePostReview(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["service", ServiceID] });
       setReviewText("");
       setActiveStar(0);
       setActiveTab("review");
-    } catch (err) {
-      toast.error("Failed to post review. Please try again.");
-      console.error("Error posting review:", err);
-    }
-  };
+      toast.success(t("toast.reviewSuccess"));
+    },
+    onError: () => toast.error(t("toast.reviewFail")),
+  });
 
-  const handleDeleteReviewClick = async (reviewId) => {
-    if (window.confirm("Are you sure you want to delete this review?")) {
-      try {
-        await handleDeleteReview(reviewId);
-
-        setReview((prevReviews) =>
-          prevReviews.filter((r) => r._id !== reviewId)
-        );
-
-        setService((prevService) => ({
-          ...prevService,
-          ratingsQuantity: prevService.ratingsQuantity - 1,
-        }));
-
-        toast.success("Review deleted successfully");
-      } catch (err) {
-        toast.error("Failed to delete review. Please try again.");
-        console.error("Error deleting review:", err);
-      }
-    }
-  };
-
-  const handleEditReviewClick = (r) => {
-    setEditReviewId(r._id);
-    setEditReviewText(r.review);
-    setEditReviewRating(r.rating);
-  };
-
-  const handleCancelEdit = () => {
-    setEditReviewId(null);
-    setEditReviewText("");
-    setEditReviewRating(0);
-  };
-
-  const handleUpdateReviewSubmit = async (e) => {
-    e.preventDefault();
-
-    const data = {
-      rating: editReviewRating,
-      review: editReviewText,
-    };
-
-    try {
-      await handleUpdateReview(editReviewId, data);
-
-      setReview((prevReviews) =>
-        prevReviews.map((r) =>
-          r._id === editReviewId
-            ? {
-                ...r,
-                review: editReviewText,
-                updatedAt: new Date().toISOString(),
-              }
-            : r
-        )
-      );
-
-      toast.success("Review updated successfully");
+  const updateReviewMutation = useMutation({
+    mutationFn: ({ id, data }) => handleUpdateReview(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["service", ServiceID] });
       setEditReviewId(null);
       setEditReviewText("");
       setEditReviewRating(0);
-    } catch (err) {
-      toast.error("Failed to update review. Please try again.");
+      toast.success(t("toast.reviewUpdateSuccess"));
+    },
+    onError: () => toast.error(t("toast.reviewUpdateFail")),
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: (id) => handleDeleteReview(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["service", ServiceID] });
+      toast.success(t("toast.reviewDeleteSuccess"));
+    },
+    onError: () => toast.error(t("toast.reviewDeleteFail")),
+  });
+
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!service || activeStar < 1) {
+      toast.error(t("toast.selectStars"));
+      return;
+    }
+    postReviewMutation.mutate({
+      rating: activeStar,
+      review: reviewText,
+      service: service._id,
+    });
+  };
+
+  const handleUpdateReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!editReviewId || editReviewRating < 1) return;
+    updateReviewMutation.mutate({
+      id: editReviewId,
+      data: { rating: editReviewRating, review: editReviewText },
+    });
+  };
+
+  const handleDeleteReviewClick = (reviewId) => {
+    if (window.confirm(t("detailService.confirmDelete"))) {
+      deleteReviewMutation.mutate(reviewId);
     }
   };
 
-  if (loading) return <Loading />;
+  if (isLoading) return <Loading />;
+  if (error || !service) {
+    return (
+      <div className="ds-error">
+        <p>{error?.message || t("detailService.notFound")}</p>
+        <button type="button" onClick={() => navigate("/shop")}>
+          {t("detailService.backToShop")}
+        </button>
+      </div>
+    );
+  }
+
+  const imgUrl = service.photoService?.url || PLACEHOLDER_IMG;
 
   return (
-    <div className="sidebar-page-container">
-      <div className="auto-container">
-        <div className="row clearfix">
-          <div className="content-side col-lg-8 col-md-12 col-sm-12">
-            <div className="shop-single">
-              <div className="product-details">
-                <div className="basic-details">
-                  <div className="row clearfix">
-                    <div className="image-column col-md-6 col-sm-12">
-                      <figure className="image-box">
-                        <img
-                          src={
-                            service?.photoService?.url ||
-                            "/placeholder-image.jpg"
-                          }
-                          alt={service?.nameService || "Service image"}
-                        />
-                      </figure>
-                    </div>
-                    <div className="info-column col-md-6 col-sm-12">
-                      <div className="details-header">
-                        <h4>{service?.nameService || "Unnamed Service"}</h4>
-                        <div className="rating">
-                          {[...Array(5)].map((_, i) => (
-                            <span
-                              key={i}
-                              className={`fa fa-star ${
-                                i < service.ratingsAverage
-                                  ? "text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            ></span>
-                          ))}
-                        </div>
-                        <a className="reviews" href="#">
-                          {`( ${
-                            service?.ratingsQuantity || 0
-                          } Customer Reviews )`}
-                        </a>
-                        <div className="item-price">
-                          {service?.priceDiscount?.toLocaleString("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }) || "N/A"}
-                          {service?.priceService && (
-                            <del>
-                              {service.priceService.toLocaleString("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                              })}
-                            </del>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text">{service.summary}</div>
-                      <div className="other-options clearfix">
-                        <div className="item-quantity">
-                          <div className="input-group bootstrap-touchspin">
-                            <span
-                              className="input-group-addon bootstrap-touchspin-prefix"
-                              style={{ display: "none" }}
-                            ></span>
-                            <input
-                              className="quantity-spinner form-control"
-                              type="text"
-                              value={quantity}
-                              name="quantity"
-                              style={{ display: "block" }}
-                              readOnly
-                            />
-                            <span
-                              className="input-group-addon bootstrap-touchspin-postfix"
-                              style={{ display: "none" }}
-                            ></span>
-                            <span className="input-group-btn-vertical">
-                              <button
-                                className="btn btn-default bootstrap-touchspin-up"
-                                type="button"
-                                onClick={incrementQuantity}
-                              >
-                                <i className="fa fa-chevron-up"></i>
-                              </button>
-                              <button
-                                className="btn btn-default bootstrap-touchspin-down"
-                                type="button"
-                                onClick={decrementQuantity}
-                              >
-                                <i className="fa fa-chevron-down"></i>
-                              </button>
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className="theme-btn btn-style-one add-to-cart"
-                          onClick={addToCart}
-                        >
-                          <span className="btn-title">Add To Cart</span>
-                          <span></span> <span></span> <span></span>{" "}
-                          <span></span> <span></span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+    <div className="ds-page">
+      <div className="ds-container">
+        {/* Back */}
+        <button
+          type="button"
+          className="ds-back"
+          onClick={() => navigate("/shop")}
+        >
+          <ArrowLeft size={18} />
+          {t("detailService.backToShop")}
+        </button>
 
-                <div className="product-info-tabs">
-                  <div className="prod-tabs tabs-box">
-                    <ul className="tab-btns tab-buttons clearfix">
-                      <li
-                        data-tab="#prod-details"
-                        className={`tab-btn ${
-                          activeTab === "description" ? "active-btn" : ""
-                        } `}
-                        onClick={() => handleTabClick("description")}
-                      >
-                        Descripton
-                      </li>
-                      <li
-                        data-tab="#prod-reviews"
-                        className={`tab-btn ${
-                          activeTab === "review" ? "active-btn" : ""
-                        } `}
-                        onClick={() => handleTabClick("review")}
-                      >
-                        {`Review (${service.ratingsQuantity})`}
-                      </li>
-                    </ul>
-
-                    <div className="tabs-content">
-                      <div
-                        className={`tab ${
-                          activeTab === "description" ? "active-tab" : ""
-                        }`}
-                        id="prod-details"
-                      >
-                        <div className="content">
-                          <h3>Product Descripton</h3>
-                          <p>{service.description}</p>
-                          <p>
-                            Excepteur sint occaecat cupidatat non proident, sunt
-                            in culpa qui officia deserunt mollit anim id est
-                            laborum consectetur adipiscing elit, sed do eiusmod
-                            tempor incididunt ut labore et dolore magna aliqua.
-                            Ut enim ad minim veniam, quis nostrud exercitation
-                            ullamco laboris nisi ut aliquip ex ea commodo
-                            consequat. sunt in culpa qui officia deserunt mollit
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`tab ${
-                          activeTab === "review" ? "active-tab" : ""
-                        }`}
-                        id="prod-reviews"
-                      >
-                        <h2 className="title">{`${service.ratingsQuantity} Reviews For ${service.nameService}`}</h2>
-
-                        <div className="comments-area style-two">
-                          <div className="comment-box">
-                            {review.length > 0 ? (
-                              review.map((r) => (
-                                <div className="comment" key={r._id}>
-                                  <div className="author-thumb">
-                                    <img
-                                      src="/images/resource/avatar-1.jpg"
-                                      alt=""
-                                    />
-                                  </div>
-
-                                  <div className="comment-inner">
-                                    <div
-                                      className="comment-info"
-                                      style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                      }}
-                                    >
-                                      <div
-                                        style={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                        }}
-                                      >
-                                        <div className="name">
-                                          {r.account.email}
-                                        </div>
-                                        <div
-                                          className="date"
-                                          style={{ marginLeft: "10px" }}
-                                        >
-                                          {formatDate(r.createdAt)}
-                                        </div>
-                                      </div>
-
-                                      {/* Edit and Delete icons - Only visible to the review owner */}
-                                      {r.account._id === userID && (
-                                        <div className="review-actions">
-                                          <button
-                                            onClick={() =>
-                                              handleEditReviewClick(r)
-                                            }
-                                            className="edit-review-btn"
-                                            style={{
-                                              background: "none",
-                                              border: "none",
-                                              cursor: "pointer",
-                                              marginRight: "10px",
-                                              color: "#3498db",
-                                            }}
-                                          >
-                                            <i className="fa fa-edit"></i>
-                                          </button>
-                                          <button
-                                            onClick={() =>
-                                              handleDeleteReviewClick(r._id)
-                                            }
-                                            className="delete-review-btn"
-                                            style={{
-                                              background: "none",
-                                              border: "none",
-                                              cursor: "pointer",
-                                              color: "#e74c3c",
-                                            }}
-                                          >
-                                            <i className="fa fa-trash"></i>
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="rating">
-                                      {[...Array(5)].map((_, i) => (
-                                        <span
-                                          key={i}
-                                          className={`fa fa-star ${
-                                            i < r.rating
-                                              ? "text-yellow-400"
-                                              : "text-gray-300"
-                                          }`}
-                                        ></span>
-                                      ))}
-                                    </div>
-
-                                    {/* Show edit form if this review is being edited */}
-                                    {editReviewId === r._id ? (
-                                      <form
-                                        onSubmit={handleUpdateReviewSubmit}
-                                        className="edit-review-form"
-                                      >
-                                        <div className="form-group">
-                                          <textarea
-                                            value={editReviewText}
-                                            onChange={(e) =>
-                                              setEditReviewText(e.target.value)
-                                            }
-                                            placeholder="Edit your review..."
-                                            required
-                                            style={{ marginTop: "10px" }}
-                                          ></textarea>
-                                        </div>
-                                        <div
-                                          className="form-group"
-                                          style={{
-                                            display: "flex",
-                                            gap: "10px",
-                                          }}
-                                        >
-                                          <button
-                                            type="submit"
-                                            className="theme-btn btn-style-one"
-                                          >
-                                            <span className="btn-title">
-                                              Update
-                                            </span>
-                                          </button>
-                                          <button
-                                            type="button"
-                                            onClick={handleCancelEdit}
-                                            className="theme-btn btn-style-two"
-                                          >
-                                            <span className="btn-title">
-                                              Cancel
-                                            </span>
-                                          </button>
-                                        </div>
-                                      </form>
-                                    ) : (
-                                      <div className="text">{r.review}</div>
-                                    )}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <span>No review for this service</span>
-                            )}
-                          </div>
-                        </div>
-
-                        {!hasReviewed && (
-                          <div className="shop-comment-form">
-                            <h2>Add a Review</h2>
-                            <div className="rating-box">
-                              <div className="text"> Your Rating:</div>
-                              <div className="star-ratings">
-                                <div className="rating">
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleStarClick(1);
-                                    }}
-                                    className={activeStar >= 1 ? "active" : ""}
-                                  >
-                                    <span className="fa fa-star"></span>
-                                  </a>
-                                </div>
-                                <div className="rating">
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleStarClick(2);
-                                    }}
-                                    className={activeStar >= 2 ? "active" : ""}
-                                  >
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                  </a>
-                                </div>
-                                <div className="rating">
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleStarClick(3);
-                                    }}
-                                    className={activeStar >= 3 ? "active" : ""}
-                                  >
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                  </a>
-                                </div>
-                                <div className="rating">
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleStarClick(4);
-                                    }}
-                                    className={activeStar >= 4 ? "active" : ""}
-                                  >
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                  </a>
-                                </div>
-                                <div className="rating">
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleStarClick(5);
-                                    }}
-                                    className={activeStar >= 5 ? "active" : ""}
-                                  >
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                    <span className="fa fa-star"></span>
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                            <form method="post" onSubmit={handleReviewSubmit}>
-                              <div className="form-group">
-                                <textarea
-                                  name="message"
-                                  placeholder="Your Review*"
-                                  value={reviewText}
-                                  onChange={(e) =>
-                                    setReviewText(e.target.value)
-                                  }
-                                  required
-                                ></textarea>
-                              </div>
-                              <div className="form-group">
-                                <button
-                                  className="theme-btn btn-style-one"
-                                  type="submit"
-                                  name="submit-form"
-                                >
-                                  <span className="btn-title">SUBMIT</span>
-                                </button>
-                              </div>
-                            </form>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        {/* Hero + Info */}
+        <section className="ds-hero">
+          <div className="ds-hero-image">
+            <img src={imgUrl} alt={service.nameService} />
+          </div>
+          <div className="ds-hero-content">
+            <h1 className="ds-title">{service.nameService}</h1>
+            <div className="ds-rating-row">
+              <div className="ds-stars">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    size={20}
+                    className={i <= (service.ratingsAverage || 0) ? "filled" : ""}
+                  />
+                ))}
               </div>
+              <span className="ds-review-count">
+                {service.ratingsQuantity || 0} {t("detailService.reviews")}
+              </span>
+            </div>
+            {service.summary && (
+              <p className="ds-summary">{service.summary}</p>
+            )}
+            <div className="ds-price-row">
+              <span className="ds-price">
+                {formatPrice(service.priceDiscount || service.priceService)}
+              </span>
+              {service.priceDiscount && (
+                <span className="ds-price-old">
+                  {formatPrice(service.priceService)}
+                </span>
+              )}
+              <span className="ds-unit">/ {service.Unit || t("detailService.hour")}</span>
+            </div>
+            <div className="ds-actions">
+              <div className="ds-quantity">
+                <button
+                  type="button"
+                  onClick={decrementQuantity}
+                  aria-label={t("detailService.decrease")}
+                >
+                  <Minus size={16} />
+                </button>
+                <span>{quantity}</span>
+                <button
+                  type="button"
+                  onClick={incrementQuantity}
+                  aria-label={t("detailService.increase")}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+              <button
+                type="button"
+                className="ds-add-cart"
+                onClick={addToCart}
+              >
+                <ShoppingCart size={20} />
+                {t("detailService.addToCart")}
+              </button>
             </div>
           </div>
+        </section>
 
-          <div className="sidebar-side col-lg-4 col-md-12 col-sm-12">
-            <aside className="sidebar">
-              <div className="sidebar-widget search-box">
-                <form
-                  method="post"
-                  action="https://skyethemes.com/html/2022/medicoz/blog.html"
-                >
-                  <div className="form-group">
-                    <input
-                      type="search"
-                      name="search-field"
-                      defaultValue=""
-                      placeholder="Search....."
-                      required=""
-                    />
-                    <button type="submit">
-                      <span className="icon fa fa-search"></span>
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              <div className="sidebar-widget category-list">
-                <div className="sidebar-title">
-                  <h3>Categories</h3>
-                </div>
-                <ul className="cat-list">
-                  <li>
-                    <a href="#">
-                      Procedures <span>(06)</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      Transplantation <span>(02)</span>
-                    </a>
-                  </li>
-                  <li className="active">
-                    <a href="#">
-                      Management <span>(05)</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      Healthcare Tips <span>(25)</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      Uncategorized <span>(04)</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="sidebar-widget latest-news">
-                <div className="sidebar-title">
-                  <h3>Popular Products</h3>
-                </div>
-                <div className="widget-content">
-                  <article className="post">
-                    <div className="post-thumb">
-                      <a href="shop-single.html">
-                        <img
-                          src="/images/resource/products/product-thumb-1.jpg"
-                          alt=""
-                        />
-                      </a>
-                    </div>
-                    <h5>
-                      <a href="shop-single.html">First Aid Kit</a>
-                    </h5>
-                    <div className="price">$9.00</div>
-                    <div className="rating">
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                    </div>
-                  </article>
-
-                  <article className="post">
-                    <div className="post-thumb">
-                      <a href="shop-single.html">
-                        <img
-                          src="/images/resource/products/product-thumb-2.jpg"
-                          alt=""
-                        />
-                      </a>
-                    </div>
-                    <h5>
-                      <a href="shop-single.html">Vitamin C+</a>
-                    </h5>
-                    <div className="price">$20.00</div>
-                    <div className="rating">
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                    </div>
-                  </article>
-
-                  <article className="post">
-                    <div className="post-thumb">
-                      <a href="shop-single.html">
-                        <img
-                          src="/images/resource/products/product-thumb-3.jpg"
-                          alt=""
-                        />
-                      </a>
-                    </div>
-                    <h5>
-                      <a href="shop-single.html">Zinc Tablet</a>
-                    </h5>
-                    <div className="price">$ 18.00</div>
-                    <div className="rating">
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                      <span className="fa fa-star"></span>
-                    </div>
-                  </article>
-                </div>
-              </div>
-
-              <div className="sidebar-widget newslatters">
-                <div className="sidebar-title">
-                  <h3>
-                    <span className="icon flaticon-rss-symbol"></span>Newsletter
-                  </h3>
-                </div>
-                <div className="text">
-                  Enter your email address below to subscribe to our newsletter
-                </div>
-                <form
-                  method="post"
-                  action="https://skyethemes.com/html/2022/medicoz/blog-sidebar.html"
-                >
-                  <div className="form-group">
-                    <input
-                      type="text"
-                      name="input"
-                      defaultValue=""
-                      placeholder="Your email address..."
-                      required=""
-                    />
-                    <button type="submit" className="theme-btn">
-                      <span className="btn-title">Subscribe</span>
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              <div className="sidebar-widget tags">
-                <div className="sidebar-title">
-                  <h3>Tag Cloud</h3>
-                </div>
-                <ul className="popular-tags clearfix">
-                  <li>
-                    <a href="#">Ideas</a>
-                  </li>
-                  <li>
-                    <a href="#">Doctor</a>
-                  </li>
-                  <li>
-                    <a href="#">Health</a>
-                  </li>
-                  <li>
-                    <a href="#">Department</a>
-                  </li>
-                  <li>
-                    <a href="#">Nurse</a>
-                  </li>
-                  <li>
-                    <a href="#">Growth</a>
-                  </li>
-                  <li>
-                    <a href="#">Expert</a>
-                  </li>
-                  <li>
-                    <a href="#">Tips</a>
-                  </li>
-                  <li>
-                    <a href="#">Service</a>
-                  </li>
-                  <li>
-                    <a href="#">Medical</a>
-                  </li>
-                </ul>
-              </div>
-            </aside>
+        {/* Tabs */}
+        <section className="ds-tabs-section">
+          <div className="ds-tabs-header">
+            <button
+              type="button"
+              className={`ds-tab ${activeTab === "description" ? "active" : ""}`}
+              onClick={() => setActiveTab("description")}
+            >
+              <FileText size={18} />
+              {t("detailService.description")}
+            </button>
+            <button
+              type="button"
+              className={`ds-tab ${activeTab === "review" ? "active" : ""}`}
+              onClick={() => setActiveTab("review")}
+            >
+              <MessageCircle size={18} />
+              {t("detailService.review")} ({service.ratingsQuantity || 0})
+            </button>
           </div>
-        </div>
+
+          <div className="ds-tabs-content">
+            {activeTab === "description" && (
+              <div className="ds-description">
+                <p>{service.description || t("detailService.noDescription")}</p>
+              </div>
+            )}
+
+            {activeTab === "review" && (
+              <div className="ds-reviews">
+                {review.length > 0 ? (
+                  <ul className="ds-review-list">
+                    {review.map((r) => (
+                      <li key={r._id} className="ds-review-card">
+                        <div className="ds-review-avatar">
+                          {(r.account?.email?.[0] || "?").toUpperCase()}
+                        </div>
+                        <div className="ds-review-body">
+                          <div className="ds-review-meta">
+                            <span className="ds-review-email">
+                              {r.account?.email}
+                            </span>
+                            <span className="ds-review-date">
+                              {formatDate(r.createdAt)}
+                            </span>
+                            {r.account?._id === userID && (
+                              <div className="ds-review-actions">
+                                {editReviewId === r._id ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditReviewId(null);
+                                        setEditReviewText("");
+                                        setEditReviewRating(0);
+                                      }}
+                                    >
+                                      {t("detailService.cancel")}
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditReviewId(r._id);
+                                        setEditReviewText(r.review);
+                                        setEditReviewRating(r.rating);
+                                      }}
+                                    >
+                                      <Pencil size={14} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteReviewClick(r._id)}
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="ds-review-stars">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <Star
+                                key={i}
+                                size={14}
+                                className={i <= r.rating ? "filled" : ""}
+                              />
+                            ))}
+                          </div>
+                          {editReviewId === r._id ? (
+                            <form
+                              onSubmit={handleUpdateReviewSubmit}
+                              className="ds-edit-form"
+                            >
+                              <textarea
+                                value={editReviewText}
+                                onChange={(e) => setEditReviewText(e.target.value)}
+                                required
+                              />
+                              <div className="ds-edit-stars">
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                  <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => setEditReviewRating(i)}
+                                  >
+                                    <Star
+                                      size={18}
+                                      className={i <= editReviewRating ? "filled" : ""}
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                              <button type="submit">{t("detailService.update")}</button>
+                            </form>
+                          ) : (
+                            <p className="ds-review-text">{r.review}</p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="ds-no-reviews">Chưa có đánh giá nào.</p>
+                )}
+
+                {!hasReviewed && (
+                  <form
+                    onSubmit={handleReviewSubmit}
+                    className="ds-add-review"
+                  >
+                    <h3>{t("detailService.writeReview")}</h3>
+                    <div className="ds-add-stars">
+                      <span>{t("detailService.yourRating")}</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setActiveStar(i)}
+                        >
+                          <Star
+                            size={24}
+                            className={i <= activeStar ? "filled" : ""}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      placeholder={t("detailService.reviewPlaceholder")}
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={postReviewMutation.isPending}
+                    >
+                      {t("detailService.submitReview")}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Related Services */}
+        {relatedServices.length > 0 && (
+          <section className="ds-related">
+            <h2>{t("detailService.relatedServices")}</h2>
+            <div className="ds-related-grid">
+              {relatedServices.map((s) => (
+                <article
+                  key={s._id}
+                  className="ds-related-card"
+                  onClick={() => navigate(`/shop/${s._id}`)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && navigate(`/shop/${s._id}`)
+                  }
+                >
+                  <img
+                    src={s.photoService?.url || PLACEHOLDER_IMG}
+                    alt={s.nameService}
+                  />
+                  <div className="ds-related-info">
+                    <h4>{s.nameService}</h4>
+                    <span>{formatPrice(s.priceService)}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
+
+      <style>{`
+        .ds-page { padding: 24px 0 60px; background: #f8fafc; min-height: 60vh; }
+        .ds-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        .ds-error { text-align: center; padding: 60px 20px; }
+        .ds-error button { margin-top: 16px; padding: 10px 20px; background: #1370b5; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+        .ds-back { display: inline-flex; align-items: center; gap: 8px; padding: 10px 0; color: #64748b; background: none; border: none; cursor: pointer; font-size: 15px; margin-bottom: 24px; }
+        .ds-back:hover { color: #1370b5; }
+        .ds-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-bottom: 32px; }
+        .ds-hero-image { aspect-ratio: 4/3; overflow: hidden; background: #f1f5f9; }
+        .ds-hero-image img { width: 100%; height: 100%; object-fit: cover; }
+        .ds-hero-content { padding: 32px 40px; }
+        .ds-title { font-size: 28px; font-weight: 700; color: #1e293b; margin: 0 0 16px; line-height: 1.3; }
+        .ds-rating-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .ds-stars { display: flex; gap: 4px; }
+        .ds-stars svg, .ds-review-stars svg { color: #e2e8f0; }
+        .ds-stars svg.filled, .ds-review-stars svg.filled { color: #fbbf24; fill: #fbbf24; }
+        .ds-review-count { font-size: 14px; color: #64748b; }
+        .ds-summary { font-size: 16px; color: #475569; line-height: 1.6; margin: 0 0 20px; }
+        .ds-price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .ds-price { font-size: 26px; font-weight: 700; color: #1370b5; }
+        .ds-price-old { font-size: 18px; color: #94a3b8; text-decoration: line-through; }
+        .ds-unit { font-size: 14px; color: #64748b; }
+        .ds-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        .ds-quantity { display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .ds-quantity button { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: #fff; border: none; cursor: pointer; color: #64748b; }
+        .ds-quantity button:hover { background: #f1f5f9; color: #1370b5; }
+        .ds-quantity span { min-width: 44px; text-align: center; font-weight: 600; }
+        .ds-add-cart { display: inline-flex; align-items: center; gap: 10px; padding: 14px 28px; background: #1370b5; color: #fff; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; cursor: pointer; transition: background 0.2s; }
+        .ds-add-cart:hover { background: #0d5a94; }
+        .ds-tabs-section { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 40px; }
+        .ds-tabs-header { display: flex; border-bottom: 1px solid #e2e8f0; }
+        .ds-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 18px 24px; background: none; border: none; font-size: 16px; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.2s; }
+        .ds-tab:hover { color: #1370b5; }
+        .ds-tab.active { color: #1370b5; border-bottom: 2px solid #1370b5; margin-bottom: -1px; }
+        .ds-tabs-content { padding: 32px 40px; }
+        .ds-description p { font-size: 16px; line-height: 1.8; color: #475569; margin: 0; }
+        .ds-reviews { display: flex; flex-direction: column; gap: 32px; }
+        .ds-review-list { list-style: none; padding: 0; margin: 0; }
+        .ds-review-card { display: flex; gap: 20px; padding: 24px; background: #f8fafc; border-radius: 12px; margin-bottom: 16px; }
+        .ds-review-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #1370b5, #0d5a94); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; }
+        .ds-review-body { flex: 1; min-width: 0; }
+        .ds-review-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+        .ds-review-email { font-weight: 600; color: #1e293b; }
+        .ds-review-date { font-size: 13px; color: #94a3b8; }
+        .ds-review-actions { display: flex; gap: 8px; margin-left: auto; }
+        .ds-review-actions button { background: none; border: none; cursor: pointer; color: #64748b; padding: 4px; }
+        .ds-review-actions button:hover { color: #1370b5; }
+        .ds-review-stars { margin-bottom: 8px; }
+        .ds-review-text { font-size: 15px; line-height: 1.6; color: #475569; margin: 0; }
+        .ds-no-reviews { color: #94a3b8; font-size: 15px; margin: 0 0 24px; }
+        .ds-add-review { padding: 24px; background: #f8fafc; border-radius: 12px; }
+        .ds-add-review h3 { font-size: 18px; margin: 0 0 16px; color: #1e293b; }
+        .ds-add-stars { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .ds-add-stars span { font-size: 14px; color: #64748b; }
+        .ds-add-stars button { background: none; border: none; cursor: pointer; padding: 4px; }
+        .ds-add-stars button svg { color: #e2e8f0; }
+        .ds-add-stars button svg.filled { color: #fbbf24; fill: #fbbf24; }
+        .ds-add-review textarea { width: 100%; min-height: 120px; padding: 14px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; resize: vertical; margin-bottom: 16px; }
+        .ds-add-review textarea:focus { outline: none; border-color: #1370b5; }
+        .ds-add-review button { padding: 12px 24px; background: #1370b5; color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .ds-add-review button:hover:not(:disabled) { background: #0d5a94; }
+        .ds-add-review button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .ds-edit-form textarea { width: 100%; min-height: 80px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; }
+        .ds-edit-stars { display: flex; gap: 4px; margin-bottom: 12px; }
+        .ds-edit-stars button { background: none; border: none; cursor: pointer; padding: 2px; }
+        .ds-edit-form button[type=submit] { padding: 8px 16px; background: #1370b5; color: #fff; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; }
+        .ds-related h2 { font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 24px; }
+        .ds-related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+        .ds-related-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .ds-related-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        .ds-related-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+        .ds-related-info { padding: 16px; }
+        .ds-related-info h4 { font-size: 16px; font-weight: 600; margin: 0 0 8px; color: #1e293b; }
+        .ds-related-info span { font-size: 15px; font-weight: 600; color: #1370b5; }
+        @media (max-width: 768px) {
+          .ds-hero { grid-template-columns: 1fr; }
+          .ds-hero-content { padding: 24px; }
+          .ds-title { font-size: 22px; }
+          .ds-tabs-content { padding: 24px; }
+          .ds-review-card { flex-direction: column; align-items: flex-start; }
+        }
+      `}</style>
     </div>
   );
 }

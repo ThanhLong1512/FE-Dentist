@@ -218,6 +218,7 @@ function Checkout() {
                             src="images/payments/momo.png"
                             alt="MoMo"
                             style={{ height: "24px", marginLeft: "10px" }}
+                            loading="lazy"
                           />
                         </span>
                         <span className="small-text">
@@ -245,6 +246,7 @@ function Checkout() {
                             src="images/payments/zalopay.png"
                             alt="ZaloPay"
                             style={{ height: "24px", marginLeft: "10px" }}
+                            loading="lazy"
                           />
                         </span>
                         <span className="small-text">
@@ -271,6 +273,7 @@ function Checkout() {
                             src="images/payments/vnpay.png"
                             alt="VNPay"
                             style={{ height: "24px", marginLeft: "10px" }}
+                            loading="lazy"
                           />
                         </span>
                         <span className="small-text">

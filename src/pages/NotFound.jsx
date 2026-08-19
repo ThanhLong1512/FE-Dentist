@@ -4,7 +4,7 @@ function NotFound() {
       <div className="auto-container">
         <div className="content-box">
           <figure className="error-image">
-            <img src="/images/icons/error.png" alt="" />
+            <img src="/images/icons/error.png" alt="" loading="lazy" />
           </figure>
           <h2>Page not found</h2>
           <div className="text">Please try one of the following pages:</div>

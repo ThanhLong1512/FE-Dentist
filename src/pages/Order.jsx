@@ -58,6 +58,7 @@ const Order = () => {
                 src={service.photoService.url}
                 alt={service.nameService}
                 className="w-16 h-16 object-cover rounded"
+                loading="lazy"
                 onError={(e) =>
                   (e.target.src = "https://via.placeholder.com/64")
                 }

@@ -224,7 +224,8 @@ export const handleGetAppointments = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/appointments`
   );
-  return res.data.data.data;
+  const data = res.data?.data?.data ?? res.data?.data;
+  return Array.isArray(data) ? data : [];
 };
 export const handleGetNyOrder = async () => {
   const res = await authorizedAxiosInstance.get(
@@ -235,7 +236,8 @@ export const handleGetNyOrder = async () => {
 
 export const handleGetOrders = async () => {
   const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/orders`);
-  return res.data.data.data;
+  const data = res.data?.data?.data ?? res.data?.data;
+  return Array.isArray(data) ? data : [];
 };
 
 export const handleGetMyConservation = async () => {
@@ -338,6 +340,13 @@ export const handleUpdateAccount = async (data, accountID) => {
     data
   );
   return res.data.data.data;
+};
+
+export const handleDeleteAccount = async (accountID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/accounts/${accountID}`
+  );
+  return res.data;
 };
 
 export const handleGetAppointmentByPeriod = async (period) => {

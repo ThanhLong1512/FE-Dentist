@@ -19,16 +19,20 @@ function DashboardLayout() {
   const { isLoading, bookings } = useRecentBookings();
   const { isLoading: isLoadingOrder, orders, numDays } = useRecentOrder();
   const { isLoading: isLoadingReview, reviews } = useRecentReview();
+  console.log(reviews);
 
   if (isLoading || isLoadingOrder || isLoadingReview) return <Spinner />;
+
+  const averageRating = !reviews ? 5 : reviews.averageRating;
+  const reviewCount = !reviews ? 0 : reviews.totalReviews;
 
   return (
     <StyledDashboardLayout>
       <Stats
         bookings={bookings}
         confirmedOrders={orders}
-        averageRating={reviews.averageRating}
-        reviewCount={reviews.totalReviews}
+        averageRating={averageRating}
+        reviewCount={reviewCount}
       />
       <RecentActivities orders={orders} reviews={reviews} />
       <ServiceChart confirmedOrder={orders} />

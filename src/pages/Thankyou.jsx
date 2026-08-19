@@ -10,7 +10,11 @@ function Thankyou() {
                   <div className="row clearfix">
                     <div className="image-column col-md-6 col-sm-12">
                       <figure className="image-box">
-                        <img src={service.photoService.url} alt="" />
+                        <img
+                          src={service.photoService.url}
+                          alt=""
+                          loading="lazy"
+                        />
                       </figure>
                     </div>
                     <div className="info-column col-md-6 col-sm-12">
@@ -145,6 +149,7 @@ function Thankyou() {
                                 <img
                                   src="/images/resource/avatar-1.jpg"
                                   alt=""
+                                  loading="lazy"
                                 />
                               </div>
                               <div className="comment-inner">
@@ -174,6 +179,7 @@ function Thankyou() {
                                 <img
                                   src="/images/resource/avatar-2.jpg"
                                   alt=""
+                                  loading="lazy"
                                 />
                               </div>
                               <div className="comment-inner">
@@ -202,6 +208,7 @@ function Thankyou() {
                                 <img
                                   src="/images/resource/avatar-3.jpg"
                                   alt=""
+                                  loading="lazy"
                                 />
                               </div>
                               <div className="comment-inner">
@@ -386,6 +393,7 @@ function Thankyou() {
                         <img
                           src="images/resource/products/product-thumb-1.jpg"
                           alt=""
+                          loading="lazy"
                         />
                       </a>
                     </div>
@@ -408,6 +416,7 @@ function Thankyou() {
                         <img
                           src="images/resource/products/product-thumb-2.jpg"
                           alt=""
+                          loading="lazy"
                         />
                       </a>
                     </div>
@@ -430,6 +439,7 @@ function Thankyou() {
                         <img
                           src="images/resource/products/product-thumb-3.jpg"
                           alt=""
+                          loading="lazy"
                         />
                       </a>
                     </div>

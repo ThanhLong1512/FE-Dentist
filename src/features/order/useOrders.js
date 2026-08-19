@@ -11,5 +11,5 @@ export function useOrders() {
     queryFn: handleGetOrders,
   });
 
-  return { isLoading, error, orders };
+  return { isLoading, error, orders: orders || [] };
 }

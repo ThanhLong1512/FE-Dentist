@@ -11,5 +11,5 @@ export function useAppointments() {
     queryFn: handleGetAppointments,
   });
 
-  return { isLoading, error, appointments };
+  return { isLoading, error, appointments: appointments || [] };
 }

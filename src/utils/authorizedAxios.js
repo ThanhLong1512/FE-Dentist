@@ -17,7 +17,10 @@ authorizedAxiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthRequest =
+      error.config?.url?.includes("/login") ||
+      error.config?.url?.includes("/register");
+    if (error.response?.status === 401 && !isAuthRequest) {
       toast.error(
         error.response?.data?.message ||
           "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!",

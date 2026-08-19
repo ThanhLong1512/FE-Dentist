@@ -146,7 +146,7 @@ function Logo() {
           <text
             x="0"
             y="50"
-            fontFamily="'Segoe UI', Arial, sans-serif"
+            fontFamily="'Inter', 'Segoe UI', system-ui, sans-serif"
             fontSize="36"
             fontWeight="700"
             fill="url(#textGradient)"
@@ -158,7 +158,7 @@ function Logo() {
           <text
             x="0"
             y="80"
-            fontFamily="'Segoe UI', Arial, sans-serif"
+            fontFamily="'Inter', 'Segoe UI', system-ui, sans-serif"
             fontSize="18"
             fontWeight="300"
             letterSpacing="3px"

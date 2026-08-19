@@ -13,7 +13,7 @@ const Employee = styled.div`
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--color-grey-600);
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 `;
 
 const Service = styled.div`
@@ -22,13 +22,13 @@ const Service = styled.div`
 `;
 
 const Day = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-grey-700);
 `;
 
 const Time = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-grey-600);
 `;

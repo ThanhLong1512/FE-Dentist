@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-s;
+
 const Heading = lazy(() => import("../../components/admin/Heading"));
 const Row = lazy(() => import("../../components/admin/Row"));
 const AppointmentTable = lazy(() =>
