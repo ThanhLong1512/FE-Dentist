@@ -1,0 +1,82 @@
+.slot-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.slot-card {
+  text-align: left;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 14px 16px;
+  transition: transform 0.06s ease, border-color 0.15s ease;
+}
+
+.slot-card:hover {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+}
+
+.slot-card.selected {
+  border-color: #1370b5;
+  box-shadow: 0 0 0 3px rgba(19, 112, 181, 0.15);
+}
+
+.slot-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slot-doctor {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.slot-time {
+  margin-top: 8px;
+  font-weight: 700;
+  color: #1d4ed8;
+  font-size: 16px;
+}
+
+.slot-meta {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #475569;
+  font-size: 13px;
+}
+
+.slot-meta .dot {
+  opacity: 0.7;
+}
+
+.slot-empty {
+  grid-column: 1 / -1;
+  padding: 16px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  color: #64748b;
+}
+
+html.dark-mode .slot-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode .slot-doctor {
+  color: #e2e8f0;
+}
+
+html.dark-mode .slot-time {
+  color: #7dd3fc;
+}
+
+html.dark-mode .slot-meta {
+  color: #cbd5e1;
+}
+

@@ -1,0 +1,136 @@
+.contact-page {
+  padding: 40px 20px;
+}
+
+.contact-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.contact-header {
+  margin-bottom: 24px;
+}
+
+.contact-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.contact-subtitle {
+  margin-top: 6px;
+  color: var(--color-grey-600);
+}
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 24px;
+}
+
+.contact-form-card {
+  background: var(--color-grey-0);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+}
+
+.contact-info-card {
+  background: var(--color-grey-0);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contact-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-field-full {
+  grid-column: 1 / -1;
+}
+
+.contact-datepicker {
+  width: 100%;
+}
+
+.contact-field input,
+.contact-field textarea,
+.contact-field select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--color-grey-200);
+  padding: 10px 12px;
+  background: var(--color-grey-0);
+  color: var(--color-grey-700);
+}
+
+.contact-field input::placeholder,
+.contact-field textarea::placeholder {
+  color: var(--color-grey-500);
+}
+
+.contact-submit-btn {
+  margin-top: 6px;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: var(--color-brand-600);
+  color: #fff;
+  font-weight: 800;
+}
+
+.contact-submit-btn:disabled {
+  opacity: 0.6;
+}
+
+.contact-info-item {
+  margin-top: 12px;
+}
+
+html.dark-mode .contact-subtitle {
+  color: var(--color-grey-400);
+}
+
+html.dark-mode .contact-form-card,
+html.dark-mode .contact-info-card {
+  background: #0f172a;
+}
+
+html.dark-mode .contact-field input,
+html.dark-mode .contact-field textarea,
+html.dark-mode .contact-field select {
+  background: #0b1220;
+  border-color: #334155;
+  color: var(--color-grey-0);
+}
+
+html.dark-mode .contact-field input::placeholder,
+html.dark-mode .contact-field textarea::placeholder {
+  color: #94a3b8;
+}
+
+@media (max-width: 900px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+  }
+  .contact-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

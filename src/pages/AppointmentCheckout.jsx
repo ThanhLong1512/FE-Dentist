@@ -173,9 +173,15 @@ function AppointmentCheckout() {
           <p>
             <strong>Dịch vụ:</strong> {reservation.serviceName}
           </p>
-          <p>
-            <strong>Ca:</strong> {reservation.shiftTime}
-          </p>
+          {reservation.slotTime ? (
+            <p>
+              <strong>Giờ:</strong> {reservation.slotTime}
+            </p>
+          ) : reservation.shiftTime ? (
+            <p>
+              <strong>Ca:</strong> {reservation.shiftTime}
+            </p>
+          ) : null}
           <p>
             <strong>Ngày:</strong>{" "}
             {new Date(reservation.appointmentDate).toLocaleDateString("vi-VN")}

@@ -144,6 +144,20 @@ export const handleGetShiftsByDayAndDate = async (dayOfWeek, date) => {
   return res.data.data;
 };
 
+export const handleGetAvailableSlots = async ({ date, serviceId, employeeId }) => {
+  const dateKey = date.toISOString().slice(0, 10);
+  const params = new URLSearchParams({
+    date: dateKey,
+    serviceId: String(serviceId),
+  });
+  if (employeeId) params.set("employeeId", String(employeeId));
+
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/availability/slots?${params.toString()}`
+  );
+  return res.data.data;
+};
+
 export const handlePayWithCOD = async (data) => {
   const res = await authorizedAxiosInstance.post(
     `${API_ROOT}/api/v1/payments/paymentWithCOD`,
