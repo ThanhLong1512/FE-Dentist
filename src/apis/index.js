@@ -1,10 +1,10 @@
 import { data } from "jquery";
 import authorizedAxiosInstance from "../utils/authorizedAxios";
+import { clearAuthSession } from "../utils/authStorage";
 import { API_ROOT } from "../utils/constants";
 
 export const handleLogoutApi = async () => {
-  localStorage.removeItem("userInfo");
-  localStorage.removeItem("cart");
+  clearAuthSession();
   return await authorizedAxiosInstance.delete(
     `${API_ROOT}/api/v1/users/logout`
   );
@@ -238,10 +238,17 @@ export const handleUpdateMe = async (formDataToSend) => {
 };
 
 export const handleGetMyAppointment = async () => {
-  const res = await authorizedAxiosInstance.get(
-    `${API_ROOT}/api/v1/appointments/getMyAppointment`
-  );
-  return res.data.data.data;
+  try {
+    const res = await authorizedAxiosInstance.get(
+      `${API_ROOT}/api/v1/appointments/getMyAppointment`
+    );
+    return res.data.data.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return [];
+    }
+    throw error;
+  }
 };
 export const handleGetAppointments = async () => {
   const res = await authorizedAxiosInstance.get(
@@ -250,11 +257,31 @@ export const handleGetAppointments = async () => {
   const data = res.data?.data?.data ?? res.data?.data;
   return Array.isArray(data) ? data : [];
 };
+
+export const handleUpdateAppointmentStatus = async (appointmentId, status) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/appointments/${appointmentId}/status`,
+    { status }
+  );
+  return res.data;
+};
+
+export const handleRescheduleAppointment = async (appointmentId, payload) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/appointments/${appointmentId}/reschedule`,
+    payload
+  );
+  return res.data;
+};
 export const handleGetNyOrder = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/orders/getOrderByUser`
   );
-  return res.data.data;
+  const data = res.data?.data || {};
+  return {
+    codOrders: Array.isArray(data.codOrders) ? data.codOrders : [],
+    paidOrders: Array.isArray(data.paidOrders) ? data.paidOrders : [],
+  };
 };
 
 export const handleGetOrders = async () => {

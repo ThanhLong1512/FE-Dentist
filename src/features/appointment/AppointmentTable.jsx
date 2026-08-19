@@ -70,13 +70,14 @@ function AppointmentTable() {
 
   return (
     <Menus>
-      <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr">
+      <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr">
         <Table.Header>
           <div>Patient</div>
           <div>Doctor</div>
           <div>Service</div>
           <div>Date</div>
           <div>Time</div>
+          <div>Status</div>
           <div>Price</div>
           <div></div>
         </Table.Header>

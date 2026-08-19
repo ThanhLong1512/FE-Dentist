@@ -24,4 +24,20 @@ export const appointmentApi = {
     );
     return response.data;
   },
+
+  updateStatus: async (appointmentId, status) => {
+    const response = await authorizedAxiosInstance.patch(
+      `${API_ROOT}/api/v1/appointments/${appointmentId}/status`,
+      { status }
+    );
+    return response.data;
+  },
+
+  reschedule: async (appointmentId, payload) => {
+    const response = await authorizedAxiosInstance.patch(
+      `${API_ROOT}/api/v1/appointments/${appointmentId}/reschedule`,
+      payload
+    );
+    return response.data;
+  },
 };

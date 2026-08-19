@@ -290,13 +290,14 @@ function Account() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 0, mb: 2, px: { xs: 0 } }}>
       <Paper
-        elevation={3}
+        elevation={0}
         sx={{
           p: 4,
           borderRadius: 2,
-          backgroundColor: "#fff",
+          border: "1px solid",
+          borderColor: "divider",
         }}
       >
         <Grid container spacing={3}>
@@ -505,10 +506,6 @@ function Account() {
                       onChange={handleInputChange}
                       disabled={!editMode}
                       required
-                      sx={{
-                        "& .MuiInputBase-input": { fontSize: "1.05rem" },
-                        "& .MuiInputLabel-root": { fontSize: "1.05rem" },
-                      }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -521,10 +518,6 @@ function Account() {
                       onChange={handleInputChange}
                       disabled={true}
                       required
-                      sx={{
-                        "& .MuiInputBase-input": { fontSize: "1.05rem" },
-                        "& .MuiInputLabel-root": { fontSize: "1.05rem" },
-                      }}
                     />
                   </Grid>
                 </Grid>

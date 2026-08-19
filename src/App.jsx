@@ -17,7 +17,11 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Login = lazy(() => import("./pages/Login"));
 const Shop = lazy(() => import("./pages/Shop"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const AppLayout = lazy(() => import("./components/AppLayout"));
+import AppLayout from "./components/AppLayout";
+import AccountLayout from "./components/AccountLayout";
+import Account from "./pages/Account";
+import Appointment from "./pages/Appointment";
+import Order from "./pages/Order";
 const Blog = lazy(() => import("./pages/Blog"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -26,9 +30,6 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const DetailService = lazy(() => import("./pages/DetailService"));
-const Account = lazy(() => import("./pages/Account"));
-const Appointment = lazy(() => import("./pages/Appointment"));
-const Order = lazy(() => import("./pages/Order"));
 const AppointmentCheckout = lazy(() => import("./pages/AppointmentCheckout"));
 const Patient = lazy(() => import("./pages/admin/Patient"));
 const Service = lazy(() => import("./pages/admin/Service"));
@@ -119,12 +120,12 @@ function App() {
                       path="/shop/:ServiceID"
                       element={<DetailService />}
                     />
-                    <Route path="/account/profile" element={<Account />} />
-                    <Route
-                      path="/account/appointments"
-                      element={<Appointment />}
-                    />
-                    <Route path="/account/orders" element={<Order />} />
+                    <Route path="/account" element={<AccountLayout />}>
+                      <Route index element={<Navigate to="profile" replace />} />
+                      <Route path="profile" element={<Account />} />
+                      <Route path="appointments" element={<Appointment />} />
+                      <Route path="orders" element={<Order />} />
+                    </Route>
                     <Route path="*" element={<NotFound />} />
                   </Route>
                   {/* Admin */}

@@ -310,7 +310,6 @@ function Home() {
                                 </span>
                               </li>
                               <li
-                                ref={userMenuRef}
                                 style={avatarContainerStyle}
                               >
                                 <img
@@ -323,10 +322,11 @@ function Home() {
                                   style={avatarStyle}
                                   onClick={() => setShowUserMenu(!showUserMenu)}
                                 />
-                                <div style={userMenuStyle}>
+                                <div style={userMenuStyle} ref={userMenuRef}>
                                   <Link
                                     to="/account/profile"
                                     style={menuItemStyle}
+                                    onClick={() => setShowUserMenu(false)}
                                   >
                                     <i
                                       className="fas fa-user"
@@ -341,6 +341,7 @@ function Home() {
                                   <Link
                                     to="/account/appointments"
                                     style={menuItemStyle}
+                                    onClick={() => setShowUserMenu(false)}
                                   >
                                     <i
                                       className="fas fa-calendar-check"
@@ -355,6 +356,7 @@ function Home() {
                                   <Link
                                     to="/account/orders"
                                     style={menuItemStyle}
+                                    onClick={() => setShowUserMenu(false)}
                                   >
                                     <i
                                       className="fas fa-shopping-bag"

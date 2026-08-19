@@ -98,7 +98,11 @@ function Header() {
                     <li>
                       <Link to="/contact">{t("nav.contact")}</Link>
                     </li>
-                    {!userInfo && (
+                    {userInfo ? (
+                      <li>
+                        <Link to="/account/profile">My Account</Link>
+                      </li>
+                    ) : (
                       <li>
                         <Link to="/login">{t("nav.login")}</Link>
                       </li>
@@ -202,7 +206,11 @@ function Header() {
                   <li>
                     <Link to="/contact">{t("nav.contact")}</Link>
                   </li>
-                  {!userInfo && (
+                  {userInfo ? (
+                    <li>
+                      <Link to="/account/profile">My Account</Link>
+                    </li>
+                  ) : (
                     <li>
                       <Link to="/login">{t("nav.login")}</Link>
                     </li>

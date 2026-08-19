@@ -2,28 +2,54 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { GoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "@greatsumini/react-facebook-login";
-import { Card as MuiCard } from "@mui/material";
+import { Card as MuiCard, ThemeProvider, createTheme } from "@mui/material";
 import CardActions from "@mui/material/CardActions";
 import TextField from "@mui/material/TextField";
 import Zoom from "@mui/material/Zoom";
 import Alert from "@mui/material/Alert";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import Typography from "@mui/material/Typography";
 import { API_ROOT } from "./../utils/constants";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { Facebook, Google } from "@mui/icons-material";
+import { Facebook } from "@mui/icons-material";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { handleRegister } from "../apis";
 import { ToastContainer, toast } from "react-toastify";
 import { handleLogin } from "../apis";
 import { useLanguage } from "../context/LanguageContext";
+import { useDarkMode } from "../context/DarkModeContext";
+import { saveAuthSession } from "../utils/authStorage";
 import "react-toastify/dist/ReactToastify.css";
 
 function Login() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { isDarkMode } = useDarkMode();
+  const muiTheme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDarkMode ? "dark" : "light",
+          primary: { main: "#1370b5" },
+          background: {
+            paper: isDarkMode ? "#1e293b" : "#ffffff",
+            default: isDarkMode ? "#0f172a" : "#f8fafc",
+          },
+        },
+        components: {
+          MuiOutlinedInput: {
+            styleOverrides: {
+              root: {
+                backgroundColor: isDarkMode ? "#0f172a" : "#ffffff",
+              },
+            },
+          },
+        },
+      }),
+    [isDarkMode]
+  );
   const {
     register,
     handleSubmit,
@@ -40,12 +66,14 @@ function Login() {
 
   const handleSuccessGoogle = async (credentialResponse) => {
     try {
-      const { credential } = credentialResponse;
+      const credential = credentialResponse?.credential;
+      if (!credential) {
+        toast.error(t("login.googleFail"));
+        return;
+      }
       const res = await axios.post(
         `${API_ROOT}/api/v1/users/loginGoogle`,
-        {
-          token: credential,
-        },
+        { token: credential, credential },
         {
           withCredentials: true,
           headers: {
@@ -54,27 +82,16 @@ function Login() {
         }
       );
       if (res.data) {
-        const userInfo = {
-          id: res.data.id,
-          name: res.data.name,
-          email: res.data.email,
-          role: res.data.role,
-          require_2FA: res.data.require_2FA,
-          is_2fa_verified: res.data.is_2fa_verified,
-          last_login: res.data.last_login,
-        };
-        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        saveAuthSession(res.data);
         res.data.role === "user"
           ? navigate("/home")
           : navigate("/admin/dashboard");
       } else {
-        console.error("Login response does not contain data");
-        alert("Login with Google failed!");
+        toast.error(t("login.googleFail"));
       }
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          t("login.googleFail")
+      toast.error(
+        error.response?.data?.message || t("login.googleFail")
       );
     }
   };
@@ -94,15 +111,7 @@ function Login() {
         }
       );
       if (res.data) {
-        const userInfo = {
-          id: res.data.id,
-          email: res.data.email,
-          role: res.data.role,
-          require_2FA: res.data.require_2FA,
-          is_2fa_verified: res.data.is_2fa_verified,
-          last_login: res.data.last_login,
-        };
-        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        saveAuthSession(res.data);
         res.data.role === "user"
           ? navigate("/home")
           : navigate("/admin/dashboard");
@@ -124,17 +133,7 @@ function Login() {
     setLoginError("");
     try {
       const res = await handleLogin(payLoad);
-      const userInfo = {
-        id: res.data.id,
-        email: res.data.email,
-        name: res.data.name,
-        role: res.data.role,
-        image: res.data.image,
-        require_2FA: res.data.require_2FA,
-        is_2fa_verified: res.data.is_2fa_verified,
-        last_login: res.data.last_login,
-      };
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      saveAuthSession(res.data);
       res.data.role === "user"
         ? navigate("/home")
         : navigate("/admin/dashboard");
@@ -159,19 +158,9 @@ function Login() {
     };
     try {
       const res = await handleRegister(apiPayload);
-      const user = res?.data?.user || res?.user || res;
-      const userInfo = {
-        id: user?.id || user?._id,
-        email: user?.email,
-        name: user?.name,
-        role: user?.role || "user",
-        require_2FA: user?.require_2FA ?? false,
-        is_2fa_verified: user?.is_2fa_verified ?? false,
-        last_login: user?.last_login,
-      };
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      saveAuthSession(res);
       toast.success(t("toast.registerSuccess"));
-      userInfo.role === "admin"
+      (res?.role || "user") === "admin"
         ? navigate("/admin/dashboard")
         : navigate("/home");
     } catch (error) {
@@ -196,6 +185,7 @@ function Login() {
         draggable
         pauseOnHover
       />
+      <ThemeProvider theme={muiTheme}>
       <section className="login-section login-page">
         <div className="login-container">
           <div className="login-grid">
@@ -329,39 +319,18 @@ function Login() {
                         >
                           {t("login.orContinue")}
                         </Typography>
-                        <GoogleLogin
-                          onSuccess={handleSuccessGoogle}
-                          render={({ onClick }) => (
-                            <Button
-                              onClick={onClick}
-                              variant="outlined"
-                              fullWidth
-                              sx={{
-                                mt: 1,
-                                py: 1,
-                                color: "#757575",
-                                borderColor: "#dadce0",
-                                textTransform: "none",
-                                fontSize: "0.875rem",
-                                height: "40px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 1,
-                              }}
-                              startIcon={
-                                <Google
-                                  sx={{
-                                    color: "#4285F4",
-                                    fontSize: "1.2rem",
-                                  }}
-                                />
-                              }
-                            >
-                              {t("login.google")}
-                            </Button>
-                          )}
-                        />
+                        <Box className="google-login-wrap" sx={{ mt: 1, width: "100%" }}>
+                          <GoogleLogin
+                            onSuccess={handleSuccessGoogle}
+                            onError={() => toast.error(t("login.googleFail"))}
+                            useOneTap={false}
+                            theme={isDarkMode ? "filled_black" : "outline"}
+                            size="large"
+                            text="signin_with"
+                            width="360"
+                            locale={language === "vi" ? "vi" : "en"}
+                          />
+                        </Box>
 
                         <FacebookLogin
                           appId="2441728712860238"
@@ -589,6 +558,7 @@ function Login() {
           </div>
         </div>
       </section>
+      </ThemeProvider>
     </>
   );
 }

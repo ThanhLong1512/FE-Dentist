@@ -72,7 +72,66 @@ html.dark-mode .login-card-header {
 }
 
 html.dark-mode .login-card-header h2 {
-  color: #f1f5f9 !important;
+  color: #f8fafc !important;
+}
+
+html.dark-mode .login-card-header .MuiTypography-root {
+  color: #cbd5e1 !important;
+}
+
+html.dark-mode .login-card .MuiFormControlLabel-label,
+html.dark-mode .login-card .MuiTypography-root {
+  color: #e2e8f0;
+}
+
+html.dark-mode .login-card .MuiInputLabel-root {
+  color: #cbd5e1 !important;
+}
+
+html.dark-mode .login-card .MuiInputLabel-root.Mui-focused {
+  color: #7dd3fc !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-root {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-input {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-notchedOutline {
+  border-color: #64748b !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #94a3b8 !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #38bdf8 !important;
+}
+
+html.dark-mode .login-card .MuiCheckbox-root {
+  color: #94a3b8;
+}
+
+.google-login-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.google-login-wrap > div,
+.google-login-wrap iframe {
+  width: 100% !important;
 }
 
 @media (max-width: 900px) {
