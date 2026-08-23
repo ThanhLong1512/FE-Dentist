@@ -10,7 +10,7 @@ import Alert from "@mui/material/Alert";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import Typography from "@mui/material/Typography";
-import { API_ROOT } from "./../utils/constants";
+import { API_ROOT, FACEBOOK_APP_ID } from "./../utils/constants";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { Facebook } from "@mui/icons-material";
@@ -333,7 +333,7 @@ function Login() {
                         </Box>
 
                         <FacebookLogin
-                          appId="2441728712860238"
+                          appId={FACEBOOK_APP_ID}
                           autoLoad={false}
                           fields="name,email,picture"
                           onSuccess={handleResponseFacebook}

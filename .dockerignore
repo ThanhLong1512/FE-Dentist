@@ -8,6 +8,9 @@ Dockerfile.prod
 .gitignore
 README.md
 .env
+.env.local
+.env.*.local
+config.json
 .nyc_output
 coverage
 .cache

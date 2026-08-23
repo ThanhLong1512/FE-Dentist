@@ -12,7 +12,7 @@ jobs:
       - name: Login to docker hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker Image
-        run: docker build -t thanhlep/reactjs-web --build-arg REACT_APP_NODE_ENV='production' .
+        run: docker build -t thanhlep/reactjs-web --build-arg VITE_API_ROOT=${{ secrets.VITE_API_ROOT }} --build-arg VITE_SOCKET_URL=${{ secrets.VITE_SOCKET_URL }} --build-arg VITE_ADMIN_ID=${{ secrets.VITE_ADMIN_ID }} --build-arg VITE_GOOGLE_MAP_API_KEY=${{ secrets.VITE_GOOGLE_MAP_API_KEY }} --build-arg VITE_DOMAIN_AUTH0=${{ secrets.VITE_DOMAIN_AUTH0 }} --build-arg VITE_CLIENT_ID_AUTH0=${{ secrets.VITE_CLIENT_ID_AUTH0 }} --build-arg VITE_REACT_GOOGLE_CLIENT_ID=${{ secrets.VITE_REACT_GOOGLE_CLIENT_ID }} --build-arg VITE_FACEBOOK_APP_ID=${{ secrets.VITE_FACEBOOK_APP_ID }} .
       - name: Publish Image to docker hub
         run: docker push thanhlep/reactjs-web:latest
   deploy:

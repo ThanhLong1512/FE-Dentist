@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# ─── Bảo mật: cấu hình & bí mật ────────────────────────────
+# .env: file cấu hình chứa API key / client id thật (KHÔNG BAO GIỜ commit)
+.env
+.env.local
+.env.*.local
+# Bất kỳ biến thể nào của .env trừ .env.example (bản mẫu trống, an toàn)
+!.env.example
+
+# config.json: chứa API key / cấu hình môi trường cục bộ
+config.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
