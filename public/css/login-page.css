@@ -1,0 +1,146 @@
+/**
+ * Login page - modern redesign
+ */
+
+.login-page.login-section {
+  min-height: calc(100vh - 200px);
+  padding: 40px 20px 60px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%);
+}
+
+.login-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.login-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.login-card-wrap {
+  width: 100%;
+}
+
+.login-card {
+  width: 100% !important;
+  max-width: 480px !important;
+  min-height: auto !important;
+  margin-top: 0 !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden;
+}
+
+.login-card-header {
+  padding: 28px 24px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.login-card-header h2 {
+  margin: 0 0 4px !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+}
+
+.login-submit-btn {
+  background: linear-gradient(135deg, #1370b5 0%, #0d5a94 100%) !important;
+}
+
+.login-submit-btn:hover {
+  background: linear-gradient(135deg, #0d5a94 0%, #0a4a7a 100%) !important;
+}
+
+/* Dark mode */
+html.dark-mode .login-page.login-section {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+html.dark-mode .login-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark-mode .login-card-header {
+  border-color: #334155;
+}
+
+html.dark-mode .login-card-header h2 {
+  color: #f8fafc !important;
+}
+
+html.dark-mode .login-card-header .MuiTypography-root {
+  color: #cbd5e1 !important;
+}
+
+html.dark-mode .login-card .MuiFormControlLabel-label,
+html.dark-mode .login-card .MuiTypography-root {
+  color: #e2e8f0;
+}
+
+html.dark-mode .login-card .MuiInputLabel-root {
+  color: #cbd5e1 !important;
+}
+
+html.dark-mode .login-card .MuiInputLabel-root.Mui-focused {
+  color: #7dd3fc !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-root {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-input {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-notchedOutline {
+  border-color: #64748b !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #94a3b8 !important;
+}
+
+html.dark-mode .login-card .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #38bdf8 !important;
+}
+
+html.dark-mode .login-card .MuiCheckbox-root {
+  color: #94a3b8;
+}
+
+.google-login-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.google-login-wrap > div,
+.google-login-wrap iframe {
+  width: 100% !important;
+}
+
+@media (max-width: 900px) {
+  .login-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .login-card {
+    max-width: 100% !important;
+  }
+}

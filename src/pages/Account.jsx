@@ -35,7 +35,9 @@ import {
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
 import { handleGetMe, handleLogoutApi, handleUpdateMe } from "../apis";
-import { error } from "jquery";
+
+const DEFAULT_AVATAR =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle fill='%23e2e8f0' cx='50' cy='50' r='50'/%3E%3Ccircle fill='%2394a3b8' cx='50' cy='38' r='18'/%3E%3Cellipse fill='%2394a3b8' cx='50' cy='88' rx='28' ry='24'/%3E%3C/svg%3E";
 
 function Account() {
   const navigate = useNavigate();
@@ -73,28 +75,27 @@ function Account() {
 
   const fetchUserData = async () => {
     setLoading(true);
-
-    await handleGetMe()
-      .then((userData) => {
-        setUserInfo({
-          name: userData.name,
-          email: userData.email,
-          photo: userData.photo,
-          role: userData.role,
-          require_2FA: userData.require_2FA || false,
-        });
-
-        setFormData({
-          name: userData.name,
-          email: userData.email,
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
-      })
-      .catch(() => {
-        toast.error("Không thể tải thông tin người dùng");
+    try {
+      const userData = await handleGetMe();
+      setUserInfo({
+        name: userData.name,
+        email: userData.email,
+        photo: userData.photo || DEFAULT_AVATAR,
+        role: userData.role,
+        require_2FA: userData.require_2FA || false,
       });
+      setFormData({
+        name: userData.name,
+        email: userData.email,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch {
+      toast.error("Không thể tải thông tin người dùng");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTabChange = (event, newValue) => {
@@ -169,6 +170,7 @@ function Account() {
     if (!hasChanges) {
       toast.info("Không có thông tin nào được thay đổi");
       setEditMode(false);
+      setLoading(false);
       return;
     }
 
@@ -176,26 +178,27 @@ function Account() {
       console.log(key, value);
     }
 
-    await handleUpdateMe(formDataToSend)
-      .then(async (res) => {
-        toast.success("Cập nhật thông tin thành công");
-        setEditMode(false);
-        setPhotoPreview(null);
-        setPhotoFile(null);
-        const existingUserInfo = JSON.parse(localStorage.getItem("userInfo"));
-        const updatedUserInfo = {
-          ...existingUserInfo,
-          image: res.photo,
-        };
-        localStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
-        await fetchUserData();
-      })
-      .catch((error) => {
-        setSubmitError(
-          error.response?.data?.message ||
-            "Đã xảy ra lỗi khi cập nhật thông tin"
-        );
-      });
+    try {
+      const res = await handleUpdateMe(formDataToSend);
+      toast.success("Cập nhật thông tin thành công");
+      setEditMode(false);
+      setPhotoPreview(null);
+      setPhotoFile(null);
+      const existingUserInfo = JSON.parse(localStorage.getItem("userInfo"));
+      const updatedUserInfo = {
+        ...existingUserInfo,
+        image: res.photo,
+      };
+      localStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
+      await fetchUserData();
+    } catch (err) {
+      setSubmitError(
+        err.response?.data?.message ||
+          "Đã xảy ra lỗi khi cập nhật thông tin"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUpdatePassword = async (e) => {
@@ -233,22 +236,23 @@ function Account() {
       passwordConfirm: formData.confirmPassword,
     };
 
-    await handleUpdateMe(passwordData)
-      .then((res) => {
-        toast.success("Cập nhật mật khẩu thành công");
-        setEditMode(false);
-        setFormData({
-          ...formData,
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        });
-      })
-      .catch((error) => {
-        setSubmitError(
-          error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật mật khẩu"
-        );
+    try {
+      await handleUpdateMe(passwordData);
+      toast.success("Cập nhật mật khẩu thành công");
+      setEditMode(false);
+      setFormData({
+        ...formData,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
+    } catch (err) {
+      setSubmitError(
+        err.response?.data?.message || "Đã xảy ra lỗi khi cập nhật mật khẩu"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -257,14 +261,17 @@ function Account() {
       return;
     }
     setLoading(true);
-    const data = { isLocked: true };
-    await handleUpdateMe(data)
-      .then(async (res) => {
-        toast.success("Tài khoản đã được xóa thành công");
-        await handleLogoutApi();
-        navigate("/");
-      })
-      .catch((error) => toast.error("Không thể xóa tài khoản"));
+    try {
+      const data = { isLocked: true };
+      await handleUpdateMe(data);
+      toast.success("Tài khoản đã được xóa thành công");
+      await handleLogoutApi();
+      navigate("/");
+    } catch {
+      toast.error("Không thể xóa tài khoản");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading && !userInfo.name) {
@@ -283,13 +290,14 @@ function Account() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 0, mb: 2, px: { xs: 0 } }}>
       <Paper
-        elevation={3}
+        elevation={0}
         sx={{
           p: 4,
           borderRadius: 2,
-          backgroundColor: "#fff",
+          border: "1px solid",
+          borderColor: "divider",
         }}
       >
         <Grid container spacing={3}>
@@ -304,11 +312,13 @@ function Account() {
             >
               <Box sx={{ position: "relative", mb: 2 }}>
                 <Avatar
-                  src={photoPreview || userInfo.photo}
+                  src={photoPreview || userInfo.photo || DEFAULT_AVATAR}
                   alt={userInfo.name}
-                  sx={{ width: 120, height: 120, mb: 1 }}
+                  sx={{ width: 140, height: 140, mb: 1 }}
                 >
-                  {!photoPreview && userInfo.photo}
+                  {!photoPreview && !userInfo.photo
+                    ? (userInfo.name?.[0] || "?").toUpperCase()
+                    : null}
                 </Avatar>
 
                 {editMode && (
@@ -342,14 +352,19 @@ function Account() {
                 )}
               </Box>
 
-              <Typography variant="h5" fontWeight="bold" textAlign="center">
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                textAlign="center"
+                sx={{ fontSize: "1.5rem" }}
+              >
                 {userInfo.name}
               </Typography>
               <Typography
                 variant="subtitle1"
                 color="text.secondary"
                 textAlign="center"
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, fontSize: "1.1rem" }}
               >
                 {userInfo.role === "user"
                   ? "Người dùng"
@@ -368,10 +383,10 @@ function Account() {
                     mb: 1,
                   }}
                 >
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "1rem" }}>
                     Email
                   </Typography>
-                  <Typography variant="body2" fontWeight="medium">
+                  <Typography variant="body2" fontWeight="medium" sx={{ fontSize: "1rem" }}>
                     {userInfo.email}
                   </Typography>
                 </Box>
@@ -382,13 +397,14 @@ function Account() {
                     mb: 1,
                   }}
                 >
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: "1rem" }}>
                     Xác thực 2 lớp
                   </Typography>
                   <Typography
                     variant="body2"
                     fontWeight="medium"
                     sx={{
+                      fontSize: "1rem",
                       color: userInfo.require_2FA
                         ? "success.main"
                         : "error.main",
@@ -406,7 +422,7 @@ function Account() {
                     variant="contained"
                     startIcon={<EditIcon />}
                     onClick={handleToggleEditMode}
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, fontSize: "1rem", py: 1.5 }}
                   >
                     Chỉnh sửa thông tin
                   </Button>
@@ -416,7 +432,7 @@ function Account() {
                     variant="outlined"
                     color="primary"
                     onClick={handleToggleEditMode}
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, fontSize: "1rem", py: 1.5 }}
                   >
                     Hủy chỉnh sửa
                   </Button>
@@ -428,6 +444,7 @@ function Account() {
                   color="error"
                   startIcon={<DeleteIcon />}
                   onClick={() => setOpenDeleteDialog(true)}
+                  sx={{ fontSize: "1rem", py: 1.5 }}
                 >
                   Xóa tài khoản
                 </Button>
@@ -443,6 +460,7 @@ function Account() {
                 aria-label="account tabs"
                 textColor="primary"
                 indicatorColor="primary"
+                sx={{ "& .MuiTab-root": { fontSize: "1.05rem", minHeight: 56 } }}
               >
                 <Tab
                   icon={<AccountCircleIcon />}
@@ -467,12 +485,12 @@ function Account() {
 
             {activeTab === 0 && (
               <Box component="form" onSubmit={handleUpdateProfile} noValidate>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, fontSize: "1.35rem" }}>
                   Thông tin cá nhân
                 </Typography>
 
                 {submitError && (
-                  <Alert severity="error" sx={{ mb: 3 }}>
+                  <Alert severity="error" sx={{ mb: 3, "& .MuiAlert-message": { fontSize: "1rem" } }}>
                     {submitError}
                   </Alert>
                 )}
@@ -514,6 +532,7 @@ function Account() {
                       color="primary"
                       startIcon={<SaveIcon />}
                       disabled={loading}
+                      sx={{ fontSize: "1rem", py: 1.25, px: 2 }}
                     >
                       {loading ? (
                         <CircularProgress size={24} />
@@ -528,12 +547,12 @@ function Account() {
 
             {activeTab === 1 && (
               <Box component="form" onSubmit={handleUpdatePassword} noValidate>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, fontSize: "1.35rem" }}>
                   Thay đổi mật khẩu
                 </Typography>
 
                 {submitError && (
-                  <Alert severity="error" sx={{ mb: 3 }}>
+                  <Alert severity="error" sx={{ mb: 3, "& .MuiAlert-message": { fontSize: "1rem" } }}>
                     {submitError}
                   </Alert>
                 )}
@@ -549,6 +568,10 @@ function Account() {
                       value={formData.currentPassword}
                       onChange={handleInputChange}
                       disabled={!editMode}
+                      sx={{
+                        "& .MuiInputBase-input": { fontSize: "1.05rem" },
+                        "& .MuiInputLabel-root": { fontSize: "1.05rem" },
+                      }}
                       InputProps={{
                         endAdornment: (
                           <IconButton
@@ -578,6 +601,10 @@ function Account() {
                       value={formData.newPassword}
                       onChange={handleInputChange}
                       disabled={!editMode}
+                      sx={{
+                        "& .MuiInputBase-input": { fontSize: "1.05rem" },
+                        "& .MuiInputLabel-root": { fontSize: "1.05rem" },
+                      }}
                       InputProps={{
                         endAdornment: (
                           <IconButton
@@ -607,6 +634,10 @@ function Account() {
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       disabled={!editMode}
+                      sx={{
+                        "& .MuiInputBase-input": { fontSize: "1.05rem" },
+                        "& .MuiInputLabel-root": { fontSize: "1.05rem" },
+                      }}
                       InputProps={{
                         endAdornment: (
                           <IconButton
@@ -638,6 +669,7 @@ function Account() {
                       color="primary"
                       startIcon={<SaveIcon />}
                       disabled={loading}
+                      sx={{ fontSize: "1rem", py: 1.25, px: 2 }}
                     >
                       {loading ? (
                         <CircularProgress size={24} />
@@ -650,7 +682,7 @@ function Account() {
 
                 <Divider sx={{ my: 4 }} />
 
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, fontSize: "1.35rem" }}>
                   Bảo mật hai lớp (2FA)
                 </Typography>
 
@@ -667,10 +699,10 @@ function Account() {
                   }}
                 >
                   <Box>
-                    <Typography variant="subtitle1" fontWeight="medium">
+                    <Typography variant="subtitle1" fontWeight="medium" sx={{ fontSize: "1.1rem" }}>
                       Xác thực hai lớp
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "1rem" }}>
                       Bảo vệ tài khoản của bạn bằng xác thực bổ sung mỗi khi
                       đăng nhập
                     </Typography>
@@ -678,6 +710,7 @@ function Account() {
                   <Button
                     variant="contained"
                     color={userInfo.require_2FA ? "error" : "primary"}
+                    sx={{ fontSize: "1rem", py: 1.25, px: 2 }}
                   >
                     {userInfo.require_2FA ? "Tắt 2FA" : "Bật 2FA"}
                   </Button>
@@ -687,14 +720,14 @@ function Account() {
 
             {activeTab === 2 && (
               <Box>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, fontSize: "1.35rem" }}>
                   Cài đặt thông báo
                 </Typography>
 
                 <Typography
                   variant="body1"
                   color="text.secondary"
-                  sx={{ mb: 4 }}
+                  sx={{ mb: 4, fontSize: "1.05rem" }}
                 >
                   Quản lý cách bạn nhận thông báo và cập nhật từ hệ thống
                 </Typography>
@@ -711,7 +744,7 @@ function Account() {
                   <Typography
                     variant="subtitle1"
                     fontWeight="medium"
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, fontSize: "1.1rem" }}
                   >
                     Thông báo qua email
                   </Typography>
@@ -723,15 +756,14 @@ function Account() {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          py: 1,
+                          py: 1.5,
                         }}
                       >
-                        <Typography variant="body2">Lịch hẹn mới</Typography>
+                        <Typography variant="body2" sx={{ fontSize: "1rem" }}>Lịch hẹn mới</Typography>
                         <Button
                           variant="contained"
                           color="primary"
-                          size="small"
-                          sx={{ minWidth: 100 }}
+                          sx={{ minWidth: 100, fontSize: "0.95rem" }}
                         >
                           Bật
                         </Button>
@@ -745,17 +777,16 @@ function Account() {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          py: 1,
+                          py: 1.5,
                         }}
                       >
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={{ fontSize: "1rem" }}>
                           Cập nhật lịch hẹn
                         </Typography>
                         <Button
                           variant="outlined"
                           color="primary"
-                          size="small"
-                          sx={{ minWidth: 100 }}
+                          sx={{ minWidth: 100, fontSize: "0.95rem" }}
                         >
                           Tắt
                         </Button>
@@ -769,17 +800,16 @@ function Account() {
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
-                          py: 1,
+                          py: 1.5,
                         }}
                       >
-                        <Typography variant="body2">
+                        <Typography variant="body2" sx={{ fontSize: "1rem" }}>
                           Tin tức và cập nhật
                         </Typography>
                         <Button
                           variant="outlined"
                           color="primary"
-                          size="small"
-                          sx={{ minWidth: 100 }}
+                          sx={{ minWidth: 100, fontSize: "0.95rem" }}
                         >
                           Tắt
                         </Button>
@@ -796,10 +826,20 @@ function Account() {
       <Dialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
+        PaperProps={{
+          sx: {
+            "& .MuiDialogTitle-root": { fontSize: "1.35rem" },
+            "& .MuiDialogContentText-root": { fontSize: "1.05rem" },
+            "& .MuiInputBase-input": { fontSize: "1.05rem" },
+            "& .MuiInputLabel-root": { fontSize: "1.05rem" },
+            "& .MuiFormHelperText-root": { fontSize: "0.95rem" },
+            "& .MuiButton-root": { fontSize: "1rem" },
+          },
+        }}
       >
-        <DialogTitle sx={{ color: "error.main" }}>Xóa tài khoản?</DialogTitle>
+        <DialogTitle sx={{ color: "error.main", fontSize: "1.35rem" }}>Xóa tài khoản?</DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <DialogContentText sx={{ fontSize: "1.05rem" }}>
             Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể khôi
             phục. Tất cả dữ liệu, bao gồm lịch sử đặt lịch và thông tin cá nhân
             sẽ bị xóa vĩnh viễn.
@@ -818,11 +858,16 @@ function Account() {
                   ? "Vui lòng nhập chính xác 'DELETE'"
                   : ""
               }
+              sx={{
+                "& .MuiInputBase-input": { fontSize: "1.05rem" },
+                "& .MuiInputLabel-root": { fontSize: "1.05rem" },
+                "& .MuiFormHelperText-root": { fontSize: "0.95rem" },
+              }}
             />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)}>Hủy</Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpenDeleteDialog(false)} sx={{ fontSize: "1rem" }}>Hủy</Button>
           <Button
             onClick={handleDeleteAccount}
             color="error"
@@ -830,6 +875,7 @@ function Account() {
             startIcon={
               loading ? <CircularProgress size={20} /> : <DeleteIcon />
             }
+            sx={{ fontSize: "1rem" }}
           >
             Xóa tài khoản
           </Button>

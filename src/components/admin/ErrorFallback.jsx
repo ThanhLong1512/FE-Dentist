@@ -24,7 +24,7 @@ const Box = styled.div`
   }
 
   & p {
-    font-family: "Sono";
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
     margin-bottom: 3.2rem;
     color: var(--color-grey-500);
   }

@@ -135,7 +135,7 @@ function Setup2FA({ isOpen, toggleOpen, handleSuccessSetup2FA }) {
             />
           )}
 
-          <Box sx={{ textAlign: "center" }}>
+          <Box sx={{ textAlign: "center", color: "black" }}>
             Quét mã QR trên ứng dụng <strong>Google Authenticator</strong> hoặc{" "}
             <strong>Authy</strong> của bạn.
             <br />

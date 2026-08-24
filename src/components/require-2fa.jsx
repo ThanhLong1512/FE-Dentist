@@ -24,7 +24,6 @@ function Require2FA({ handleSuccessVerify2FA }) {
     setLoading(true);
     console.log("handleRequire2FA > otpToken: ", otpToken);
 
-    // Call API here
     axios
       .put(
         "http://localhost:8080/api/v1/users/verify2FA",
@@ -92,7 +91,7 @@ function Require2FA({ handleSuccessVerify2FA }) {
             p: 1,
           }}
         >
-          <Box sx={{ textAlign: "center" }}>
+          <Box sx={{ textAlign: "center", color: "black" }}>
             Nhập mã gồm 6 chữ số từ ứng dụng bảo mật của bạn và click vào{" "}
             <strong>Confirm</strong> để xác nhận.
           </Box>

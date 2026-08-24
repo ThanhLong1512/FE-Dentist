@@ -10,6 +10,7 @@ const StyledAppLayout = styled.div`
   grid-template-rows: auto 1fr;
   height: 100vh;
   position: relative;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
 `;
 
 const Main = styled.main`

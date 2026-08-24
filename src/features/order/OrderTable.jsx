@@ -8,40 +8,56 @@ import Pagination from "../../components/admin/Pagination";
 import { PAGE_SIZE } from "../../utils/constants";
 
 function OrderTable() {
-  const { isLoading, orders } = useOrders();
+  const { isLoading, error, orders } = useOrders();
   const [searchParams] = useSearchParams();
 
   if (isLoading) return <Spinner />;
+  if (error)
+    return (
+      <div style={{ padding: "2rem", textAlign: "center", color: "var(--color-red-700)" }}>
+        {error?.message || "Không thể tải danh sách đơn hàng"}
+      </div>
+    );
 
+  const safeOrders = orders || [];
   let filteredOrders;
   const filterValue = searchParams.get("status") || "all";
-  if (filterValue === "all") filteredOrders = orders;
-  if (filterValue === "successful")
-    filteredOrders = orders.filter((order) => order.status === "Successful");
-  if (filterValue === "cancelled")
-    filteredOrders = orders.filter((order) => order.status === "Cancelled");
-  if (filterValue === "processing")
-    filteredOrders = orders.filter((order) => order.status === "Processing");
+  if (filterValue === "all") filteredOrders = safeOrders;
+  else if (filterValue === "successful")
+    filteredOrders = safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "successful"
+    );
+  else if (filterValue === "cancelled")
+    filteredOrders = safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "cancelled"
+    );
+  else if (filterValue === "processing")
+    filteredOrders = safeOrders.filter(
+      (o) => (o.status || "").toLowerCase() === "processing"
+    );
+  else filteredOrders = safeOrders;
+
   const sortBy = searchParams.get("sortBy") || "createAt-desc";
   const [field, direction] = sortBy.split("-");
   const modifier = direction === "asc" ? 1 : -1;
 
-  const sortedOrders = filteredOrders?.sort((a, b) => {
+  const sortedOrders = [...(filteredOrders || [])].sort((a, b) => {
     if (field === "customerName") {
-      return a.account.name.localeCompare(b.account.name) * modifier;
-    } else if (field === "createAt") {
-      return (new Date(a.createAt) - new Date(b.createAt)) * modifier;
+      return ((a.account?.name || "").localeCompare(b.account?.name || "")) * modifier;
+    } else if (field === "createAt" || field === "createdAt") {
+      const aDate = a.createAt || a.createdAt || 0;
+      const bDate = b.createAt || b.createdAt || 0;
+      return (new Date(aDate) - new Date(bDate)) * modifier;
     } else if (field === "totalPrice") {
-      return (a.totalPrice - b.totalPrice) * modifier;
+      return ((a.totalPrice || 0) - (b.totalPrice || 0)) * modifier;
     } else if (field === "status") {
-      return a.status.localeCompare(b.status) * modifier;
+      return ((a.status || "").localeCompare(b.status || "")) * modifier;
     } else if (field === "service") {
-      return (
-        a.service[0].nameService.localeCompare(b.service[0].nameService) *
-        modifier
-      );
+      const aName = a.service?.[0]?.nameService || "";
+      const bName = b.service?.[0]?.nameService || "";
+      return aName.localeCompare(bName) * modifier;
     } else {
-      return (a[field] - b[field]) * modifier;
+      return ((a[field] || 0) - (b[field] || 0)) * modifier;
     }
   });
 
@@ -52,6 +68,14 @@ function OrderTable() {
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const endIndex = startIndex + PAGE_SIZE;
   const paginatedOrders = sortedOrders.slice(startIndex, endIndex);
+
+  if (safeOrders.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: "2rem", color: "var(--color-grey-600)" }}>
+        No orders available
+      </div>
+    );
+  }
 
   return (
     <Menus>

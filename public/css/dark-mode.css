@@ -1,0 +1,387 @@
+/**
+ * Dark Mode Overrides
+ * Applied when html.dark-mode is present (via DarkModeContext)
+ */
+
+/* Dark mode toggle button - base styles */
+.dark-mode-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.dark-mode-toggle:hover {
+  color: #1370b5;
+}
+
+/* Language switcher */
+.lang-switcher-wrap {
+  position: relative;
+}
+
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.lang-toggle:hover {
+  color: #1370b5;
+}
+
+.lang-toggle-mobile {
+  padding: 6px 10px;
+}
+
+.lang-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 4px 0;
+  min-width: 120px;
+  z-index: 100;
+}
+
+.lang-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #334155;
+  transition: background 0.2s;
+}
+
+.lang-menu button:hover {
+  background: #f1f5f9;
+}
+
+.lang-menu button.active {
+  color: #1370b5;
+  font-weight: 600;
+}
+
+html.dark-mode .lang-toggle {
+  color: #e2e8f0;
+}
+
+html.dark-mode .lang-toggle:hover {
+  color: #60a5fa;
+}
+
+html.dark-mode .lang-menu {
+  background: #1e293b;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+html.dark-mode .lang-menu button {
+  color: #cbd5e1;
+}
+
+html.dark-mode .lang-menu button:hover {
+  background: #334155;
+}
+
+html.dark-mode .lang-menu button.active {
+  color: #60a5fa;
+}
+
+html.dark-mode .dark-mode-toggle {
+  color: #e2e8f0;
+}
+
+html.dark-mode .dark-mode-toggle:hover {
+  color: #60a5fa;
+}
+
+html.dark-mode body {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+/* Header */
+html.dark-mode .header-top-two,
+html.dark-mode .header-lower,
+html.dark-mode .sticky-header {
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark-mode .header-top,
+html.dark-mode .header-top-two {
+  background-color: #1e293b !important;
+}
+
+html.dark-mode .header-top .contact-list li,
+html.dark-mode .header-top-two .contact-list li,
+html.dark-mode .main-header a,
+html.dark-mode .main-header .navigation li a,
+html.dark-mode .main-header .navigation li > span {
+  color: #e2e8f0 !important;
+}
+
+html.dark-mode .main-header a:hover,
+html.dark-mode .main-header .navigation li a:hover {
+  color: #60a5fa !important;
+}
+
+/* Home page - header-style-one: main-box rounded background */
+html.dark-mode .main-header .main-box:before {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark-mode .main-menu .navigation > li.dropdown > span:after {
+  color: #e2e8f0 !important;
+}
+
+/* Page Title / Banner */
+html.dark-mode .page-title {
+  background-color: #1e293b !important;
+}
+
+html.dark-mode .page-title h1 {
+  color: #f8fafc !important;
+}
+
+/* Main content areas */
+html.dark-mode .page-wrapper {
+  background-color: #0f172a !important;
+}
+
+html.dark-mode .sidebar-page-container,
+html.dark-mode .auto-container {
+  background-color: transparent !important;
+}
+
+/* Shop Page */
+html.dark-mode .shop-page {
+  background: #0f172a !important;
+}
+
+html.dark-mode .shop-toolbar,
+html.dark-mode .shop-empty,
+html.dark-mode .shop-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark-mode .shop-search-input,
+html.dark-mode .shop-sort-select {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .shop-search-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .shop-search-icon {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .shop-sort-label,
+html.dark-mode .shop-results-count,
+html.dark-mode .shop-card-title {
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .shop-card-desc,
+html.dark-mode .shop-empty p {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .shop-card-unit {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .shop-card-price {
+  color: #60a5fa !important;
+}
+
+html.dark-mode .shop-card-image {
+  background-color: #334155 !important;
+}
+
+html.dark-mode .shop-pagination-btn,
+html.dark-mode .shop-pagination-page {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .shop-pagination-page.active {
+  background-color: #1370b5 !important;
+  border-color: #1370b5 !important;
+}
+
+html.dark-mode .shop-pagination-btn:disabled {
+  opacity: 0.5;
+}
+
+/* Detail Service Page */
+html.dark-mode .ds-page {
+  background: #0f172a !important;
+}
+
+html.dark-mode .ds-hero,
+html.dark-mode .ds-tabs-section,
+html.dark-mode .ds-related-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark-mode .ds-title,
+html.dark-mode .ds-related h2,
+html.dark-mode .ds-related-info h4 {
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .ds-summary,
+html.dark-mode .ds-description p,
+html.dark-mode .ds-review-text,
+html.dark-mode .ds-add-review h3 {
+  color: #cbd5e1 !important;
+}
+
+html.dark-mode .ds-price,
+html.dark-mode .ds-related-info span {
+  color: #60a5fa !important;
+}
+
+html.dark-mode .ds-price-old,
+html.dark-mode .ds-unit,
+html.dark-mode .ds-review-count,
+html.dark-mode .ds-review-date,
+html.dark-mode .ds-no-reviews {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .ds-review-email {
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .ds-add-review,
+html.dark-mode .ds-review-card {
+  background-color: #334155 !important;
+}
+
+html.dark-mode .ds-add-review textarea,
+html.dark-mode .ds-edit-form textarea {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .ds-back {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .ds-back:hover {
+  color: #60a5fa !important;
+}
+
+/* Footer */
+html.dark-mode .main-footer,
+html.dark-mode .footer-bottom {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark-mode .main-footer h4,
+html.dark-mode .main-footer h5,
+html.dark-mode .main-footer a,
+html.dark-mode .main-footer p,
+html.dark-mode .main-footer li {
+  color: #cbd5e1 !important;
+}
+
+html.dark-mode .main-footer a:hover {
+  color: #60a5fa !important;
+}
+
+/* Toast */
+html.dark-mode .Toastify__toast {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* General sections */
+html.dark-mode .sec-title h2,
+html.dark-mode .sec-title .title,
+html.dark-mode .section-title h2 {
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .sec-title .text,
+html.dark-mode .section-title .text {
+  color: #94a3b8 !important;
+}
+
+/* Home page sections */
+html.dark-mode .main-slider,
+html.dark-mode .banner-section,
+html.dark-mode .features-section,
+html.dark-mode .welcome-section,
+html.dark-mode .about-section,
+html.dark-mode .services-section,
+html.dark-mode .team-section,
+html.dark-mode .pricing-section,
+html.dark-mode .news-section,
+html.dark-mode .clients-section,
+html.dark-mode .call-to-action {
+  background-color: #0f172a !important;
+}
+
+html.dark-mode .main-slider h1,
+html.dark-mode .main-slider h2,
+html.dark-mode .banner-section h1,
+html.dark-mode .features-section h2,
+html.dark-mode .welcome-section h2,
+html.dark-mode .about-section h2,
+html.dark-mode .services-section h2,
+html.dark-mode .team-section h2,
+html.dark-mode .pricing-section h2,
+html.dark-mode .news-section h2 {
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .main-slider p,
+html.dark-mode .features-section p,
+html.dark-mode .welcome-section p,
+html.dark-mode .about-section p,
+html.dark-mode .services-section p,
+html.dark-mode .team-section p,
+html.dark-mode .news-section p {
+  color: #cbd5e1 !important;
+}
+
+/* Mobile header */
+html.dark-mode .mobile-header {
+  background-color: #1e293b !important;
+}

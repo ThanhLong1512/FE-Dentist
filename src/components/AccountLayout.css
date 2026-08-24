@@ -1,0 +1,247 @@
+.account-layout {
+  min-height: calc(100vh - 220px);
+  padding: 32px 16px 48px;
+  background: #f8fafc;
+}
+
+.account-layout-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.account-sidebar {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 16px;
+  position: sticky;
+  top: 24px;
+}
+
+.account-sidebar h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.account-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #334155;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.account-tab:hover {
+  background: #f1f5f9;
+  color: #1370b5;
+}
+
+.account-tab.active {
+  background: #1370b5;
+  color: #fff;
+}
+
+.account-content {
+  min-width: 0;
+}
+
+.account-page-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 280px;
+}
+
+.account-content > * {
+  min-height: auto;
+}
+
+.appt-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appt-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.appt-stat-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.appt-stat-card strong {
+  display: block;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.appt-stat-card span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.appt-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.appt-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.appt-card-head h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.appt-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.appt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.appt-box {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.appt-box h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.appt-box p {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.appt-empty {
+  text-align: center;
+  padding: 48px 16px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #475569;
+}
+
+.appt-empty h3 {
+  margin: 12px 0 6px;
+  color: #0f172a;
+}
+
+@media (max-width: 800px) {
+  .appt-stats,
+  .appt-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+html.dark-mode .appt-stat-card,
+html.dark-mode .appt-card,
+html.dark-mode .appt-empty {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode .appt-stat-card strong,
+html.dark-mode .appt-card-head h3,
+html.dark-mode .appt-box h4,
+html.dark-mode .appt-empty h3 {
+  color: #f8fafc;
+}
+
+html.dark-mode .appt-stat-card span,
+html.dark-mode .appt-box p,
+html.dark-mode .appt-empty {
+  color: #cbd5e1;
+}
+
+html.dark-mode .appt-box {
+  background: #0f172a;
+}
+
+@media (max-width: 900px) {
+  .account-layout-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .account-sidebar {
+    position: static;
+  }
+
+  .account-sidebar nav {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .account-tab {
+    white-space: nowrap;
+  }
+}
+
+html.dark-mode .account-layout {
+  background: #0f172a;
+}
+
+html.dark-mode .account-sidebar {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode .account-sidebar h2,
+html.dark-mode .account-tab {
+  color: #e2e8f0;
+}
+
+html.dark-mode .account-tab:hover {
+  background: #334155;
+  color: #7dd3fc;
+}
+
+html.dark-mode .account-tab.active {
+  background: #1370b5;
+  color: #fff;
+}

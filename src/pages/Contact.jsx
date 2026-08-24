@@ -1,359 +1,274 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { API_ROOT, GOOGLE_MAP_API_KEY } from "../utils/constants";
-import Select from "react-select";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { setHours, setMinutes } from "date-fns";
-import GoogleMapReact from "google-map-react";
-import "react-toastify/dist/ReactToastify.css";
+
+import {
+  handleGetServices,
+  handleGetAvailableSlots,
+  handleHoldAppointment,
+} from "../apis";
+import { useLanguage } from "../context/LanguageContext";
+import SlotPicker from "../features/booking/SlotPicker";
+import "./Contact.css";
 
 function Contact() {
-  const [services, setServices] = useState([]);
-  const [shifts, setShifts] = useState([]);
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phone: "",
     message: "",
-    selectedServices: [],
     appointmentDate: null,
-    shift: "",
+    serviceId: "",
   });
-  const [coordinates, setCoordinates] = useState(null);
-  const navigate = useNavigate();
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      setCoordinates({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-    });
-    const fetchData = async () => {
-      try {
-        const today = new Date();
-        const days = [
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ];
-        const currentDayOfWeek = days[today.getDay()];
-        const shiftsRes = await axios.get(
-          `${API_ROOT}/api/v1/shifts/${currentDayOfWeek}`,
-          { withCredentials: true }
-        );
-        console.log(shiftsRes.data.data);
-        setShifts(shiftsRes.data.data);
-      } catch (error) {
-        toast.error(error.response?.data?.message || error?.message);
-      }
-    };
-    fetchData();
-  }, []);
+
+  const [selectedSlot, setSelectedSlot] = useState(null);
+
+  const { data: services = [] } = useQuery({
+    queryKey: ["services"],
+    queryFn: handleGetServices,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const slotsQuery = useQuery({
+    queryKey: [
+      "availableSlots",
+      formData.serviceId,
+      formData.appointmentDate ? formData.appointmentDate.toISOString() : "",
+    ],
+    queryFn: () =>
+      handleGetAvailableSlots({
+        date: formData.appointmentDate,
+        serviceId: formData.serviceId,
+      }),
+    enabled: Boolean(formData.appointmentDate && formData.serviceId),
+  });
+
+  const selectedService = useMemo(() => {
+    if (!formData.serviceId) return null;
+    return services.find((s) => String(s._id) === String(formData.serviceId)) || null;
+  }, [formData.serviceId, services]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleShiftChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      shift: e.target.value,
-    }));
-  };
-
-  const filterPassedTime = (time) => {
-    const currentDate = new Date();
-    const selectedDate = new Date(time);
-    return currentDate.getTime() < selectedDate.getTime();
+  const handleServiceChange = (e) => {
+    setFormData((prev) => ({ ...prev, serviceId: e.target.value }));
+    setSelectedSlot(null);
   };
 
   const handleDateChange = (date) => {
-    setFormData((prev) => ({
-      ...prev,
-      appointmentDate: date,
-    }));
+    setFormData((prev) => ({ ...prev, appointmentDate: date }));
+    setSelectedSlot(null);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "null");
+      if (!userInfo) {
+        toast.error("Vui lòng đăng nhập để đặt lịch");
+        navigate("/login");
+        return;
+      }
+
       if (
         !formData.fullName ||
         !formData.email ||
         !formData.phone ||
         !formData.appointmentDate ||
-        !formData.shift
+        !formData.serviceId ||
+        !selectedSlot
       ) {
-        toast.error("Please fill in all required fields", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        toast.error("Vui lòng điền đầy đủ các trường bắt buộc");
         return;
       }
 
-      const appointmentData = {
+      const holdResponse = await handleHoldAppointment({
+        shift: selectedSlot.shiftId,
         Date: formData.appointmentDate.toISOString(),
-        shift: formData.shift,
-        patient: {
-          name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-        },
-      };
-
-      try {
-        console.log("Sending appointment data:", appointmentData);
-        const response = await axios.post(
-          `${API_ROOT}/api/v1/appointments`,
-          appointmentData,
-          {
-            withCredentials: true,
-          }
-        );
-
-        if (response.data) {
-          toast.success("Booking Appointment Successfully!", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-
-          setFormData({
-            fullName: "",
-            email: "",
-            phone: "",
-            message: "",
-            selectedServices: [],
-            appointmentDate: null,
-            shift: "",
-          });
-        }
-      } catch (error) {
-        console.error("Appointment error:", error);
-        if (error.response?.status === 401) {
-          toast.error("Please login to book an appointment", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-          navigate("/login");
-          return;
-        }
-        toast.error("Error booking appointment. Please try again.", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred. Please try again.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+        serviceId: formData.serviceId,
+        slotStart: selectedSlot.slotStart,
+        slotEnd: selectedSlot.slotEnd,
       });
+
+      const holdData = holdResponse.data;
+
+      toast.success("Giữ chỗ thành công! Vui lòng thanh toán trong 5 phút.");
+      navigate("/appointment/checkout", {
+        state: {
+          reservation: {
+            reservationId: holdData.reservationId,
+            expiresAt: holdData.expiresAt,
+            holdSeconds: holdData.holdSeconds,
+            appointmentDate: formData.appointmentDate.toISOString(),
+            doctorName: selectedSlot.doctorName || "Bác sĩ",
+            serviceName: selectedService?.nameService || "Dịch vụ",
+            serviceId: formData.serviceId,
+            totalPrice:
+              selectedSlot.price || selectedService?.priceService || 0,
+            slotTime: `${selectedSlot.slotStart} - ${selectedSlot.slotEnd}`,
+            slotStart: selectedSlot.slotStart,
+            slotEnd: selectedSlot.slotEnd,
+            shiftId: selectedSlot.shiftId,
+          },
+        },
+      });
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Giữ chỗ thất bại. Vui lòng thử lại."
+      );
     }
   };
 
-  const serviceOptions = services?.map((service) => ({
-    value: service._id,
-    label: `${service.nameService} - ${new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(service.priceService)}`,
-  }));
-
-  const customSelectStyles = {
-    control: (provided) => ({
-      ...provided,
-      borderRadius: "30px",
-      border: "1px solid #e6e6e6",
-      minHeight: "50px",
-      boxShadow: "none",
-      "&:hover": {
-        border: "1px solid #2ea3f2",
-      },
-    }),
-    multiValue: (provided) => ({
-      ...provided,
-      backgroundColor: "#2ea3f2",
-      borderRadius: "15px",
-    }),
-    multiValueLabel: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    multiValueRemove: (provided) => ({
-      ...provided,
-      color: "white",
-      "&:hover": {
-        backgroundColor: "rgba(0,0,0,0.1)",
-        color: "white",
-      },
-    }),
-  };
-
   return (
-    <>
-      <section className="contact-section" id="contact">
-        <div className="container">
-          <div className="sec-title text-center mb-5">
-            <h2 className="title">Book Your Appointment</h2>
-            <p className="subtitle">
-              Schedule a visit with our professional team
-            </p>
-          </div>
+    <div className="contact-page">
+      <div className="contact-container">
+        <div className="contact-header">
+          <h1 className="contact-title">{t("contact.title")}</h1>
+          <p className="contact-subtitle">{t("contact.subtitle")}</p>
+        </div>
 
-          <div className="appointment-form-container">
-            <div className="contact-form">
-              <form id="appointment-form">
-                <div className="row g-4">
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        className="form-control"
-                        placeholder="Full Name *"
-                      />
-                    </div>
+        <div className="contact-layout">
+          <div className="contact-form-section">
+            <div className="contact-form-card">
+              <form onSubmit={handleSubmit} className="contact-form">
+                <div className="contact-form-grid">
+                  <div className="contact-field">
+                    <label htmlFor="fullName">{t("contact.fullName")}</label>
+                    <input
+                      id="fullName"
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      placeholder={t("contact.fullNamePlaceholder")}
+                      required
+                    />
                   </div>
 
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="form-control"
-                        placeholder="Email Address *"
-                      />
-                    </div>
+                  <div className="contact-field">
+                    <label htmlFor="email">{t("contact.email")}</label>
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder={t("contact.emailPlaceholder")}
+                      required
+                    />
                   </div>
 
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <input
-                        type="text"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="form-control"
-                        placeholder="Phone Number *"
-                      />
-                    </div>
+                  <div className="contact-field">
+                    <label htmlFor="phone">{t("contact.phone")}</label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder={t("contact.phonePlaceholder")}
+                      required
+                    />
                   </div>
 
-                  <div className="col-md-6">
-                    <div className="form-group">
-                      <DatePicker
-                        selected={formData.appointmentDate}
-                        onChange={handleDateChange}
-                        showTimeSelect
-                        filterTime={filterPassedTime}
-                        dateFormat="MMMM d, yyyy h:mm aa"
-                        minDate={new Date()}
-                        minTime={setHours(setMinutes(new Date(), 0), 8)}
-                        maxTime={setHours(setMinutes(new Date(), 0), 17)}
-                        placeholderText="Select Date and Time *"
-                        className="form-control"
-                        required
-                      />
-                    </div>
+                  <div className="contact-field">
+                    <label htmlFor="appointmentDate">{t("contact.dateTime")}</label>
+                    <DatePicker
+                      id="appointmentDate"
+                      selected={formData.appointmentDate}
+                      onChange={handleDateChange}
+                      dateFormat="dd/MM/yyyy"
+                      minDate={new Date()}
+                      placeholderText={t("contact.datePlaceholder")}
+                      className="contact-datepicker"
+                      required
+                    />
                   </div>
 
-                  <div className="col-12">
-                    <div className="form-group">
-                      <select
-                        name="shift"
-                        value={formData.shift}
-                        onChange={handleShiftChange}
-                        className="form-control"
-                        required
-                      >
-                        <option value="">Select Available Shift *</option>
-                        {shifts.map((shift) => (
-                          <option key={shift._id} value={shift._id}>
-                            {shift.employee?.name || "Unknown Doctor"} -{" "}
-                            {shift.StartTime} to {shift.EndTime}(
-                            {shift.employee?.service.nameService})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="col-12">
-                    <div className="form-group">
-                      <textarea
-                        name="message"
-                        value={formData.message}
-                        onChange={handleInputChange}
-                        className="form-control"
-                        placeholder="Additional Notes (Optional)"
-                        rows="4"
-                      ></textarea>
-                    </div>
-                  </div>
-
-                  <div className="col-12 text-center">
-                    <button
-                      className="btn-appointment"
-                      type="button"
-                      onClick={handleSubmit}
+                  <div className="contact-field contact-field-full">
+                    <label htmlFor="serviceId">Dịch vụ</label>
+                    <select
+                      id="serviceId"
+                      name="serviceId"
+                      value={formData.serviceId}
+                      onChange={handleServiceChange}
+                      required
                     >
-                      Book Appointment
-                    </button>
+                      <option value="">Chọn dịch vụ</option>
+                      {services.map((svc) => (
+                        <option key={svc._id} value={svc._id}>
+                          {svc.nameService} ({svc.durationMinutes ?? 30} phút)
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
+
+                <div className="contact-field contact-field-full" style={{ marginTop: 12 }}>
+                  <label>Chọn khung giờ</label>
+                  {slotsQuery.isLoading ? (
+                    <div style={{ color: "#64748b" }}>Đang tải...</div>
+                  ) : (
+                    <SlotPicker
+                      slots={slotsQuery.data || []}
+                      selectedSlotStart={selectedSlot?.slotStart}
+                      onSelectSlot={(slot) => setSelectedSlot(slot)}
+                    />
+                  )}
+                </div>
+
+                {selectedSlot && (
+                  <div style={{ marginTop: 10, color: "#0f172a" }}>
+                    <strong>Đã chọn:</strong> {selectedSlot.doctorName} -{" "}
+                    {selectedSlot.slotStart} - {selectedSlot.slotEnd}
+                  </div>
+                )}
+
+                <div className="contact-field contact-field-full">
+                  <label htmlFor="message">{t("contact.message")}</label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    placeholder={t("contact.messagePlaceholder")}
+                    rows={4}
+                  />
+                </div>
+
+                <button type="submit" className="contact-submit-btn" disabled={slotsQuery.isLoading}>
+                  {t("contact.submit")}
+                </button>
               </form>
             </div>
           </div>
-          <div style={{ height: "500px", width: "100%" }}>
-            <GoogleMapReact
-              bootstrapURLKeys={{ key: GOOGLE_MAP_API_KEY }}
-              defaultCenter={coordinates}
-              defaultZoom={11}
-              center={coordinates}
-            >
-              {/* <AnyReactComponent
-                lat={59.955413}
-                lng={30.337844}
-                text="My Marker"
-              /> */}
-            </GoogleMapReact>
-          </div>
+
+          <aside className="contact-info-section">
+            <div className="contact-info-card">
+              <h3>Thông tin liên hệ</h3>
+              <div className="contact-info-list">
+                <div className="contact-info-item">
+                  <span className="contact-info-label">Địa chỉ</span>
+                  <span className="contact-info-value">Phòng khám (demo)</span>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 }
 
 export default Contact;
+

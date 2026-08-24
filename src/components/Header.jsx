@@ -2,10 +2,17 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useContext } from "react";
 import { RecoveryContext } from "../App";
+import { useDarkMode } from "../context/DarkModeContext";
+import { useLanguage } from "../context/LanguageContext";
+import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi2";
+import { Globe } from "lucide-react";
 
 function Header() {
   const [userInfo, setUserInfo] = useState(null);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const { countCart } = useContext(RecoveryContext);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { language, changeLanguage, t } = useLanguage();
   useEffect(() => {
     const user = localStorage.getItem("userInfo");
     if (user) {
@@ -80,26 +87,75 @@ function Header() {
                 <nav className="nav main-menu">
                   <ul className="navigation" id="navbar">
                     <li>
-                      <Link to="/home">Home</Link>
+                      <Link to="/home">{t("nav.home")}</Link>
                     </li>
                     <li>
-                      <Link to="/shop">Shop</Link>
+                      <Link to="/shop">{t("nav.shop")}</Link>
                     </li>
                     <li>
-                      <Link to="/blog">Blog</Link>
+                      <Link to="/blog">{t("nav.blog")}</Link>
                     </li>
                     <li>
-                      <Link to="/contact">Contact</Link>
+                      <Link to="/contact">{t("nav.contact")}</Link>
                     </li>
-                    {!userInfo && (
+                    {userInfo ? (
                       <li>
-                        <Link to="/login">Login</Link>
+                        <Link to="/account/profile">My Account</Link>
+                      </li>
+                    ) : (
+                      <li>
+                        <Link to="/login">{t("nav.login")}</Link>
                       </li>
                     )}
                   </ul>
                 </nav>
 
                 <div className="outer-box">
+                  <div
+                    className="lang-switcher-wrap"
+                    onMouseEnter={() => setShowLangMenu(true)}
+                    onMouseLeave={() => setShowLangMenu(false)}
+                  >
+                    <button
+                      type="button"
+                      className="lang-toggle"
+                      title={language === "vi" ? "Tiếng Việt" : "English"}
+                    >
+                      <Globe size={22} />
+                      <span>{language === "vi" ? "VI" : "EN"}</span>
+                    </button>
+                    {showLangMenu && (
+                      <div className="lang-menu">
+                        <button
+                          type="button"
+                          onClick={() => changeLanguage("vi")}
+                          className={language === "vi" ? "active" : ""}
+                        >
+                          Tiếng Việt
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => changeLanguage("en")}
+                          className={language === "en" ? "active" : ""}
+                        >
+                          English
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="dark-mode-toggle"
+                    onClick={toggleDarkMode}
+                    title={isDarkMode ? "Chế độ sáng" : "Chế độ tối"}
+                    aria-label={isDarkMode ? "Chế độ sáng" : "Chế độ tối"}
+                  >
+                    {isDarkMode ? (
+                      <HiOutlineSun size={24} />
+                    ) : (
+                      <HiOutlineMoon size={24} />
+                    )}
+                  </button>
                   <button className="cart-btn">
                     <Link
                       to="/cart"
@@ -139,20 +195,24 @@ function Header() {
               <nav className="nav main-menu">
                 <ul className="navigation" id="navbar">
                   <li>
-                    <Link to="/home">Home</Link>
+                    <Link to="/home">{t("nav.home")}</Link>
                   </li>
                   <li>
-                    <Link to="/blog">Blog</Link>
+                    <Link to="/blog">{t("nav.blog")}</Link>
                   </li>
                   <li>
-                    <Link to="/shop">Shop</Link>
+                    <Link to="/shop">{t("nav.shop")}</Link>
                   </li>
                   <li>
-                    <Link to="/contact">Contact</Link>
+                    <Link to="/contact">{t("nav.contact")}</Link>
                   </li>
-                  {!userInfo && (
+                  {userInfo ? (
                     <li>
-                      <Link to="/login">Login</Link>
+                      <Link to="/account/profile">My Account</Link>
+                    </li>
+                  ) : (
+                    <li>
+                      <Link to="/login">{t("nav.login")}</Link>
                     </li>
                   )}
                 </ul>
@@ -160,9 +220,53 @@ function Header() {
 
               {/* Header Icons */}
               <div className="outer-box">
+                <div
+                  className="lang-switcher-wrap"
+                  onMouseEnter={() => setShowLangMenu(true)}
+                  onMouseLeave={() => setShowLangMenu(false)}
+                >
+                  <button
+                    type="button"
+                    className="lang-toggle"
+                    title={language === "vi" ? "Tiếng Việt" : "English"}
+                  >
+                    <Globe size={22} />
+                    <span>{language === "vi" ? "VI" : "EN"}</span>
+                  </button>
+                  {showLangMenu && (
+                    <div className="lang-menu">
+                      <button
+                        type="button"
+                        onClick={() => changeLanguage("vi")}
+                        className={language === "vi" ? "active" : ""}
+                      >
+                        Tiếng Việt
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => changeLanguage("en")}
+                        className={language === "en" ? "active" : ""}
+                      >
+                        English
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="dark-mode-toggle"
+                  onClick={toggleDarkMode}
+                  title={isDarkMode ? "Chế độ sáng" : "Chế độ tối"}
+                >
+                  {isDarkMode ? (
+                    <HiOutlineSun size={24} />
+                  ) : (
+                    <HiOutlineMoon size={24} />
+                  )}
+                </button>
                 <button className="cart-btn">
                   <i className="icon flaticon-shopping-cart"></i>
-                  <span className="count">3</span>
+                  <span className="count">{countCart ?? 0}</span>
                 </button>
 
                 <button className="search-btn">
@@ -183,6 +287,27 @@ function Header() {
 
           <div className="nav-outer clearfix">
             <div className="outer-box">
+              <button
+                type="button"
+                className="lang-toggle lang-toggle-mobile"
+                onClick={() => changeLanguage(language === "vi" ? "en" : "vi")}
+                title={language === "vi" ? "Switch to English" : "Chuyển sang Tiếng Việt"}
+              >
+                <Globe size={20} />
+                <span>{language === "vi" ? "EN" : "VI"}</span>
+              </button>
+              <button
+                type="button"
+                className="dark-mode-toggle"
+                onClick={toggleDarkMode}
+                title={isDarkMode ? "Chế độ sáng" : "Chế độ tối"}
+              >
+                {isDarkMode ? (
+                  <HiOutlineSun size={22} />
+                ) : (
+                  <HiOutlineMoon size={22} />
+                )}
+              </button>
               <div className="search-box">
                 <button className="search-btn mobile-search-btn">
                   <i className="flaticon-magnifying-glass"></i>
@@ -190,7 +315,7 @@ function Header() {
               </div>
               <button className="cart-btn">
                 <i className="icon flaticon-shopping-cart"></i>
-                <span className="count">3</span>
+                <span className="count">{countCart ?? 0}</span>
               </button>
 
               <a

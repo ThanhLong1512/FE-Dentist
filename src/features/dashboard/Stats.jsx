@@ -15,6 +15,7 @@ function Stats({ bookings, confirmedOrders, averageRating, reviewCount }) {
     if (!rating) return 0;
     return Math.round((rating / maxRating) * 100);
   };
+  // const ratingPercentage = reviewCount === 0 ? averageRating : ratingToPercentage(reviewCount)
 
   return (
     <>

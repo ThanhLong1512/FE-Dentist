@@ -1,51 +1,202 @@
-# 📘 vite-plugin-react-pages
+# 🦷 FE-Dentist
 
-<p>
-  <a href="https://www.npmjs.com/package/vite-plugin-react-pages" target="_blank" rel="noopener"><img src="https://img.shields.io/npm/v/vite-plugin-react-pages.svg" alt="npm package" /></a>
-</p>
+Hệ thống quản lý phòng khám nha khoa — Frontend được xây dựng bằng **React 18 + Vite 4**, gồm 2 phần chính:
 
-[vite-plugin-react-pages](https://vitejs.github.io/vite-plugin-react-pages) (vite-pages) is a React app framework powered by [vite](https://github.com/vitejs/vite). It is very suitable for:
+- **Website khách hàng**: giới thiệu dịch vụ, đặt lịch hẹn, mua sắm, thanh toán online.
+- **Trang quản trị (Admin)**: dashboard, quản lý bệnh nhân / dịch vụ / ca làm việc / nhân viên / lịch hẹn / đơn hàng / tài khoản.
 
-- blog site
-- documentation site for your library or product
-- stories/demos/playgrounds for your React components or libraries (like [storybook.js](https://storybook.js.org/))
+> ⚠️ README này được viết lại dựa trên cấu trúc mã nguồn thực tế của dự án (thay cho README mặc định của template Vite).
 
-It provides many features that help developers **build a React App quickly**:
+---
 
-- **Fantastic development experience**. Start the local development server in a blink, even when you have many pages. Hot module replacement works with React and Mdx, so you can get instant feedback when you edit your code.
-- **Filesystem based routing**. By following a [simple filesystem routing convention](https://vitejs.github.io/vite-plugin-react-pages/fs-routing), It is easy to create, locate and develop pages. You don't need to worry about routing configuration. For advanced users, you can [tell vite-pages how to find page files](https://vitejs.github.io/vite-plugin-react-pages/advanced-fs-routing), so that vite-pages can work with any project file structure.
-- **Support Mdx**. You can write content with either "normal React" or [Mdx](https://mdxjs.com/). Normal Reactjs is more flexible and composable. While Mdx is more readable and easier to edit. You can choose the proper format for your task. These formats can import each other like normal esModules.
-- **Powerful [theme customization](https://vitejs.github.io/vite-plugin-react-pages/theme-customization)**. Vite-pages itself doesn't render any concrete DOM node. You can customize **anything** on the page with theme. It is easy to write a theme that is sharable and configurable. If you use typescript, the users of your theme will get type-check and intelliSense.
-- **Automatic code splitting based on pages**. Visitors don't need to download the whole app, they only load page data as needed.
-- **Support static site generation out of the box**. By pre-rendering your app into HTML at buildtime, users can see the content before any JS is loaded. With this feature, you can [deploy your single page apps on GitHub Pages](https://github.com/vitejs/vite-plugin-react-pages/tree/main/doc-site)(which [doesn't natively support single page apps](https://www.google.com/search?q=github+pages+single+page+apps&oq=github+pages+single+page+apps)).
-- **Tools for Library documentation**. Vite-pages provides [some tools](https://vitejs.github.io/vite-plugin-react-pages/library-documentation-tools) to reduce the maintenance costs for library authors and make their documents more easily to read.
+## 🛠️ Công nghệ sử dụng
 
-## Translation of this README
+| Nhóm | Công nghệ |
+|---|---|
+| **Core** | React 18, Vite 4, JavaScript (JSX) |
+| **Routing** | React Router v6 (lazy-load theo route) |
+| **State / Data** | Redux Toolkit, TanStack React Query |
+| **Auth** | Auth0, Google OAuth, Facebook SDK, JWT + refresh token, 2FA (QR code / OTP) |
+| **UI** | MUI, Bootstrap 5, TailwindCSS, react-hook-form, react-select, swiper |
+| **Biểu đồ** | Recharts |
+| **Realtime** | Socket.IO client (chat) |
+| **Thanh toán** | MoMo, ZaloPay, VNPay, COD |
+| **Đa ngôn ngữ** | i18n tự viết (Context) — Việt / Anh |
+| **CI/CD** | GitHub Actions + Docker + Nginx |
 
-- [Simplified Chinese (中文)](/README-CN.md)
+---
 
-## Getting stated
+## ✨ Tính năng chính
 
-### Try it online on StackBlitz
+### Website khách hàng
+- Trang chủ giới thiệu (banner, dịch vụ, đội ngũ, tin tức, đánh giá...)
+- **Đặt lịch hẹn** theo slot khả dụng (chọn ngày → dịch vụ → nhân viên → ca trống)
+- **Shop dịch vụ**: xem chi tiết, thêm vào giỏ hàng
+- **Thanh toán** online: MoMo / ZaloPay / VNPay / COD
+- **Tài khoản cá nhân**: hồ sơ, lịch sử lịch hẹn, đơn hàng, đánh giá dịch vụ
+- **Chat hỗ trợ** realtime với admin
+- Đăng ký / đăng nhập (email + mật khẩu, Google, Facebook), quên mật khẩu, bảo mật **2FA**
 
-You can play with these demo projects in your browser, without installing anything on your machine.
+### Trang quản trị (`/admin`)
+- **Dashboard**: thống kê doanh thu, số lịch hẹn, đánh giá theo kỳ; biểu đồ
+- **Quản lý**: Bệnh nhân, Dịch vụ, Ca làm việc, Nhân viên, Lịch hẹn, Đơn hàng, Tài khoản, Cơ sở vật chất, Cài đặt
+- CRUD đầy đủ + nhân bản (duplicate), tìm kiếm, phân trang
+- **Chat** quản trị viên ↔ khách hàng
 
-- [app demo](https://stackblitz.com/fork/github/vitejs/vite-plugin-react-pages/tree/main/packages/create-project/template-app?file=README.md&terminal=dev)
-- [library demo](https://stackblitz.com/fork/github/vitejs/vite-plugin-react-pages/tree/main/packages/create-project/template-lib?file=README.md&terminal=dev)
-- [library monorepo demo](https://stackblitz.com/fork/github/vitejs/vite-plugin-react-pages/tree/main/packages/create-project/template-lib-monorepo?file=README.md&terminal=dev)
+---
 
-### Initialize a demo project locally
+## 🗂️ Cấu trúc thư mục
 
-1. Initialize a vite-pages project (with npm 7+):
-   - execute `npm init vite-pages app-demo -- --template app` to initialize an app project, or
-   - execute `npm init vite-pages library-demo -- --template lib` to initialize a library project, or
-   - execute `npm init vite-pages library-monorepo-demo -- --template lib-monorepo` to initialize a library project with monorepo setup.
-   - If you are using **npm 6.x**, the extra double-dash before `--template` should be deleted. For example, `npm init vite-pages app-demo --template app`.
-2. `npm install`
-3. `npm run dev` and play with the local dev environment.
-4. `npm run build`.
-5. `npm run ssr`. You can [disable javascript in your browser](https://developer.chrome.com/docs/devtools/javascript/disable/), to verify if it can still render.
+```
+src/
+├── main.jsx                  # Entry point (bọc Redux, Auth0, Google OAuth)
+├── App.jsx                   # Định nghĩa routes + QueryClient + Context
+├── apis/                     # Tầng gọi API (axios)
+│   ├── index.js              # ~60 hàm API: auth, users, services, orders, payments...
+│   └── appointmentApi.js     # Logic lịch hẹn (hold / cancel / reschedule)
+├── components/               # UI dùng chung
+│   ├── admin/                # Components quản trị (Button, Table, Modal, Spinner...)
+│   └── *.jsx                 # Header, Footer, Chat, OTP, 2FA, Home sections...
+├── features/                 # Logic + hook theo module
+│   ├── account/              # Tài khoản
+│   ├── appointment/          # Lịch hẹn
+│   ├── authentication/       # Đăng nhập / đăng xuất
+│   ├── booking/              # Đặt lịch
+│   ├── dashboard/            # Thống kê, biểu đồ
+│   ├── employee/  order/  patient/  services/  shift/
+├── pages/                    # Trang client (Home, Shop, Cart, Checkout, Login...)
+│   └── admin/                # Trang quản trị
+├── context/                  # DarkModeContext, LanguageContext
+├── hooks/                    # useLocalStorageState, useOutsideClick, useMoveBack...
+├── locales/                  # vi.js, en.js (bản dịch)
+├── redux/store.js            # Redux store
+├── utils/                    # constants, authorizedAxios, authStorage, helpers
+└── styles/                   # GlobalStyles (theme dark/light)
+```
 
-### Read the documentation
+---
 
-Read [the documentation of vite-plugin-react-pages](https://vitejs.github.io/vite-plugin-react-pages/).
+## 🚀 Chạy dự án
+
+### Yêu cầu
+- Node.js ≥ 18
+- npm
+
+### Cài đặt & chạy dev
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+```
+
+### Build cho production
+
+```bash
+npm run build      # output vào thư mục dist/
+npm run preview    # xem thử bản build
+```
+
+### Kiểm tra code
+
+```bash
+npm run lint
+```
+
+---
+
+## ⚙️ Cấu hình (biến môi trường)
+
+Toàn bộ cấu hình được quản lý qua **file `.env`** (Vite sử dụng tiền tố `VITE_`), không còn khai báo cứng trong mã nguồn.
+
+### Bước 1 — Tạo file `.env`
+
+```bash
+cp .env.example .env
+```
+
+Sau đó mở `.env` và điền giá trị thật của bạn:
+
+| Biến | Mô tả |
+|---|---|
+| `VITE_API_ROOT` | URL backend REST API |
+| `VITE_SOCKET_URL` | URL Socket.IO server cho chat |
+| `VITE_ADMIN_ID` | ID tài khoản admin |
+| `VITE_GOOGLE_MAP_API_KEY` | Key Google Maps |
+| `VITE_DOMAIN_AUTH0` / `VITE_CLIENT_ID_AUTH0` | Cấu hình Auth0 |
+| `VITE_REACT_GOOGLE_CLIENT_ID` | Client ID Google OAuth |
+| `VITE_FACEBOOK_APP_ID` | App ID Facebook (đăng nhập Facebook) |
+
+### ⚠️ Bảo mật
+
+- **`.env` đã nằm trong `.gitignore`** — KHÔNG BAO GIỜ commit file này lên git.
+- **`.env.example`** là bản mẫu trống (chỉ chứa placeholder), được phép commit.
+- `config.json` cũng đã được thêm vào `.gitignore` (chứa cấu hình môi trường cục bộ).
+
+### Cách hoạt động
+
+- `src/utils/constants.js` đọc giá trị qua `import.meta.env.VITE_*`.
+- Sau khi thay đổi `.env`, **khởi động lại** server dev (`npm run dev`) để áp dụng.
+
+### Token & xác thực (`src/utils/authorizedAxios.js`)
+- Interceptor tự gắn `Authorization: Bearer <token>`.
+- Nhận mã lỗi **410** → tự động gọi refresh token rồi gửi lại request.
+- Nhận mã lỗi **401** → toast thông báo + chuyển về `/login`.
+
+---
+
+## 🐳 Docker & CI/CD
+
+### Build image (truyền biến môi trường qua build-arg)
+
+Các biến `VITE_*` được đưa vào build qua `--build-arg`, **không** copy file `.env` vào image:
+
+```bash
+docker build -t fe-dentist \
+  --build-arg VITE_API_ROOT='http://localhost:8080' \
+  --build-arg VITE_SOCKET_URL='http://localhost:8090' \
+  --build-arg VITE_ADMIN_ID='your-admin-id' \
+  --build-arg VITE_DOMAIN_AUTH0='your-domain.auth0.com' \
+  --build-arg VITE_CLIENT_ID_AUTH0='your-client-id' \
+  --build-arg VITE_REACT_GOOGLE_CLIENT_ID='your-google-client-id' \
+  --build-arg VITE_GOOGLE_MAP_API_KEY='your-maps-key' \
+  --build-arg VITE_FACEBOOK_APP_ID='your-fb-app-id' \
+  .
+```
+
+- Giai đoạn **build**: `node:18` chạy `npm install --legacy-peer-deps && npm run build`.
+- Giai đoạn **runtime**: `nginx:1.23-alpine` phục vụ thư mục `dist/` trên cổng `80`.
+
+### Chạy container
+
+```bash
+docker run -d -p 5173:80 --name fe-dentist fe-dentist
+```
+
+### CI/CD (`.github/workflows/cicd.yml`)
+Khi push lên nhánh `master`, workflow tự động:
+1. **Build** image Docker (lấy biến `VITE_*` từ GitHub **secrets**) và push lên Docker Hub.
+2. **Deploy** trên runner self-hosted: pull image → xóa container cũ → chạy container mới (cổng `5173:80`).
+
+> Cần khai báo các secrets trong GitHub: `DOCKER_USERNAME`, `DOCKER_PASSWORD`, và `VITE_API_ROOT`, `VITE_SOCKET_URL`, `VITE_ADMIN_ID`, `VITE_DOMAIN_AUTH0`, `VITE_CLIENT_ID_AUTH0`, `VITE_REACT_GOOGLE_CLIENT_ID`, `VITE_GOOGLE_MAP_API_KEY`, `VITE_FACEBOOK_APP_ID`.
+
+---
+
+## 🔑 Nhóm quyền / Route chính
+
+| Route | Mô tả |
+|---|---|
+| `/home` | Trang chủ |
+| `/shop` `/shop/:ServiceID` | Danh sách / chi tiết dịch vụ |
+| `/booking` | Đặt lịch hẹn |
+| `/cart` `/checkout` | Giỏ hàng & thanh toán |
+| `/appointment/checkout` | Thanh toán lịch hẹn |
+| `/account/profile` `/appointments` `/orders` | Khu vực cá nhân |
+| `/admin/dashboard` ... `/admin/settings` | Trang quản trị |
+
+---
+
+## 📝 Ghi chú
+
+- Redux store hiện tại rỗng (`reducer: {}`) — dữ liệu chủ yếu dùng **React Query** và **Context API**.
+- Giao diện được viết chủ yếu bằng tiếng Việt, hỗ trợ chuyển đổi ngôn ngữ **Vi/En** qua `LanguageContext`.
+- Hỗ trợ **dark mode** lưu vào `localStorage`.

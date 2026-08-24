@@ -7,28 +7,30 @@ import {
 } from "react-router-dom";
 import { createContext, Suspense } from "react";
 import { useState } from "react";
-import { ToastContainer } from "react-toastify";
+import ThemedToastContainer from "./components/ThemedToastContainer";
 import { Toaster } from "react-hot-toast";
 import GlobalStyles from "../styles/GlobalStyles";
 import { lazy } from "react";
+import Shop from "./pages/Shop";
+import Home from "./pages/Home";
+import Contact from "./pages/Contact";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+import Blog from "./pages/Blog";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import DetailService from "./pages/DetailService";
+import AppointmentCheckout from "./pages/AppointmentCheckout";
 
-const Home = lazy(() => import("./pages/Home"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Login = lazy(() => import("./pages/Login"));
-const Shop = lazy(() => import("./pages/Shop"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const AppLayout = lazy(() => import("./components/AppLayout"));
-const Blog = lazy(() => import("./pages/Blog"));
+import AppLayout from "./components/AppLayout";
+import AccountLayout from "./components/AccountLayout";
+import Account from "./pages/Account";
+import Appointment from "./pages/Appointment";
+import Order from "./pages/Order";
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const Cart = lazy(() => import("./pages/Cart"));
-const Checkout = lazy(() => import("./pages/Checkout"));
-const DetailService = lazy(() => import("./pages/DetailService"));
-const Account = lazy(() => import("./pages/Account"));
-const Appointment = lazy(() => import("./pages/Appointment"));
-const Order = lazy(() => import("./pages/Appointment"));
 const Patient = lazy(() => import("./pages/admin/Patient"));
 const Service = lazy(() => import("./pages/admin/Service"));
 const Shift = lazy(() => import("./pages/admin/Shift"));
@@ -43,6 +45,7 @@ const Spinner = lazy(() => import("./components/admin/Spinner"));
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { DarkModeProvider } from "./context/DarkModeContext";
+import { LanguageProvider } from "./context/LanguageContext";
 
 export const RecoveryContext = createContext();
 const queryClient = new QueryClient({
@@ -68,7 +71,7 @@ function App() {
   return (
     <>
       <DarkModeProvider>
-        {" "}
+        <LanguageProvider>
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools
             initialIsOpen={false}
@@ -102,7 +105,6 @@ function App() {
                       <Route path="login" element={<Login />} />
                     </Route>
                     <Route path="shop" element={<Shop />} />
-                    <Route path="*" element={<NotFound />} />
                     <Route
                       path="/forgot-password"
                       element={<ForgotPassword />}
@@ -111,15 +113,20 @@ function App() {
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/checkout" element={<Checkout />} />
                     <Route
+                      path="/appointment/checkout"
+                      element={<AppointmentCheckout />}
+                    />
+                    <Route
                       path="/shop/:ServiceID"
                       element={<DetailService />}
                     />
-                    <Route path="/account/profile" element={<Account />} />
-                    <Route
-                      path="/account/appointments"
-                      element={<Appointment />}
-                    />
-                    <Route path="/account/orders" element={<Order />} />
+                    <Route path="/account" element={<AccountLayout />}>
+                      <Route index element={<Navigate to="profile" replace />} />
+                      <Route path="profile" element={<Account />} />
+                      <Route path="appointments" element={<Appointment />} />
+                      <Route path="orders" element={<Order />} />
+                    </Route>
+                    <Route path="*" element={<NotFound />} />
                   </Route>
                   {/* Admin */}
                   <Route element={<AdminLayout />}>
@@ -136,18 +143,7 @@ function App() {
                   </Route>
                 </Routes>
               </Suspense>
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-              />
+              <ThemedToastContainer />
             </RecoveryContext.Provider>
           </BrowserRouter>
           <Toaster
@@ -171,6 +167,7 @@ function App() {
             }}
           />
         </QueryClientProvider>
+        </LanguageProvider>
       </DarkModeProvider>
     </>
   );

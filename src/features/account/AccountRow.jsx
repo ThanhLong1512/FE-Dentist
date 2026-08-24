@@ -1,9 +1,11 @@
 import styled from "styled-components";
 import Table from "../../components/admin/Table";
 import Menus from "../../components/admin/Menus";
-import { HiPencil } from "react-icons/hi2";
+import { HiPencil, HiTrash } from "react-icons/hi2";
 import Modal from "../../components/admin/Modal";
+import ConfirmDelete from "../../components/admin/ConfirmDelete";
 import CreateAccountForm from "./CreateAccountForm";
+import { useDeleteAccount } from "./useDeleteAccount";
 
 const Photo = styled.div`
   display: flex;
@@ -22,7 +24,7 @@ const Name = styled.div`
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--color-grey-600);
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 `;
 
 const Email = styled.div`
@@ -31,7 +33,7 @@ const Email = styled.div`
 `;
 
 const Role = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-grey-700);
   text-transform: capitalize;
@@ -86,8 +88,17 @@ function AccountRow({ account }) {
     require_2FA,
   } = account;
 
+  const { isDeleting, deleteAccount } = useDeleteAccount();
+  const currentUser = JSON.parse(localStorage.getItem("userInfo") || "{}");
+  const isCurrentUser =
+    currentUser?.id === accountId || currentUser?._id === accountId;
+
   const status = isLocked ? "locked" : "active";
   const twoFAStatus = require_2FA ? "enabled" : "disabled";
+
+  const handleDelete = () => {
+    deleteAccount(accountId);
+  };
 
   return (
     <Table.Row>
@@ -115,11 +126,26 @@ function AccountRow({ account }) {
               <Modal.Open opens="edit">
                 <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
               </Modal.Open>
+              {!isCurrentUser && (
+                <Modal.Open opens="delete">
+                  <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
+                </Modal.Open>
+              )}
             </Menus.List>
 
             <Modal.Window name="edit">
               <CreateAccountForm accountToEdit={account} />
             </Modal.Window>
+
+            {!isCurrentUser && (
+              <Modal.Window name="delete">
+                <ConfirmDelete
+                  resource="user"
+                  disabled={isDeleting}
+                  onConfirm={handleDelete}
+                />
+              </Modal.Window>
+            )}
           </Menus.Menu>
         </Modal>
       </div>

@@ -1,10 +1,10 @@
 import { data } from "jquery";
 import authorizedAxiosInstance from "../utils/authorizedAxios";
+import { clearAuthSession } from "../utils/authStorage";
 import { API_ROOT } from "../utils/constants";
 
 export const handleLogoutApi = async () => {
-  localStorage.removeItem("userInfo");
-  localStorage.removeItem("cart");
+  clearAuthSession();
   return await authorizedAxiosInstance.delete(
     `${API_ROOT}/api/v1/users/logout`
   );
@@ -115,10 +115,88 @@ export const handlePayWithZaloPay = async (data) => {
 
 export const handlePayWithVNPay = async (data) => {
   const res = await authorizedAxiosInstance.post(
-    `${API_ROOT}/api/v1/payments/paymentWithVNPay`,
+    `${API_ROOT}/api/v1/payments/paymentWithVnPay`,
     data
   );
   return res.data;
+};
+
+export const handleHoldAppointment = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/appointments/hold`,
+    data
+  );
+  return res.data;
+};
+
+export const handleCancelReservation = async (reservationId) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/appointments/reservations/${reservationId}/cancel`
+  );
+  return res.data;
+};
+
+export const handleGetShiftsByDayAndDate = async (dayOfWeek, date) => {
+  const dateKey = date.toISOString().slice(0, 10);
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/shifts/${dayOfWeek}?date=${dateKey}`
+  );
+  return res.data.data;
+};
+
+export const handleGetAvailableSlots = async ({ date, serviceId, employeeId }) => {
+  const dateKey = date.toISOString().slice(0, 10);
+  const params = new URLSearchParams({
+    date: dateKey,
+    serviceId: String(serviceId),
+  });
+  if (employeeId) params.set("employeeId", String(employeeId));
+
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/availability/slots?${params.toString()}`
+  );
+  return res.data.data;
+};
+
+export const handleSearchPatients = async ({ q, limit = 10 }) => {
+  const params = new URLSearchParams({
+    q: String(q),
+    limit: String(limit),
+  });
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/search/patients?${params.toString()}`
+  );
+  return res.data.data;
+};
+
+export const handleSearchAppointments = async ({
+  q,
+  patientId,
+  from,
+  to,
+  limit = 10,
+}) => {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (q) params.set("q", String(q));
+  if (patientId) params.set("patientId", String(patientId));
+  if (from) params.set("from", String(from));
+  if (to) params.set("to", String(to));
+
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/search/appointments?${params.toString()}`
+  );
+  return res.data.data;
+};
+
+export const handleSearchServices = async ({ q, limit = 10 }) => {
+  const params = new URLSearchParams({
+    q: String(q),
+    limit: String(limit),
+  });
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/search/services?${params.toString()}`
+  );
+  return res.data.data;
 };
 
 export const handlePayWithCOD = async (data) => {
@@ -215,27 +293,56 @@ export const handleUpdateMe = async (formDataToSend) => {
 };
 
 export const handleGetMyAppointment = async () => {
-  const res = await authorizedAxiosInstance.get(
-    `${API_ROOT}/api/v1/appointments/getMyAppointment`
-  );
-  return res.data.data.data;
+  try {
+    const res = await authorizedAxiosInstance.get(
+      `${API_ROOT}/api/v1/appointments/getMyAppointment`
+    );
+    return res.data.data.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return [];
+    }
+    throw error;
+  }
 };
 export const handleGetAppointments = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/appointments`
   );
-  return res.data.data.data;
+  const data = res.data?.data?.data ?? res.data?.data;
+  return Array.isArray(data) ? data : [];
+};
+
+export const handleUpdateAppointmentStatus = async (appointmentId, status) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/appointments/${appointmentId}/status`,
+    { status }
+  );
+  return res.data;
+};
+
+export const handleRescheduleAppointment = async (appointmentId, payload) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/appointments/${appointmentId}/reschedule`,
+    payload
+  );
+  return res.data;
 };
 export const handleGetNyOrder = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/orders/getOrderByUser`
   );
-  return res.data.data;
+  const data = res.data?.data || {};
+  return {
+    codOrders: Array.isArray(data.codOrders) ? data.codOrders : [],
+    paidOrders: Array.isArray(data.paidOrders) ? data.paidOrders : [],
+  };
 };
 
 export const handleGetOrders = async () => {
   const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/orders`);
-  return res.data.data.data;
+  const data = res.data?.data?.data ?? res.data?.data;
+  return Array.isArray(data) ? data : [];
 };
 
 export const handleGetMyConservation = async () => {
@@ -338,6 +445,13 @@ export const handleUpdateAccount = async (data, accountID) => {
     data
   );
   return res.data.data.data;
+};
+
+export const handleDeleteAccount = async (accountID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/accounts/${accountID}`
+  );
+  return res.data;
 };
 
 export const handleGetAppointmentByPeriod = async (period) => {

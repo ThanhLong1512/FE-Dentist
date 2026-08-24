@@ -13,17 +13,17 @@ const PatientName = styled.div`
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-grey-600);
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 `;
 
 const PatientInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-grey-500);
 `;
 
 const ContactInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-blue-700);
 `;

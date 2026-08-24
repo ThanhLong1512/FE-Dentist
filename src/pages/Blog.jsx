@@ -8,7 +8,11 @@ function Blog() {
               <div className="news-block">
                 <div className="inner-box">
                   <div className="image">
-                    <img src="images/resource/blog-1.jpg" alt="" />
+                    <img
+                      src="images/resource/blog-1.jpg"
+                      alt=""
+                      loading="lazy"
+                    />
                   </div>
                   <div className="lower-content">
                     <ul className="post-info">
@@ -46,7 +50,11 @@ function Blog() {
               <div className="news-block">
                 <div className="inner-box">
                   <div className="image">
-                    <img src="images/resource/blog-2.jpg" alt="" />
+                    <img
+                      loading="lazy"
+                      src="images/resource/blog-2.jpg"
+                      alt=""
+                    />
                   </div>
                   <div className="lower-content">
                     <ul className="post-info">
@@ -84,7 +92,11 @@ function Blog() {
               <div className="news-block">
                 <div className="inner-box">
                   <div className="image">
-                    <img src="images/resource/blog-3.jpg" alt="" />
+                    <img
+                      src="images/resource/blog-3.jpg"
+                      alt=""
+                      loading="lazy"
+                    />
                   </div>
                   <div className="lower-content">
                     <ul className="post-info">
@@ -122,7 +134,11 @@ function Blog() {
               <div className="news-block">
                 <div className="inner-box">
                   <div className="image">
-                    <img src="images/resource/blog-4.jpg" alt="" />
+                    <img
+                      src="images/resource/blog-4.jpg"
+                      alt=""
+                      loading="lazy"
+                    />
                   </div>
                   <div className="lower-content">
                     <ul className="post-info">
@@ -161,7 +177,11 @@ function Blog() {
               <div className="news-block">
                 <div className="inner-box">
                   <div className="image">
-                    <img src="images/resource/blog-5.jpg" alt="" />
+                    <img
+                      src="images/resource/blog-5.jpg"
+                      alt=""
+                      loading="lazy"
+                    />
                   </div>
                   <div className="lower-content">
                     <ul className="post-info">
@@ -199,7 +219,11 @@ function Blog() {
               <div className="news-block">
                 <div className="inner-box">
                   <div className="image">
-                    <img src="images/resource/blog-6.jpg" alt="" />
+                    <img
+                      src="images/resource/blog-6.jpg"
+                      alt=""
+                      loading="lazy"
+                    />
                   </div>
                   <div className="lower-content">
                     <ul className="post-info">
@@ -321,7 +345,11 @@ function Blog() {
                   <article className="post">
                     <div className="post-thumb">
                       <a href="blog-single.html">
-                        <img src="images/resource/post-thumb-1.jpg" alt="" />
+                        <img
+                          src="images/resource/post-thumb-1.jpg"
+                          alt=""
+                          loading="lazy"
+                        />
                       </a>
                     </div>
                     <h5>
@@ -337,7 +365,11 @@ function Blog() {
                   <article className="post">
                     <div className="post-thumb">
                       <a href="blog-single.html">
-                        <img src="images/resource/post-thumb-2.jpg" alt="" />
+                        <img
+                          src="images/resource/post-thumb-2.jpg"
+                          alt=""
+                          loading="lazy"
+                        />
                       </a>
                     </div>
                     <h5>
@@ -352,7 +384,11 @@ function Blog() {
                   <article className="post">
                     <div className="post-thumb">
                       <a href="blog-single.html">
-                        <img src="images/resource/post-thumb-3.jpg" alt="" />
+                        <img
+                          src="images/resource/post-thumb-3.jpg"
+                          alt=""
+                          loading="lazy"
+                        />
                       </a>
                     </div>
                     <h5>
@@ -400,37 +436,61 @@ function Blog() {
                 <div className="widget-content">
                   <div className="clearfix">
                     <figure className="post-thumb">
-                      <img src="images/resource/instagram-1.jpg" alt="" />
+                      <img
+                        src="images/resource/instagram-1.jpg"
+                        alt=""
+                        loading="lazy"
+                      />
                       <a href="blog-single.html" className="overlay-box">
                         <span className="icon fa fa-link"></span>
                       </a>
                     </figure>
                     <figure className="post-thumb">
-                      <img src="images/resource/instagram-2.jpg" alt="" />
+                      <img
+                        src="images/resource/instagram-2.jpg"
+                        alt=""
+                        loading="lazy"
+                      />
                       <a href="blog-single.html" className="overlay-box">
                         <span className="icon fa fa-link"></span>
                       </a>
                     </figure>
                     <figure className="post-thumb">
-                      <img src="images/resource/instagram-3.jpg" alt="" />
+                      <img
+                        src="images/resource/instagram-3.jpg"
+                        alt=""
+                        loading="lazy"
+                      />
                       <a href="blog-single.html" className="overlay-box">
                         <span className="icon fa fa-link"></span>
                       </a>
                     </figure>
                     <figure className="post-thumb">
-                      <img src="images/resource/instagram-4.jpg" alt="" />
+                      <img
+                        src="images/resource/instagram-4.jpg"
+                        alt=""
+                        loading="lazy"
+                      />
                       <a href="blog-single.html" className="overlay-box">
                         <span className="icon fa fa-link"></span>
                       </a>
                     </figure>
                     <figure className="post-thumb">
-                      <img src="images/resource/instagram-5.jpg" alt="" />
+                      <img
+                        src="images/resource/instagram-5.jpg"
+                        alt=""
+                        loading="lazy"
+                      />
                       <a href="blog-single.html" className="overlay-box">
                         <span className="icon fa fa-link"></span>
                       </a>
                     </figure>
                     <figure className="post-thumb">
-                      <img src="images/resource/instagram-6.jpg" alt="" />
+                      <img
+                        src="images/resource/instagram-6.jpg"
+                        alt=""
+                        loading="lazy"
+                      />
                       <a href="blog-single.html" className="overlay-box">
                         <span className="icon fa fa-link"></span>
                       </a>

@@ -9,29 +9,29 @@ const CustomerName = styled.div`
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-grey-600);
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 `;
 
 const OrderInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-grey-500);
 `;
 
 const ServiceInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-green-700);
 `;
 
 const PriceInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 600;
   color: var(--color-red-700);
 `;
 
 const StatusInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 600;
   padding: 0.4rem 0.8rem;
   border-radius: 4px;
@@ -60,7 +60,7 @@ const StatusInfo = styled.div`
 `;
 
 const PaymentInfo = styled.div`
-  font-family: "Sono";
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-weight: 500;
   color: var(--color-blue-700);
 `;
@@ -68,13 +68,17 @@ const PaymentInfo = styled.div`
 function OrderRow({ order }) {
   const {
     _id: orderID,
-    account,
-    service,
+    account = {},
+    service = [],
     status,
     totalPrice,
     paymentMethod,
     createAt,
-  } = order;
+    createdAt,
+  } = order || {};
+  const orderDate = createAt || createdAt;
+
+  if (!orderID) return null;
 
   // Format date
   const formatDate = (dateString) => {
@@ -97,29 +101,30 @@ function OrderRow({ order }) {
 
   // Get service names
   const getServiceNames = (services) => {
+    if (!services?.length) return "-";
     if (services.length === 1) {
-      return services[0].nameService;
+      return services[0]?.nameService || "-";
     }
-    return `${services[0].nameService} +${services.length - 1} more`;
+    return `${services[0]?.nameService || "-"} +${services.length - 1} more`;
   };
 
   return (
     <>
       <Table.Row>
         <div>
-          <CustomerName>{account.name}</CustomerName>
-          <OrderInfo>{account.email}</OrderInfo>
+          <CustomerName>{account?.name || "-"}</CustomerName>
+          <OrderInfo>{account?.email || "-"}</OrderInfo>
         </div>
 
         <ServiceInfo>{getServiceNames(service)}</ServiceInfo>
 
-        <StatusInfo status={status}>{status}</StatusInfo>
+        <StatusInfo status={status || ""}>{status || "-"}</StatusInfo>
 
-        <PriceInfo>{formatPrice(totalPrice)}</PriceInfo>
+        <PriceInfo>{formatPrice(totalPrice || 0)}</PriceInfo>
 
-        <PaymentInfo>{paymentMethod}</PaymentInfo>
+        <PaymentInfo>{paymentMethod || "-"}</PaymentInfo>
 
-        <OrderInfo>{formatDate(createAt)}</OrderInfo>
+        <OrderInfo>{formatDate(orderDate)}</OrderInfo>
 
         <div>
           <Modal>
@@ -146,24 +151,26 @@ function OrderRow({ order }) {
                   </div>
 
                   <div style={{ marginBottom: "1rem" }}>
-                    <strong>Customer:</strong> {account.name}
+                    <strong>Customer:</strong> {account?.name || "-"}
                   </div>
 
                   <div style={{ marginBottom: "1rem" }}>
-                    <strong>Email:</strong> {account.email}
+                    <strong>Email:</strong> {account?.email || "-"}
                   </div>
 
                   <div style={{ marginBottom: "1rem" }}>
                     <strong>Services:</strong>
                     <ul style={{ marginLeft: "1rem", marginTop: "0.5rem" }}>
-                      {service.map((srv, index) => (
+                      {(service || []).map((srv, index) => (
                         <li key={index} style={{ marginBottom: "0.5rem" }}>
-                          <strong>{srv.nameService}</strong> -{" "}
-                          {formatPrice(srv.priceDiscount || srv.priceService)}
+                          <strong>{srv?.nameService || "-"}</strong> -{" "}
+                          {formatPrice(srv?.priceDiscount || srv?.priceService || 0)}
                           <br />
-                          <small style={{ color: "var(--color-grey-500)" }}>
-                            {srv.summary}
-                          </small>
+                          {srv?.summary && (
+                            <small style={{ color: "var(--color-grey-500)" }}>
+                              {srv.summary}
+                            </small>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -172,10 +179,10 @@ function OrderRow({ order }) {
                   <div style={{ marginBottom: "1rem" }}>
                     <strong>Status:</strong>
                     <StatusInfo
-                      status={status}
+                      status={status || ""}
                       style={{ display: "inline-block", marginLeft: "0.5rem" }}
                     >
-                      {status}
+                      {status || "-"}
                     </StatusInfo>
                   </div>
 
@@ -184,11 +191,11 @@ function OrderRow({ order }) {
                   </div>
 
                   <div style={{ marginBottom: "1rem" }}>
-                    <strong>Payment Method:</strong> {paymentMethod}
+                    <strong>Payment Method:</strong> {paymentMethod || "-"}
                   </div>
 
                   <div style={{ marginBottom: "1rem" }}>
-                    <strong>Order Date:</strong> {formatDate(createAt)}
+                    <strong>Order Date:</strong> {formatDate(orderDate)}
                   </div>
                 </div>
               </Modal.Window>
