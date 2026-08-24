@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useContext } from "react";
-import { RecoveryContext } from "../App";
-import {
-  handlePayWithCOD,
-  handlePayWithMoMo,
-  handlePayWithVNPay,
-  handlePayWithZaloPay,
-} from "../apis";
+import { useSelector, useDispatch } from "react-redux";
+import { clearCartUi } from "../redux/slices/cartUiSlice";
+import { usePayments } from "../features/payment/usePayments";
 
 function Checkout() {
   const [provinces, setProvinces] = useState([]);
-  const { totalPrice } = useContext(RecoveryContext);
+  const totalPrice = useSelector((state) => state.cartUi.totalPrice);
+  const dispatch = useDispatch();
+  const {
+    payWithMoMo,
+    payWithZaloPay,
+    payWithVNPay,
+    payWithCOD,
+    isPending,
+  } = usePayments();
   const [selectedPayment, setSelectedPayment] = useState("cod");
-  const [services, setServices] = useState(() => {
+  const [services] = useState(() => {
     const cartData = localStorage.getItem("cart");
     return cartData ? JSON.parse(cartData) : [];
   });
@@ -32,46 +35,51 @@ function Checkout() {
     setSelectedPayment(e.target.value);
   };
 
+  const clearCartAfterPay = () => {
+    localStorage.removeItem("cart");
+    dispatch(clearCartUi());
+  };
+
   const handleOrder = async () => {
     try {
       const serviceID = services.map((service) => service._id);
       switch (selectedPayment) {
-        case "momo":
-          await handlePayWithMoMo({
+        case "momo": {
+          const res = await payWithMoMo({
             totalPrice,
             service: serviceID,
-          }).then((res) => {
-            localStorage.removeItem("cart");
-            window.location.href = res.data.payUrl;
           });
+          clearCartAfterPay();
+          window.location.href = res.data.payUrl;
           break;
-        case "zalopay":
-          await handlePayWithZaloPay({
+        }
+        case "zalopay": {
+          const res = await payWithZaloPay({
             totalPrice,
             service: serviceID,
-          }).then((res) => {
-            localStorage.removeItem("cart");
-            window.location.href = res.data.payUrl;
           });
+          clearCartAfterPay();
+          window.location.href = res.data.payUrl;
           break;
-        case "vnpay":
-          await handlePayWithVNPay({
+        }
+        case "vnpay": {
+          const res = await payWithVNPay({
             totalPrice,
             service: serviceID,
-          }).then((res) => {
-            localStorage.removeItem("cart");
-            window.location.href = res.data.paymentUrl;
           });
+          clearCartAfterPay();
+          window.location.href = res.data.paymentUrl;
           break;
-        case "cod":
-          await handlePayWithCOD({
+        }
+        case "cod": {
+          await payWithCOD({
             totalPrice,
             service: serviceID,
-          }).then((res) => {
-            localStorage.removeItem("cart");
-            location.href = "/home";
           });
+          clearCartAfterPay();
+          location.href = "/home";
           break;
+        }
         default:
           console.log("Invalid payment method");
       }
@@ -307,7 +315,11 @@ function Checkout() {
               </div>
             </div>
             <div className="lower-box">
-              <button className="theme-btn btn-style-one" onClick={handleOrder}>
+              <button
+                className="theme-btn btn-style-one"
+                onClick={handleOrder}
+                disabled={isPending}
+              >
                 <span className="btn-title">Order</span>
               </button>
             </div>

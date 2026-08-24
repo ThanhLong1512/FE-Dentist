@@ -1,52 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
 import { Calendar, Clock, User, Phone, MapPin, Stethoscope } from "lucide-react";
-import { handleGetMyAppointment } from "../apis";
 import {
   useAppointmentSocket,
   getStoredUserId,
 } from "../hooks/useAppointmentSocket";
 import { APPOINTMENT_STATUS_LABELS } from "../features/appointment/appointmentStatus";
+import {
+  useMyAppointments,
+  usePatchMyAppointmentCache,
+} from "../features/appointment/useMyAppointments";
 import { Link } from "react-router-dom";
 
 function Appointment() {
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { appointments, isLoading } = useMyAppointments();
+  const patchMyAppointment = usePatchMyAppointmentCache();
   const userId = getStoredUserId();
-
-  const handleAppointmentUpdated = useCallback((updatedAppointment) => {
-    if (!updatedAppointment?._id) return;
-    setAppointments((prev) => {
-      const index = prev.findIndex((item) => item._id === updatedAppointment._id);
-      if (index >= 0) {
-        const next = [...prev];
-        next[index] = { ...next[index], ...updatedAppointment };
-        return next;
-      }
-      return [updatedAppointment, ...prev];
-    });
-  }, []);
 
   useAppointmentSocket({
     userId,
     role: "user",
-    onAppointmentUpdated: handleAppointmentUpdated,
+    onAppointmentUpdated: patchMyAppointment,
     showToasts: true,
   });
-
-  useEffect(() => {
-    async function fetchMyAppointment() {
-      try {
-        const res = await handleGetMyAppointment();
-        setAppointments(Array.isArray(res) ? res : []);
-      } catch (error) {
-        console.error("Error fetching appointments:", error);
-        setAppointments([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchMyAppointment();
-  }, []);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -58,7 +32,7 @@ function Appointment() {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div className="account-page-loading">Đang tải lịch hẹn...</div>;
   }
 
@@ -99,7 +73,11 @@ function Appointment() {
           <Calendar size={40} />
           <h3>Chưa có lịch hẹn</h3>
           <p>Bạn chưa đặt lịch nào. Đặt lịch mới từ trang liên hệ.</p>
-          <Link to="/contact" className="account-tab active" style={{ display: "inline-flex", marginTop: 12 }}>
+          <Link
+            to="/contact"
+            className="account-tab active"
+            style={{ display: "inline-flex", marginTop: 12 }}
+          >
             Đặt lịch ngay
           </Link>
         </div>
@@ -127,7 +105,8 @@ function Appointment() {
               <div className="appt-box">
                 <h4>Bác sĩ & dịch vụ</h4>
                 <p>
-                  <Stethoscope size={14} /> {appointment.shift?.employee?.name || "-"}
+                  <Stethoscope size={14} />{" "}
+                  {appointment.shift?.employee?.name || "-"}
                 </p>
                 <p>{appointment.shift?.employee?.service?.nameService || "-"}</p>
                 <p>

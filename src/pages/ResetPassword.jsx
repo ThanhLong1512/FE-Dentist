@@ -1,10 +1,10 @@
-import { useState, useContext, useEffect } from "react";
-import { RecoveryContext } from "../App";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Eye, EyeOff, Lock, Check, X } from "lucide-react";
 import { handleResetPassword } from "../apis";
 
 function ResetPassword() {
-  const { email } = useContext(RecoveryContext);
+  const email = useSelector((state) => state.recoveryUi.email);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);

@@ -1,7 +1,11 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { RecoveryContext } from "../App";
 import { useLanguage } from "../context/LanguageContext";
+import {
+  setCountCart,
+  setTotalPrice,
+} from "../redux/slices/cartUiSlice";
 import {
   ShoppingCart,
   Minus,
@@ -19,7 +23,7 @@ function Cart() {
   const [couponCode, setCouponCode] = useState("");
   const [isCorrectCode, setIsCorrectCode] = useState(false);
   const [discount, setDiscount] = useState(0);
-  const { setTotalPrice, setCountCart } = useContext(RecoveryContext);
+  const dispatch = useDispatch();
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -32,7 +36,7 @@ function Cart() {
   const syncCartToStorage = (updatedCart) => {
     setCartItems(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-    setCountCart?.(updatedCart.length);
+    dispatch(setCountCart(updatedCart.length));
   };
 
   const updateQuantity = (itemId, newQuantity) => {
@@ -86,7 +90,9 @@ function Cart() {
   };
 
   const total = Math.max(0, subTotal - discount);
-  setTotalPrice?.(total);
+  useEffect(() => {
+    dispatch(setTotalPrice(total));
+  }, [dispatch, total]);
 
   const formatPrice = (price) =>
     (price || 0).toLocaleString("vi-VN", {

@@ -34,13 +34,16 @@ import {
   Security as SecurityIcon,
   Notifications as NotificationsIcon,
 } from "@mui/icons-material";
-import { handleGetMe, handleLogoutApi, handleUpdateMe } from "../apis";
+import { handleLogoutApi } from "../apis";
+import { useMe, useUpdateMe } from "../features/authentication/useMe";
 
 const DEFAULT_AVATAR =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle fill='%23e2e8f0' cx='50' cy='50' r='50'/%3E%3Ccircle fill='%2394a3b8' cx='50' cy='38' r='18'/%3E%3Cellipse fill='%2394a3b8' cx='50' cy='88' rx='28' ry='24'/%3E%3C/svg%3E";
 
 function Account() {
   const navigate = useNavigate();
+  const { me, isLoading: isLoadingMe, refetch: refetchMe } = useMe();
+  const { updateMe, isUpdating } = useUpdateMe();
   const [activeTab, setActiveTab] = useState(0);
   const [userInfo, setUserInfo] = useState({
     name: "",
@@ -56,7 +59,6 @@ function Account() {
     newPassword: "",
     confirmPassword: "",
   });
-  const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showPassword, setShowPassword] = useState({
     current: false,
@@ -68,35 +70,34 @@ function Account() {
   const [photoFile, setPhotoFile] = useState(null);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loading = isLoadingMe || isUpdating || isSubmitting;
 
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    if (!me) return;
+    setUserInfo({
+      name: me.name,
+      email: me.email,
+      photo: me.photo || DEFAULT_AVATAR,
+      role: me.role,
+      require_2FA: me.require_2FA || false,
+    });
+    setFormData((prev) => ({
+      ...prev,
+      name: me.name,
+      email: me.email,
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    }));
+  }, [me]);
 
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const userData = await handleGetMe();
-      setUserInfo({
-        name: userData.name,
-        email: userData.email,
-        photo: userData.photo || DEFAULT_AVATAR,
-        role: userData.role,
-        require_2FA: userData.require_2FA || false,
-      });
-      setFormData({
-        name: userData.name,
-        email: userData.email,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    } catch {
+  useEffect(() => {
+    if (!isLoadingMe && !me) {
       toast.error("Không thể tải thông tin người dùng");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [isLoadingMe, me]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -154,7 +155,7 @@ function Account() {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setSubmitError("");
-    setLoading(true);
+    setIsSubmitting(true);
 
     const formDataToSend = new FormData();
     let hasChanges = false;
@@ -170,16 +171,12 @@ function Account() {
     if (!hasChanges) {
       toast.info("Không có thông tin nào được thay đổi");
       setEditMode(false);
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
-    for (let [key, value] of formDataToSend.entries()) {
-      console.log(key, value);
-    }
-
     try {
-      const res = await handleUpdateMe(formDataToSend);
+      const res = await updateMe(formDataToSend);
       toast.success("Cập nhật thông tin thành công");
       setEditMode(false);
       setPhotoPreview(null);
@@ -190,43 +187,43 @@ function Account() {
         image: res.photo,
       };
       localStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
-      await fetchUserData();
+      await refetchMe();
     } catch (err) {
       setSubmitError(
         err.response?.data?.message ||
           "Đã xảy ra lỗi khi cập nhật thông tin"
       );
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     setSubmitError("");
-    setLoading(true);
+    setIsSubmitting(true);
 
     if (!formData.currentPassword) {
       setSubmitError("Vui lòng nhập mật khẩu hiện tại");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     if (!formData.newPassword) {
       setSubmitError("Vui lòng nhập mật khẩu mới");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     if (formData.newPassword.length < 8) {
       setSubmitError("Mật khẩu mới phải có ít nhất 8 ký tự");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
       setSubmitError("Mật khẩu mới không khớp");
-      setLoading(false);
+      setIsSubmitting(false);
       return;
     }
 
@@ -237,7 +234,7 @@ function Account() {
     };
 
     try {
-      await handleUpdateMe(passwordData);
+      await updateMe(passwordData);
       toast.success("Cập nhật mật khẩu thành công");
       setEditMode(false);
       setFormData({
@@ -251,7 +248,7 @@ function Account() {
         err.response?.data?.message || "Đã xảy ra lỗi khi cập nhật mật khẩu"
       );
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -260,17 +257,17 @@ function Account() {
       toast.error("Vui lòng nhập 'DELETE' để xác nhận");
       return;
     }
-    setLoading(true);
+    setIsSubmitting(true);
     try {
       const data = { isLocked: true };
-      await handleUpdateMe(data);
+      await updateMe(data);
       toast.success("Tài khoản đã được xóa thành công");
       await handleLogoutApi();
       navigate("/");
     } catch {
       toast.error("Không thể xóa tài khoản");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 

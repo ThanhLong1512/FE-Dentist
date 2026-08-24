@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { handleLogoutApi } from "../apis/index";
-import { useDarkMode } from "../context/DarkModeContext";
+import { useDarkMode } from "../hooks/useDarkMode";
 
 const Setup2FA = lazy(() => import("../components/setup-2fa"));
 const Require2FA = lazy(() => import("../components/require-2fa"));

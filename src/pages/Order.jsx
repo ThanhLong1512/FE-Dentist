@@ -1,37 +1,7 @@
-import { useState, useEffect } from "react";
-import { handleGetNyOrder } from "../apis";
+import { useMyOrders } from "../features/order/useMyOrders";
 
 const Order = () => {
-  const [ordersData, setOrdersData] = useState({
-    codOrders: [],
-    paidOrders: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const data = await handleGetNyOrder();
-        setOrdersData({
-          codOrders: data?.codOrders || [],
-          paidOrders: data?.paidOrders || [],
-        });
-        setError(null);
-      } catch (err) {
-        if (err.response?.status === 404) {
-          setOrdersData({ codOrders: [], paidOrders: [] });
-          setError(null);
-        } else {
-          setError("Error fetching orders. Please try again later.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
+  const { codOrders, paidOrders, isLoading, error } = useMyOrders();
 
   const renderOrder = (order, type) => (
     <div
@@ -78,9 +48,11 @@ const Order = () => {
                 <p className="text-gray-600">{service.summary}</p>
                 <p className="text-gray-600">
                   Price:{" "}
-                  {(service.priceDiscount || service.priceService || 0).toLocaleString(
-                    "vi-VN"
-                  )}{" "}
+                  {(
+                    service.priceDiscount ||
+                    service.priceService ||
+                    0
+                  ).toLocaleString("vi-VN")}{" "}
                   VND
                 </p>
                 <p className="text-gray-600">Unit: {service.Unit}</p>
@@ -110,43 +82,42 @@ const Order = () => {
   return (
     <div className="account-orders-page py-2 px-1">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Your Orders</h1>
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-800"></div>
         </div>
       ) : error ? (
         <div className="text-center p-6 bg-white rounded-lg shadow-md border border-gray-200">
-          <p className="text-red-600 font-medium">{error}</p>
+          <p className="text-red-600 font-medium">
+            Error fetching orders. Please try again later.
+          </p>
         </div>
-      ) : ordersData.codOrders.length === 0 &&
-        ordersData.paidOrders.length === 0 ? (
+      ) : codOrders.length === 0 && paidOrders.length === 0 ? (
         <div className="text-center p-8 bg-white rounded-lg shadow-md border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-700 mb-2">
             No Orders Found
           </h2>
           <p className="text-gray-600">
-            You haven't placed any orders yet. Start exploring our services to
-            book your first appointment!
+            You haven&apos;t placed any orders yet. Start exploring our services
+            to book your first appointment!
           </p>
         </div>
       ) : (
         <div className="space-y-6">
-          {ordersData.codOrders.length > 0 && (
+          {codOrders.length > 0 && (
             <>
               <h2 className="text-lg font-semibold text-gray-700 mt-4">
                 COD Orders
               </h2>
-              {ordersData.codOrders.map((order) => renderOrder(order, "cod"))}
+              {codOrders.map((order) => renderOrder(order, "cod"))}
             </>
           )}
-          {ordersData.paidOrders.length > 0 && (
+          {paidOrders.length > 0 && (
             <>
               <h2 className="text-lg font-semibold text-gray-700 mt-4">
                 Paid Orders
               </h2>
-              {ordersData.paidOrders.map((order) =>
-                renderOrder(order, "paid")
-              )}
+              {paidOrders.map((order) => renderOrder(order, "paid"))}
             </>
           )}
         </div>

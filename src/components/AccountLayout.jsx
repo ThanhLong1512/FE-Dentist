@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { Suspense, useMemo } from "react";
 import { User, CalendarCheck, ShoppingBag } from "lucide-react";
 import { ThemeProvider, createTheme, CircularProgress, Box } from "@mui/material";
-import { useDarkMode } from "../context/DarkModeContext";
+import { useDarkMode } from "../hooks/useDarkMode";
 import "./AccountLayout.css";
 
 const tabs = [

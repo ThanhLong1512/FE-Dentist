@@ -1,11 +1,14 @@
-import React, { useState, useContext, useEffect } from "react";
-import { RecoveryContext } from "../App";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { setShowOTPInput } from "../redux/slices/recoveryUiSlice";
 
 export default function OTPInput() {
-  const { email, otp, setShowOTPInput } = useContext(RecoveryContext);
+  const dispatch = useDispatch();
+  const email = useSelector((state) => state.recoveryUi.email);
+  const otp = useSelector((state) => state.recoveryUi.otp);
   const [timerCount, setTimer] = useState(60);
   const [OTPinput, setOTPinput] = useState(["", "", "", ""]);
   const [disable, setDisable] = useState(true);
@@ -41,7 +44,7 @@ export default function OTPInput() {
   }
 
   function handleClose() {
-    setShowOTPInput(false);
+    dispatch(setShowOTPInput(false));
   }
 
   useEffect(() => {
