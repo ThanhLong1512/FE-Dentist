@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useContext } from "react";
-import { RecoveryContext } from "../App";
-import { useDarkMode } from "../context/DarkModeContext";
+import { useSelector } from "react-redux";
+import { useDarkMode } from "../hooks/useDarkMode";
 import { useLanguage } from "../context/LanguageContext";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi2";
 import { Globe } from "lucide-react";
@@ -10,7 +9,7 @@ import { Globe } from "lucide-react";
 function Header() {
   const [userInfo, setUserInfo] = useState(null);
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const { countCart } = useContext(RecoveryContext);
+  const countCart = useSelector((state) => state.cartUi.countCart);
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { language, changeLanguage, t } = useLanguage();
   useEffect(() => {

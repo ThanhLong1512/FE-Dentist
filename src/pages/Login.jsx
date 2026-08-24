@@ -20,7 +20,7 @@ import { handleRegister } from "../apis";
 import { ToastContainer, toast } from "react-toastify";
 import { handleLogin } from "../apis";
 import { useLanguage } from "../context/LanguageContext";
-import { useDarkMode } from "../context/DarkModeContext";
+import { useDarkMode } from "../hooks/useDarkMode";
 import { saveAuthSession } from "../utils/authStorage";
 import "react-toastify/dist/ReactToastify.css";
 

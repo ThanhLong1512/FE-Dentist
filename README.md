@@ -15,7 +15,7 @@ Hệ thống quản lý phòng khám nha khoa — Frontend được xây dựng 
 |---|---|
 | **Core** | React 18, Vite 4, JavaScript (JSX) |
 | **Routing** | React Router v6 (lazy-load theo route) |
-| **State / Data** | Redux Toolkit, TanStack React Query |
+| **State / Data** | Redux Toolkit (UI only) + TanStack React Query (server) |
 | **Auth** | Auth0, Google OAuth, Facebook SDK, JWT + refresh token, 2FA (QR code / OTP) |
 | **UI** | MUI, Bootstrap 5, TailwindCSS, react-hook-form, react-select, swiper |
 | **Biểu đồ** | Recharts |
@@ -50,29 +50,43 @@ Hệ thống quản lý phòng khám nha khoa — Frontend được xây dựng 
 ```
 src/
 ├── main.jsx                  # Entry point (bọc Redux, Auth0, Google OAuth)
-├── App.jsx                   # Định nghĩa routes + QueryClient + Context
+├── App.jsx                   # Routes + QueryClient + LanguageProvider + ThemeSync
 ├── apis/                     # Tầng gọi API (axios)
 │   ├── index.js              # ~60 hàm API: auth, users, services, orders, payments...
 │   └── appointmentApi.js     # Logic lịch hẹn (hold / cancel / reschedule)
 ├── components/               # UI dùng chung
 │   ├── admin/                # Components quản trị (Button, Table, Modal, Spinner...)
-│   └── *.jsx                 # Header, Footer, Chat, OTP, 2FA, Home sections...
-├── features/                 # Logic + hook theo module
-│   ├── account/              # Tài khoản
-│   ├── appointment/          # Lịch hẹn
-│   ├── authentication/       # Đăng nhập / đăng xuất
-│   ├── booking/              # Đặt lịch
+│   └── *.jsx                 # Header, Footer, Chat, OTP, 2FA, ThemeSync...
+├── features/                 # Logic + React Query hooks theo module
+│   ├── account/              # Tài khoản (admin)
+│   ├── appointment/          # Lịch hẹn + useMyAppointments
+│   ├── authentication/       # useLogout, useMe
+│   ├── booking/              # SlotPicker, useAvailableSlots
+│   ├── payment/              # usePayments
 │   ├── dashboard/            # Thống kê, biểu đồ
 │   ├── employee/  order/  patient/  services/  shift/
 ├── pages/                    # Trang client (Home, Shop, Cart, Checkout, Login...)
 │   └── admin/                # Trang quản trị
-├── context/                  # DarkModeContext, LanguageContext
-├── hooks/                    # useLocalStorageState, useOutsideClick, useMoveBack...
+├── context/                  # LanguageContext (i18n)
+├── hooks/                    # useDarkMode (Redux), useLocalStorageState, ...
 ├── locales/                  # vi.js, en.js (bản dịch)
-├── redux/store.js            # Redux store
+├── redux/
+│   ├── store.js              # UI slices only — không chứa API data
+│   └── slices/               # theme, cartUi, recoveryUi
 ├── utils/                    # constants, authorizedAxios, authStorage, helpers
 └── styles/                   # GlobalStyles (theme dark/light)
 ```
+
+### Phân định state (quan trọng)
+
+| Layer | Chứa gì | Ví dụ |
+|-------|---------|--------|
+| **Redux Toolkit** | Client / UI state thuần | theme dark/light, badge giỏ hàng, form quên mật khẩu |
+| **TanStack React Query** | Mọi dữ liệu từ API | `features/*/use*.js` — appointments, orders, me, payments, slots... |
+| **Context** | i18n | `LanguageContext` (`t`, `changeLanguage`) |
+| **localStorage** | Token / session / cart items | `authStorage`, `userInfo`, `cart` — **không** đưa response API vào Redux |
+
+> Không nhân đôi nguồn dữ liệu: list/CRUD từ BE luôn qua React Query + invalidate; Redux không lưu response API.
 
 ---
 

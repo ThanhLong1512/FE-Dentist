@@ -1,5 +1,5 @@
 import { ToastContainer } from "react-toastify";
-import { useDarkMode } from "../context/DarkModeContext";
+import { useDarkMode } from "../hooks/useDarkMode";
 import "react-toastify/dist/ReactToastify.css";
 
 function ThemedToastContainer() {

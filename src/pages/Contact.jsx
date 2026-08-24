@@ -1,16 +1,13 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import {
-  handleGetServices,
-  handleGetAvailableSlots,
-  handleHoldAppointment,
-} from "../apis";
 import { useLanguage } from "../context/LanguageContext";
+import { useServices } from "../features/services/useServices";
+import { useAvailableSlots } from "../features/booking/useAvailableSlots";
+import { useHoldAppointment } from "../features/appointment/useHoldAppointment";
 import SlotPicker from "../features/booking/SlotPicker";
 import "./Contact.css";
 
@@ -29,29 +26,21 @@ function Contact() {
 
   const [selectedSlot, setSelectedSlot] = useState(null);
 
-  const { data: services = [] } = useQuery({
-    queryKey: ["services"],
-    queryFn: handleGetServices,
-    staleTime: 5 * 60 * 1000,
+  const { services = [] } = useServices();
+
+  const slotsQuery = useAvailableSlots({
+    date: formData.appointmentDate,
+    serviceId: formData.serviceId,
   });
 
-  const slotsQuery = useQuery({
-    queryKey: [
-      "availableSlots",
-      formData.serviceId,
-      formData.appointmentDate ? formData.appointmentDate.toISOString() : "",
-    ],
-    queryFn: () =>
-      handleGetAvailableSlots({
-        date: formData.appointmentDate,
-        serviceId: formData.serviceId,
-      }),
-    enabled: Boolean(formData.appointmentDate && formData.serviceId),
-  });
+  const { mutateAsync: holdAppointment, isLoading: isHolding } =
+    useHoldAppointment();
 
   const selectedService = useMemo(() => {
     if (!formData.serviceId) return null;
-    return services.find((s) => String(s._id) === String(formData.serviceId)) || null;
+    return (
+      services.find((s) => String(s._id) === String(formData.serviceId)) || null
+    );
   }, [formData.serviceId, services]);
 
   const handleInputChange = (e) => {
@@ -92,7 +81,7 @@ function Contact() {
         return;
       }
 
-      const holdResponse = await handleHoldAppointment({
+      const holdResponse = await holdAppointment({
         shift: selectedSlot.shiftId,
         Date: formData.appointmentDate.toISOString(),
         serviceId: formData.serviceId,
@@ -246,7 +235,11 @@ function Contact() {
                   />
                 </div>
 
-                <button type="submit" className="contact-submit-btn" disabled={slotsQuery.isLoading}>
+                <button
+                  type="submit"
+                  className="contact-submit-btn"
+                  disabled={slotsQuery.isLoading || isHolding}
+                >
                   {t("contact.submit")}
                 </button>
               </form>

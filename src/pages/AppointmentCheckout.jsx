@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import {
-  handleCancelReservation,
-  handlePayWithCOD,
-  handlePayWithMoMo,
-  handlePayWithVNPay,
-  handlePayWithZaloPay,
-} from "../apis";
+import { useCancelReservation } from "../features/appointment/useCancelReservation";
+import { usePayments } from "../features/payment/usePayments";
 
 const RESERVATION_STORAGE_KEY = "appointmentReservation";
 
@@ -15,7 +10,16 @@ function AppointmentCheckout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedPayment, setSelectedPayment] = useState("cod");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { mutateAsync: cancelReservation, isLoading: isCancelling } =
+    useCancelReservation();
+  const {
+    payWithMoMo,
+    payWithZaloPay,
+    payWithVNPay,
+    payWithCOD,
+    isPending: isPaying,
+  } = usePayments();
+  const isProcessing = isCancelling || isPaying;
 
   const reservation = useMemo(() => {
     if (location.state?.reservation) {
@@ -77,7 +81,7 @@ function AppointmentCheckout() {
     if (!reservation?.reservationId) return;
 
     try {
-      await handleCancelReservation(reservation.reservationId);
+      await cancelReservation(reservation.reservationId);
       sessionStorage.removeItem(RESERVATION_STORAGE_KEY);
       toast.success("Đã hủy giữ chỗ");
       navigate("/contact");
@@ -97,30 +101,28 @@ function AppointmentCheckout() {
       service: [reservation.serviceId],
     };
 
-    setIsProcessing(true);
-
     try {
       switch (selectedPayment) {
         case "momo": {
-          const res = await handlePayWithMoMo(payload);
+          const res = await payWithMoMo(payload);
           sessionStorage.removeItem(RESERVATION_STORAGE_KEY);
           window.location.href = res.data.payUrl;
           break;
         }
         case "zalopay": {
-          const res = await handlePayWithZaloPay(payload);
+          const res = await payWithZaloPay(payload);
           sessionStorage.removeItem(RESERVATION_STORAGE_KEY);
           window.location.href = res.data.payUrl;
           break;
         }
         case "vnpay": {
-          const res = await handlePayWithVNPay(payload);
+          const res = await payWithVNPay(payload);
           sessionStorage.removeItem(RESERVATION_STORAGE_KEY);
           window.location.href = res.data.paymentUrl;
           break;
         }
         case "cod": {
-          const res = await handlePayWithCOD(payload);
+          const res = await payWithCOD(payload);
           sessionStorage.removeItem(RESERVATION_STORAGE_KEY);
           toast.success("Đặt lịch và thanh toán COD thành công!");
           navigate("/account/appointments", {
@@ -136,8 +138,6 @@ function AppointmentCheckout() {
         error.response?.data?.message ||
           "Thanh toán thất bại. Giữ chỗ có thể đã hết hạn."
       );
-    } finally {
-      setIsProcessing(false);
     }
   };
 

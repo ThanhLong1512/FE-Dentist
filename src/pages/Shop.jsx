@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext, useMemo } from "react";
-import { RecoveryContext } from "../App";
+import { useState, useEffect, useMemo } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useServices } from "../features/services/useServices";
@@ -8,12 +8,13 @@ import { useLanguage } from "../context/LanguageContext";
 import Loading from "../components/Loading";
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { handleSearchServices } from "../apis";
+import { setCountCart } from "../redux/slices/cartUiSlice";
 
 const ITEMS_PER_PAGE = 9;
 
 function Shop() {
   const { isLoading, error, services = [] } = useServices();
-  const { setCountCart } = useContext(RecoveryContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -43,8 +44,8 @@ function Shop() {
   useEffect(() => {
     const cartData = localStorage.getItem("cart");
     const cartItems = cartData ? JSON.parse(cartData) : [];
-    setCountCart(cartItems.length);
-  }, [setCountCart]);
+    dispatch(setCountCart(cartItems.length));
+  }, [dispatch]);
 
   const filteredAndSortedServices = useMemo(() => {
     let result = searchEnabled ? [...(searchedServices || [])] : [...(services || [])];
@@ -101,7 +102,7 @@ function Shop() {
       currentCart.push({ ...cartItem, quantity: 1 });
     }
     localStorage.setItem("cart", JSON.stringify(currentCart));
-    setCountCart(currentCart.length);
+    dispatch(setCountCart(currentCart.length));
     toast.success(t("toast.addToCartSuccess"));
   };
 

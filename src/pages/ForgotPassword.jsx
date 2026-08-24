@@ -1,29 +1,35 @@
-import { useState, useContext, lazy } from "react";
+import { useState, lazy } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Mail } from "lucide-react";
-import { RecoveryContext } from "../App";
 import { handleSendRecoveryEmail } from "../apis";
+import {
+  setEmail,
+  setOTP,
+  setShowOTPInput,
+} from "../redux/slices/recoveryUiSlice";
 
 const OTPInput = lazy(() => import("../components/OTPInput"));
 
 function ForgotPassword() {
-  const { setEmail, email, showOTPInput, setShowOTPInput, setOTP } =
-    useContext(RecoveryContext);
+  const dispatch = useDispatch();
+  const email = useSelector((state) => state.recoveryUi.email);
+  const showOTPInput = useSelector((state) => state.recoveryUi.showOTPInput);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const handleEmailChange = (e) => {
-    setEmail(e.target.value);
+    dispatch(setEmail(e.target.value));
     setError("");
   };
 
-  const validateEmail = (email) => {
+  const validateEmail = (value) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return re.test(value);
   };
 
   const handleSubmitClick = async () => {
     const OTP = Math.floor(Math.random() * 9000 + 1000);
-    setOTP(OTP);
+    dispatch(setOTP(OTP));
     const data = {
       recipient_email: email,
       OTP: OTP,
@@ -41,7 +47,7 @@ function ForgotPassword() {
     setIsSubmitting(true);
     await handleSendRecoveryEmail(data).then(() => {
       setIsSubmitting(false);
-      setShowOTPInput(true);
+      dispatch(setShowOTPInput(true));
     });
   };
 

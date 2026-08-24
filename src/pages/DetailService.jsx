@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { RecoveryContext } from "../App";
 import {
   handlePostReview,
   handleDeleteReview,
@@ -12,6 +12,7 @@ import { useService } from "../features/services/useService";
 import { useServices } from "../features/services/useServices";
 import { useLanguage } from "../context/LanguageContext";
 import Loading from "../components/Loading";
+import { setCountCart } from "../redux/slices/cartUiSlice";
 import {
   Star,
   ShoppingCart,
@@ -32,9 +33,9 @@ function DetailService() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
   const { service, isLoading, error } = useService(ServiceID);
   const { services = [] } = useServices();
-  const { setCountCart } = useContext(RecoveryContext);
 
   const [activeTab, setActiveTab] = useState("description");
   const [activeStar, setActiveStar] = useState(0);
@@ -48,8 +49,8 @@ function DetailService() {
 
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCountCart(cart.length);
-  }, [setCountCart]);
+    dispatch(setCountCart(cart.length));
+  }, [dispatch]);
 
   const review = service?.reviews || [];
   const hasReviewed = review.some(
@@ -100,7 +101,7 @@ function DetailService() {
       currentCart.push(cartItem);
     }
     localStorage.setItem("cart", JSON.stringify(currentCart));
-    setCountCart(currentCart.length);
+    dispatch(setCountCart(currentCart.length));
     toast.success(t("toast.addToCartSuccess"));
   };
 
