@@ -10,33 +10,150 @@ import {
   YAxis,
 } from "recharts";
 import styled from "styled-components";
-import Heading from "../../components/admin/Heading";
-import DashboardBox from "./DashboardBox";
+import { TrendingUp, BarChart3, Calendar, DollarSign } from "lucide-react";
 import { formatCurrency } from "../../utils/helpers";
 
-const StyledSalesChart = styled(DashboardBox)`
-  grid-column: 1 / -1;
+const ChartContainer = styled.div`
+  background-color: var(--color-grey-0);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 2.4rem 2.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  transition: all 0.25s ease;
 
-  /* Hack to change grid line colors */
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Grid line colors */
   & .recharts-cartesian-grid-horizontal line,
   & .recharts-cartesian-grid-vertical line {
-    stroke: var(--color-grey-300);
+    stroke: var(--color-grey-200);
+    stroke-dasharray: 4 4;
   }
 `;
 
-function SalesChart({ orders, numDays }) {
-  const { isDarkMode } = useDarkMode();
+const HeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 
-  if (!orders || !orders.orders || !Array.isArray(orders.orders)) {
+  .title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .icon-box {
+      width: 3.8rem;
+      height: 3.8rem;
+      border-radius: var(--border-radius-md);
+      background: rgba(2, 132, 199, 0.1);
+      color: var(--color-brand-600);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h3 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--color-grey-800);
+      margin: 0;
+    }
+
+    .period-tag {
+      font-size: 1.2rem;
+      color: var(--color-grey-400);
+      font-weight: 500;
+    }
+  }
+`;
+
+const MetricsSummaryRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MetricMiniPill = styled.div`
+  background: var(--color-grey-50);
+  border: 1px solid var(--color-grey-100);
+  border-radius: var(--border-radius-md);
+  padding: 1rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .pill-icon {
+    color: ${(props) => props.$color || "var(--color-brand-600)"};
+  }
+
+  .pill-text {
+    display: flex;
+    flex-direction: column;
+
+    .label {
+      font-size: 1.15rem;
+      color: var(--color-grey-400);
+      font-weight: 500;
+    }
+
+    .val {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-grey-800);
+    }
+  }
+`;
+
+const CustomTooltipBox = styled.div`
+  background: var(--color-grey-0);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--border-radius-md);
+  padding: 1rem 1.4rem;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  .tooltip-date {
+    font-size: 1.15rem;
+    color: var(--color-grey-400);
+    font-weight: 600;
+  }
+
+  .tooltip-sales {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--color-brand-600);
+  }
+`;
+
+function CustomTooltip({ active, payload, label }) {
+  if (active && payload && payload.length) {
     return (
-      <StyledSalesChart>
-        <Heading as="h2">Sales Chart</Heading>
-        <div style={{ padding: "20px", textAlign: "center" }}>
-          No sales data available
-        </div>
-      </StyledSalesChart>
+      <CustomTooltipBox>
+        <span className="tooltip-date">Ngày {label}</span>
+        <span className="tooltip-sales">
+          {formatCurrency(payload[0].value)}
+        </span>
+      </CustomTooltipBox>
     );
   }
+  return null;
+}
+
+function SalesChart({ orders, numDays }) {
+  const { isDarkMode } = useDarkMode();
 
   const validNumDays = numDays && numDays > 0 ? numDays : 7;
   const allDates = eachDayOfInterval({
@@ -44,50 +161,116 @@ function SalesChart({ orders, numDays }) {
     end: new Date(),
   });
 
+  const orderList = orders?.orders || [];
+
   const data = allDates.map((date) => {
-    const dayOrders = orders.orders.filter((order) => {
+    const dayOrders = orderList.filter((order) => {
       const orderDate = new Date(order.createdAt);
       return isSameDay(date, orderDate);
     });
 
-    const totalSales = dayOrders.reduce((acc, cur) => acc + cur.totalPrice, 0);
+    const totalSales = dayOrders.reduce(
+      (acc, cur) => acc + (cur.totalPrice || 0),
+      0
+    );
 
     return {
-      label: format(date, "MMM dd"),
+      label: format(date, "dd/MM"),
+      fullDate: format(date, "dd/MM/yyyy"),
       totalSales: totalSales,
     };
   });
 
+  const totalSalesPeriod = data.reduce((acc, cur) => acc + cur.totalSales, 0);
+  const avgSalesPerDay = Math.round(totalSalesPeriod / (data.length || 1));
+  const peakSales = Math.max(...data.map((d) => d.totalSales), 0);
+
   const colors = isDarkMode
     ? {
-        totalSales: { stroke: "#4f46e5", fill: "#4f46e5" },
-        extrasSales: { stroke: "#22c55e", fill: "#22c55e" },
-        text: "#e5e7eb",
-        background: "#18212f",
+        stroke: "#38bdf8",
+        fillStart: "rgba(56, 189, 248, 0.45)",
+        fillEnd: "rgba(56, 189, 248, 0.0)",
+        text: "#9ca3af",
       }
     : {
-        totalSales: { stroke: "#4f46e5", fill: "#c7d2fe" },
-        extrasSales: { stroke: "#16a34a", fill: "#dcfce7" },
-        text: "#374151",
-        background: "#fff",
+        stroke: "#0284c7",
+        fillStart: "rgba(2, 132, 199, 0.35)",
+        fillEnd: "rgba(2, 132, 199, 0.0)",
+        text: "#6b7280",
       };
 
   return (
-    <StyledSalesChart>
-      <Heading as="h2">
-        {" "}
-        Sales from {format(allDates.at(0), "MMM dd yyyy")} &mdash;{" "}
-        {format(allDates.at(-1), "MMM dd yyyy")}{" "}
-      </Heading>
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={data}>
+    <ChartContainer>
+      <HeaderRow>
+        <div className="title-group">
+          <div className="icon-box">
+            <TrendingUp size={20} />
+          </div>
+          <div>
+            <h3>Biểu Đồ Doanh Thu Phòng Khám</h3>
+            <span className="period-tag">
+              Từ {format(allDates.at(0), "dd/MM/yyyy")} đến{" "}
+              {format(allDates.at(-1), "dd/MM/yyyy")}
+            </span>
+          </div>
+        </div>
+      </HeaderRow>
+
+      <MetricsSummaryRow>
+        <MetricMiniPill $color="#10b981">
+          <DollarSign size={20} className="pill-icon" />
+          <div className="pill-text">
+            <span className="label">Tổng doanh thu kỳ</span>
+            <span className="val">{formatCurrency(totalSalesPeriod)}</span>
+          </div>
+        </MetricMiniPill>
+
+        <MetricMiniPill $color="#0284c7">
+          <BarChart3 size={20} className="pill-icon" />
+          <div className="pill-text">
+            <span className="label">Trung bình mỗi ngày</span>
+            <span className="val">{formatCurrency(avgSalesPerDay)}</span>
+          </div>
+        </MetricMiniPill>
+
+        <MetricMiniPill $color="#f59e0b">
+          <TrendingUp size={20} className="pill-icon" />
+          <div className="pill-text">
+            <span className="label">Đỉnh doanh thu ngày</span>
+            <span className="val">{formatCurrency(peakSales)}</span>
+          </div>
+        </MetricMiniPill>
+      </MetricsSummaryRow>
+
+      <ResponsiveContainer width="100%" height={290}>
+        <AreaChart
+          data={data}
+          margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="5%"
+                stopColor={colors.fillStart}
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="95%"
+                stopColor={colors.fillEnd}
+                stopOpacity={0.1}
+              />
+            </linearGradient>
+          </defs>
           <XAxis
             dataKey="label"
-            tick={{ fill: colors.text }}
-            tickLine={{ stroke: colors.text }}
+            tick={{ fill: colors.text, fontSize: 12 }}
+            tickLine={false}
+            axisLine={{ stroke: "var(--color-grey-200)" }}
           />
           <YAxis
-            tick={{ fill: colors.text }}
+            tick={{ fill: colors.text, fontSize: 12 }}
+            tickLine={false}
+            axisLine={false}
             tickFormatter={(value) =>
               new Intl.NumberFormat("vi-VN", {
                 notation: "compact",
@@ -95,22 +278,21 @@ function SalesChart({ orders, numDays }) {
               }).format(value)
             }
           />
-          <CartesianGrid strokeDasharray="4" />
-          <Tooltip
-            contentStyle={{ backgroundColor: colors.background }}
-            formatter={(value, name) => [formatCurrency(value), name]}
-          />
+          <CartesianGrid vertical={false} />
+          <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"
             dataKey="totalSales"
-            stroke={colors.totalSales.stroke}
-            fill={colors.totalSales.fill}
-            strokeWidth={2}
-            name="Total sales"
+            stroke={colors.stroke}
+            strokeWidth={3}
+            fill="url(#salesGradient)"
+            name="Doanh thu"
+            dot={{ r: 3, fill: colors.stroke }}
+            activeDot={{ r: 6, stroke: "#ffffff", strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>
-    </StyledSalesChart>
+    </ChartContainer>
   );
 }
 

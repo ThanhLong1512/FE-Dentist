@@ -1,18 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { handleGetPatients, handleSearchPatients } from "../../apis/index";
 
-export function usePatients({ q } = {}) {
+export function usePatients() {
   const {
     isLoading,
     data: patients,
     error,
   } = useQuery({
-    queryKey: ["patients", q || ""],
-    queryFn: () =>
-      q && q.trim()
-        ? handleSearchPatients({ q: q.trim(), limit: 50 })
-        : handleGetPatients(),
-    enabled: true,
+    queryKey: ["patients"],
+    queryFn: handleGetPatients,
   });
 
   return { isLoading, error, patients: patients || [] };

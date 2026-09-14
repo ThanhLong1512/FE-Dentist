@@ -1,10 +1,14 @@
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { UserPlus, UserCheck } from "lucide-react";
 
 import Input from "../../components/admin/Input";
 import Form from "../../components/admin/Form";
 import Button from "../../components/admin/Button";
 import { Textarea } from "../../components/admin/Textarea";
-import FormRow from "../../components/admin/FormRow";
+import Select from "../../components/admin/Select";
+import FormRow, { FormGrid } from "../../components/admin/FormRow";
+import FormHeader from "../../components/admin/FormHeader";
 import { useCreatePatient } from "./useCreatePatient";
 import { useEditPatient } from "./useEditPatient";
 
@@ -18,14 +22,14 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
   const defaultValues = isEditSession
     ? {
         name: editValues.name || "",
-        gender: editValues.gender || true,
+        gender: editValues.gender !== undefined ? String(editValues.gender) : "true",
         yearOfBirth: editValues.yearOfBirth || "",
         phoneNumber: editValues.phoneNumber || "",
         address: editValues.address || "",
       }
     : {
         name: "",
-        gender: true,
+        gender: "true",
         yearOfBirth: "",
         phoneNumber: "",
         address: "",
@@ -37,14 +41,14 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
   const { errors } = formState;
 
   function onSubmit(data) {
-    // Convert gender to boolean: true = male, false = female
     const patientData = {
       ...data,
+      name: data.name.trim(),
       gender: data.gender === "true" || data.gender === true,
       yearOfBirth: Number(data.yearOfBirth),
+      phoneNumber: data.phoneNumber.trim(),
+      address: data.address.trim(),
     };
-
-    console.log("Submitting patient data:", patientData);
 
     if (isEditSession) {
       editPatient(
@@ -54,6 +58,7 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
         },
         {
           onSuccess: () => {
+            toast.success("Cập nhật hồ sơ bệnh nhân thành công!");
             reset();
             onCloseModal?.();
           },
@@ -62,6 +67,7 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
     } else {
       createPatient(patientData, {
         onSuccess: () => {
+          toast.success("Thêm bệnh nhân mới thành công!");
           reset();
           onCloseModal?.();
         },
@@ -72,7 +78,7 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
   function onError(errors) {
     const firstError = Object.values(errors)[0];
     if (firstError?.message) {
-      alert(firstError.message);
+      toast.error(firstError.message);
     }
   }
 
@@ -83,89 +89,94 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
       onSubmit={handleSubmit(onSubmit, onError)}
       type={onCloseModal ? "modal" : "regular"}
     >
-      <FormRow label="Patient name" error={errors?.name?.message}>
-        <Input
-          type="text"
-          id="name"
-          disabled={isWorking}
-          {...register("name", {
-            required: "This field is required",
-            minLength: {
-              value: 2,
-              message: "Patient name must be at least 2 characters",
-            },
-          })}
-        />
-      </FormRow>
+      <FormHeader
+        icon={isEditSession ? <UserCheck /> : <UserPlus />}
+        title={isEditSession ? "Cập nhật hồ sơ bệnh nhân" : "Thêm bệnh nhân mới"}
+        subtitle="Điền thông tin định danh và liên lạc của bệnh nhân để quản lý hồ sơ khám và lịch hẹn."
+      />
 
-      <FormRow label="Gender" error={errors?.gender?.message}>
-        <select
-          id="gender"
-          disabled={isWorking}
-          {...register("gender", {
-            required: "This field is required",
-          })}
-          style={{
-            width: "100%",
-            padding: "0.8rem 1.2rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.5rem",
-            fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f3f4f6" : "white",
-          }}
-        >
-          <option value={true}>Nam</option>
-          <option value={false}>Nữ</option>
-        </select>
-      </FormRow>
+      <FormGrid>
+        <FormRow label="Họ và tên bệnh nhân" required error={errors?.name?.message}>
+          <Input
+            type="text"
+            id="name"
+            placeholder="Ví dụ: Nguyễn Văn A"
+            disabled={isWorking}
+            {...register("name", {
+              required: "Vui lòng nhập họ và tên bệnh nhân",
+              minLength: {
+                value: 2,
+                message: "Tên bệnh nhân phải có ít nhất 2 ký tự",
+              },
+            })}
+          />
+        </FormRow>
 
-      <FormRow label="Year of Birth" error={errors?.yearOfBirth?.message}>
-        <Input
-          type="number"
-          id="yearOfBirth"
-          disabled={isWorking}
-          {...register("yearOfBirth", {
-            required: "This field is required",
-            min: {
-              value: 1900,
-              message: "Year of birth cannot be before 1900",
-            },
-            max: {
-              value: currentYear,
-              message: `Year of birth cannot be after ${currentYear}`,
-            },
-            valueAsNumber: true,
-          })}
-        />
-      </FormRow>
+        <FormRow label="Giới tính" required error={errors?.gender?.message}>
+          <Select
+            id="gender"
+            disabled={isWorking}
+            {...register("gender", {
+              required: "Vui lòng chọn giới tính",
+            })}
+            options={[
+              { value: "true", label: "Nam" },
+              { value: "false", label: "Nữ" },
+            ]}
+          />
+        </FormRow>
+      </FormGrid>
 
-      <FormRow label="Phone number" error={errors?.phoneNumber?.message}>
-        <Input
-          type="tel"
-          id="phoneNumber"
-          disabled={isWorking}
-          placeholder="e.g., 0123 456 789"
-          {...register("phoneNumber", {
-            required: "This field is required",
-            pattern: {
-              value: /^[\d\s\-\+\(\)]+$/,
-              message: "Invalid phone number format",
-            },
-          })}
-        />
-      </FormRow>
+      <FormGrid>
+        <FormRow label="Năm sinh" required error={errors?.yearOfBirth?.message}>
+          <Input
+            type="number"
+            id="yearOfBirth"
+            placeholder="Ví dụ: 1995"
+            disabled={isWorking}
+            {...register("yearOfBirth", {
+              required: "Vui lòng nhập năm sinh",
+              min: {
+                value: 1900,
+                message: "Năm sinh không hợp lệ (từ 1900 trở đi)",
+              },
+              max: {
+                value: currentYear,
+                message: `Năm sinh không được vượt quá ${currentYear}`,
+              },
+              valueAsNumber: true,
+            })}
+          />
+        </FormRow>
 
-      <FormRow label="Address" error={errors?.address?.message}>
+        <FormRow label="Số điện thoại" required error={errors?.phoneNumber?.message}>
+          <Input
+            type="tel"
+            id="phoneNumber"
+            placeholder="Ví dụ: 0912 345 678"
+            disabled={isWorking}
+            {...register("phoneNumber", {
+              required: "Vui lòng nhập số điện thoại liên hệ",
+              pattern: {
+                value: /^[\d\s\-\+\(\)]{9,15}$/,
+                message: "Số điện thoại không hợp lệ (9-15 chữ số)",
+              },
+            })}
+          />
+        </FormRow>
+      </FormGrid>
+
+      <FormRow label="Địa chỉ liên hệ" required error={errors?.address?.message}>
         <Textarea
           id="address"
           disabled={isWorking}
-          placeholder="Patient's address"
+          placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."
           rows={3}
           {...register("address", {
-            required: "This field is required",
+            required: "Vui lòng nhập địa chỉ bệnh nhân",
             maxLength: {
               value: 300,
-              message: "Address cannot exceed 300 characters",
+              message: "Địa chỉ không vượt quá 300 ký tự",
             },
           })}
         />
@@ -175,20 +186,21 @@ function CreatePatientForm({ patientToEdit = {}, onCloseModal }) {
         <Button
           variation="secondary"
           type="button"
+          disabled={isWorking}
           onClick={() => {
             onCloseModal?.();
           }}
         >
-          Cancel
+          Hủy bỏ
         </Button>
         <Button type="submit" disabled={isWorking}>
           {isWorking
             ? isEditSession
-              ? "Updating..."
-              : "Creating..."
+              ? "Đang cập nhật..."
+              : "Đang lưu..."
             : isEditSession
-            ? "Update Patient"
-            : "Create Patient"}
+            ? "Cập nhật hồ sơ"
+            : "Lưu bệnh nhân mới"}
         </Button>
       </FormRow>
     </Form>

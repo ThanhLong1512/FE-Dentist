@@ -1,3 +1,5 @@
+import styled from "styled-components";
+import { CalendarX, Search } from "lucide-react";
 import Spinner from "../../components/admin/Spinner";
 import AppointmentRow from "./AppointmentRow";
 import { useAppointments } from "./useAppointments";
@@ -6,21 +8,44 @@ import Menus from "../../components/admin/Menus";
 import { useSearchParams } from "react-router-dom";
 import Pagination from "../../components/admin/Pagination";
 import { PAGE_SIZE } from "../../utils/constants";
-import styled from "styled-components";
 
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 0.8rem 1rem;
+const EmptyStateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  gap: 1.2rem;
+  background: var(--color-grey-0);
   border: 1px solid var(--color-grey-200);
-  border-radius: var(--border-radius-sm);
-  background: transparent;
-  color: inherit;
+  border-radius: var(--border-radius-md);
+  text-align: center;
+
+  svg {
+    width: 4.8rem;
+    height: 4.8rem;
+    color: var(--color-grey-300);
+  }
+
+  h3 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--color-grey-700);
+    margin: 0;
+  }
+
+  p {
+    font-size: 1.3rem;
+    color: var(--color-grey-400);
+    margin: 0;
+    max-width: 32rem;
+  }
 `;
 
 function AppointmentTable() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const q = searchParams.get("q") || "";
-  const { isLoading, error, appointments } = useAppointments({ q });
+  const { isLoading, error, appointments = [] } = useAppointments({ q });
 
   if (isLoading) return <Spinner />;
   if (error)
@@ -30,11 +55,22 @@ function AppointmentTable() {
       </div>
     );
 
+  const safeAppointments = appointments || [];
+
+  if (safeAppointments.length === 0) {
+    return (
+      <EmptyStateContainer>
+        <CalendarX />
+        <h3>Chưa có lịch hẹn nào</h3>
+        <p>Hệ thống chưa ghi nhận lịch hẹn khám nào từ bệnh nhân.</p>
+      </EmptyStateContainer>
+    );
+  }
+
   let filteredAppointments;
 
   // Filter by patient gender
   const filterValue = q && q.trim() ? "all" : searchParams.get("gender") || "all";
-  const safeAppointments = appointments || [];
   if (filterValue === "all") filteredAppointments = safeAppointments;
   else if (filterValue === "male")
     filteredAppointments = safeAppointments.filter(
@@ -46,31 +82,41 @@ function AppointmentTable() {
     );
   else filteredAppointments = safeAppointments;
 
+  if (filteredAppointments.length === 0) {
+    return (
+      <EmptyStateContainer>
+        <Search />
+        <h3>Không tìm thấy lịch hẹn phù hợp</h3>
+        <p>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+      </EmptyStateContainer>
+    );
+  }
+
   // 2) SORT
   const sortBy = searchParams.get("sortBy") || "Date-desc";
   const [field, direction] = sortBy.split("-");
   const modifier = direction === "asc" ? 1 : -1;
 
-  const sortedAppointments = [...(filteredAppointments || [])].sort((a, b) => {
+  const sortedAppointments = [...filteredAppointments].sort((a, b) => {
     if (field === "patientName") {
       return ((a.patient?.name || "").localeCompare(b.patient?.name || "")) * modifier;
     } else if (field === "doctorName") {
       return (
         ((a.shift?.employee?.name || "").localeCompare(b.shift?.employee?.name || "")) * modifier
       );
-    } else if (field === "Date") {
-      return (new Date(a.Date || 0) - new Date(b.Date || 0)) * modifier;
     } else if (field === "service") {
       return (
-        ((a.shift?.employee?.service?.nameService || "").localeCompare(
-          b.shift?.employee?.service?.nameService || ""
-        )) * modifier
+        ((a.service?.nameService || "").localeCompare(b.service?.nameService || "")) * modifier
       );
-    } else {
-      return ((a[field] || 0) - (b[field] || 0)) * modifier;
+    } else if (field === "Date") {
+      const dateA = new Date(a.date || a.Date || 0).getTime();
+      const dateB = new Date(b.date || b.Date || 0).getTime();
+      return (dateA - dateB) * modifier;
     }
+    return 0;
   });
 
+  // 3) PAGINATION
   const currentPage = !searchParams.get("page")
     ? 1
     : Number(searchParams.get("page"));
@@ -81,29 +127,16 @@ function AppointmentTable() {
 
   return (
     <Menus>
-      <div style={{ marginBottom: 12 }}>
-        <SearchInput
-          placeholder="Tìm theo bệnh nhân / ghi chú / bác sĩ..."
-          value={q}
-          onChange={(e) => {
-            const next = e.target.value;
-            if (!next) searchParams.delete("q");
-            else searchParams.set("q", next);
-            searchParams.set("page", "1");
-            setSearchParams(searchParams);
-          }}
-        />
-      </div>
-      <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr">
+      <Table columns="1.2fr 1.2fr 1.4fr 1fr 0.9fr 1fr 1fr 0.6fr">
         <Table.Header>
-          <div>Patient</div>
-          <div>Doctor</div>
-          <div>Service</div>
-          <div>Date</div>
-          <div>Time</div>
-          <div>Status</div>
-          <div>Price</div>
-          <div></div>
+          <div>Bệnh nhân</div>
+          <div>Bác sĩ</div>
+          <div>Dịch vụ</div>
+          <div>Ngày khám</div>
+          <div>Giờ khám</div>
+          <div>Trạng thái</div>
+          <div>Chi phí</div>
+          <div>Thao tác</div>
         </Table.Header>
         <Table.Body
           data={paginatedAppointments}

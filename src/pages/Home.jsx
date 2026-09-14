@@ -1,1480 +1,962 @@
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { handleLogoutApi } from "../apis/index";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import {
+  Sparkles,
+  Calendar,
+  ArrowRight,
+  ShieldCheck,
+  Award,
+  Star,
+  Clock,
+  Phone,
+  CheckCircle2,
+  HeartHandshake,
+  Stethoscope,
+  ChevronRight,
+  Flame,
+} from "lucide-react";
+
+import { useServices } from "../features/services/useServices";
+import { useEmployees } from "../features/employee/useEmployees";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { getImageUrl, handleImageError } from "../utils/imageHelper";
 
-const Setup2FA = lazy(() => import("../components/setup-2fa"));
-const Require2FA = lazy(() => import("../components/require-2fa"));
-const HomeFooter = lazy(() => import("../components/HomeFooter"));
-const HomeFeatures = lazy(() => import("../components/HomeFeatures"));
-const HomeAbout = lazy(() => import("../components/HomeAbout"));
-const HomeServices = lazy(() => import("../components/HomeServices"));
-const HomeTeam = lazy(() => import("../components/HomeTeam"));
-const HomeAppointment = lazy(() => import("../components/HomeAppointment"));
-const HomePricing = lazy(() => import("../components/HomePricing"));
-const HomeNews = lazy(() => import("../components/HomeNews"));
-const HomeClients = lazy(() => import("../components/HomeClients"));
-const Chat = lazy(() => import("../components/Chat"));
-const Spinner = lazy(() => import("../components/admin/Spinner"));
+const HomeWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: ${(props) =>
+    props.$isDark ? "#0b1329" : "#ffffff"};
+  color: ${(props) =>
+    props.$isDark ? "#f8fafc" : "#1e293b"};
+  overflow-x: hidden;
+`;
 
-function Home() {
-  const [openSetup2FA, setOpenSetup2FA] = useState(false);
-  const [showRequire2FA, setShowRequire2FA] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState("vi");
-  const { isDarkMode: darkMode, toggleDarkMode } = useDarkMode();
-  const userMenuRef = useRef(null);
+// HERO SECTION
+const HeroSection = styled.section`
+  position: relative;
+  padding: 8rem 2rem 10rem;
+  background: ${(props) =>
+    props.$isDark
+      ? "radial-gradient(ellipse at 80% 20%, rgba(14, 165, 233, 0.15), transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(37, 99, 235, 0.15), transparent 50%), #0f172a"
+      : "radial-gradient(ellipse at 80% 20%, rgba(14, 165, 233, 0.12), transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(37, 99, 235, 0.08), transparent 50%), #f8fafc"};
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  let formatEmail,
-    check2FA = false,
-    checkVerify2FA;
+  @media (max-width: 768px) {
+    padding: 5rem 1.6rem 6rem;
+  }
+`;
 
-  const useInfoFromLocalStorage = localStorage.getItem("userInfo");
+const HeroContainer = styled.div`
+  max-width: 1280px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr;
+  gap: 5rem;
+  align-items: center;
 
-  const navigate = useNavigate();
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 4rem;
+  }
+`;
 
-  useEffect(() => {
-    const userInfo = getUserInfoFromStorage();
-    if (userInfo) {
-      setShowRequire2FA(userInfo.require_2FA && !userInfo.is_2fa_verified);
-    }
-    const handleClickOutside = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
-      }
-    };
+const HeroContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const getUserInfoFromStorage = () => {
-    const storedInfo = localStorage.getItem("userInfo");
-    if (storedInfo) {
-      return JSON.parse(storedInfo);
-    }
-    return null;
-  };
-
-  const handleLogout = async () => {
-    await handleLogoutApi().then(() => navigate("/login"));
-  };
-
-  const handleSuccessVerify2FA = (response) => {
-    const { is_2fa_verified, last_login, user } = response.data;
-    const newUserInfo = {
-      email: user.email,
-      id: user._id,
-      role: user.role,
-      require_2FA: user.require_2FA,
-      is_2fa_verified: is_2fa_verified,
-      last_login: last_login,
-    };
-    localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
-    setShowRequire2FA(false);
-  };
-
-  const handleSuccessSetup2FA = (response) => {
-    const { is_2fa_verified, last_login, user } = response.data;
-    const newUserInfo = {
-      email: user.email,
-      id: user._id,
-      role: user.role,
-      require_2FA: user.require_2FA,
-      is_2fa_verified: is_2fa_verified,
-      last_login: last_login,
-    };
-    localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
-    setOpenSetup2FA(false);
-  };
-
-  const changeLanguage = (language) => {
-    setCurrentLanguage(language);
-  };
-
-  const userInfo = getUserInfoFromStorage();
-  if (userInfo) {
-    const { email, require_2FA, is_2fa_verified, image } = userInfo;
-    formatEmail = email.split("@")[0];
-    check2FA = require_2FA;
-    checkVerify2FA = is_2fa_verified;
+  @media (max-width: 960px) {
+    align-items: center;
   }
 
-  const userMenuStyle = {
-    position: "absolute",
-    top: "100%",
-    right: "0",
-    backgroundColor: darkMode ? "#1e293b" : "#fff",
-    color: darkMode ? "#e2e8f0" : "#1e293b",
-    boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
-    borderRadius: "8px",
-    width: "220px",
-    zIndex: "1000",
-    padding: "8px 0",
-    display: showUserMenu ? "block" : "none",
-    border: darkMode ? "1px solid #334155" : "1px solid #e2e8f0",
-  };
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 1.6rem;
+    border-radius: 999px;
+    background: rgba(14, 165, 233, 0.15);
+    color: #0284c7;
+    font-size: 1.35rem;
+    font-weight: 700;
+    align-self: flex-start;
 
-  const menuItemStyle = {
-    padding: "10px 16px",
-    display: "block",
-    color: darkMode ? "#e2e8f0" : "#1e293b",
-    textDecoration: "none",
-    transition: "background-color 0.2s",
-    cursor: "pointer",
-  };
+    @media (max-width: 960px) {
+      align-self: center;
+    }
+  }
 
-  const dividerStyle = {
-    height: "1px",
-    margin: "8px 0",
-    backgroundColor: darkMode ? "#334155" : "#e2e8f0",
-  };
+  h1 {
+    font-size: clamp(3.2rem, 5vw, 5.2rem);
+    font-weight: 850;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+    margin: 0;
 
-  const avatarContainerStyle = {
-    position: "relative",
-    cursor: "pointer",
-  };
+    span.highlight {
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
 
-  const avatarStyle = {
-    width: "40px",
-    height: "40px",
-    borderRadius: "50%",
-    objectFit: "cover",
-    border: "2px solid #fff",
-  };
+  p.subtitle {
+    font-size: 1.7rem;
+    line-height: 1.7;
+    color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    margin: 0;
+    max-width: 580px;
+  }
+
+  .cta-group {
+    display: flex;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+
+    @media (max-width: 960px) {
+      justify-content: center;
+    }
+  }
+`;
+
+const PrimaryButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.4rem 2.8rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(14, 165, 233, 0.45);
+    background: linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%);
+  }
+`;
+
+const SecondaryButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.4rem 2.6rem;
+  border-radius: 999px;
+  background: ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
+  color: ${(props) => (props.$isDark ? "#f8fafc" : "#1e293b")};
+  font-size: 1.55rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid
+    ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    background: ${(props) => (props.$isDark ? "#334155" : "#f1f5f9")};
+    transform: translateY(-2px);
+  }
+`;
+
+const HeroVisual = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+
+  .card-banner {
+    width: 100%;
+    max-width: 440px;
+    border-radius: 2.4rem;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    border: 4px solid ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
+
+    img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .floating-badge {
+    position: absolute;
+    bottom: -2rem;
+    left: -2rem;
+    background: ${(props) =>
+      props.$isDark ? "rgba(30, 41, 59, 0.95)" : "rgba(255, 255, 255, 0.95)"};
+    backdrop-filter: blur(12px);
+    border: 1px solid
+      ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
+    padding: 1.4rem 1.8rem;
+    border-radius: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+    .icon-star {
+      width: 4.4rem;
+      height: 4.4rem;
+      border-radius: 50%;
+      background: #fef3c7;
+      color: #f59e0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .info {
+      white-space: nowrap;
+      h5 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 800;
+        white-space: nowrap;
+        color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+      }
+      p {
+        margin: 0;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        color: #64748b;
+      }
+    }
+
+    @media (max-width: 640px) {
+      left: 1rem;
+      bottom: -1rem;
+    }
+  }
+`;
+
+// STATS ROW
+const StatsSection = styled.section`
+  max-width: 1280px;
+  margin: -4rem auto 6rem;
+  padding: 0 2rem;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+`;
+
+const StatsCard = styled.div`
+  background: ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
+  border: 1px solid
+    ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
+  border-radius: 1.6rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+
+  @media (max-width: 860px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+    position: relative;
+
+    &:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 15%;
+      height: 70%;
+      width: 1px;
+      background: ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
+
+      @media (max-width: 860px) {
+        display: none;
+      }
+    }
+
+    .num {
+      font-size: 3.2rem;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .label {
+      font-size: 1.4rem;
+      font-weight: 600;
+      white-space: nowrap;
+      color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    }
+  }
+`;
+
+// COMMON SECTION STYLES
+const SectionWrapper = styled.section`
+  padding: 6rem 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+`;
+
+const SectionHeader = styled.div`
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 4.5rem;
+
+  .tag {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0284c7;
+    background: rgba(14, 165, 233, 0.1);
+    padding: 0.4rem 1.4rem;
+    border-radius: 999px;
+  }
+
+  h2 {
+    font-size: clamp(2.6rem, 3.5vw, 3.8rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+    margin: 0;
+  }
+
+  p {
+    font-size: 1.6rem;
+    color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    max-width: 600px;
+    margin: 0;
+    line-height: 1.6;
+  }
+`;
+
+// FEATURES / PILLARS
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2.4rem;
+`;
+
+const FeatureCard = styled.div`
+  background: ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
+  border: 1px solid
+    ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
+  border-radius: 1.6rem;
+  padding: 2.8rem 2.4rem;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    border-color: #0284c7;
+  }
+
+  .icon-wrap {
+    width: 5.6rem;
+    height: 5.6rem;
+    border-radius: 1.4rem;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(37, 99, 235, 0.15));
+    color: #0284c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+  }
+
+  p {
+    font-size: 1.4rem;
+    line-height: 1.6;
+    color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    margin: 0;
+  }
+`;
+
+// SERVICES SHOWCASE
+const ServicesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 2.8rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ServiceCard = styled.div`
+  background: ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
+  border: 1px solid
+    ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
+  border-radius: 1.8rem;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+    border-color: #0284c7;
+  }
+
+  .img-holder {
+    height: 200px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    background: ${(props) => (props.$isDark ? "#0f172a" : "#e2e8f0")};
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+
+    .duration-tag {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      color: #ffffff;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+  }
+
+  .card-body {
+    padding: 2.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    flex: 1;
+
+    h4 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+    }
+
+    p.summary {
+      font-size: 1.35rem;
+      line-height: 1.6;
+      color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+      margin: 0;
+      flex: 1;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid
+        ${(props) => (props.$isDark ? "#334155" : "#f1f5f9")};
+      padding-top: 1.4rem;
+      margin-top: auto;
+
+      .price {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: #0284c7;
+      }
+    }
+  }
+`;
+
+// DOCTOR TEAM
+const DoctorsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2.4rem;
+`;
+
+const DoctorCard = styled.div`
+  background: ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
+  border: 1px solid
+    ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
+  border-radius: 1.6rem;
+  overflow: hidden;
+  text-align: center;
+  transition: all 0.25s ease;
+  padding-bottom: 2rem;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.07);
+  }
+
+  .doc-avatar {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    background: ${(props) => (props.$isDark ? "#0f172a" : "#e2e8f0")};
+  }
+
+  .doc-info {
+    padding: 1.8rem 1.6rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    h4 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+    }
+
+    span.exp {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #0284c7;
+    }
+
+    p.bio {
+      font-size: 1.3rem;
+      color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+      margin: 0;
+    }
+  }
+`;
+
+// CTA BANNER
+const CTABanner = styled.div`
+  background: linear-gradient(135deg, #0284c7 0%, #1e40af 100%);
+  color: white;
+  border-radius: 2.4rem;
+  padding: 5rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem;
+  margin: 4rem 0;
+  box-shadow: 0 20px 40px rgba(2, 132, 199, 0.25);
+
+  @media (max-width: 860px) {
+    flex-direction: column;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .content {
+    h2 {
+      font-size: 3.2rem;
+      font-weight: 850;
+      margin: 0 0 1rem;
+    }
+    p {
+      font-size: 1.6rem;
+      margin: 0;
+      opacity: 0.9;
+      max-width: 600px;
+    }
+  }
+
+  a.btn-white {
+    padding: 1.5rem 3rem;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0284c7;
+    font-size: 1.6rem;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s;
+
+    &:hover {
+      transform: scale(1.04);
+      background: #f8fafc;
+    }
+  }
+`;
+
+export default function Home() {
+  const { isDarkMode } = useDarkMode();
+  const { services = [] } = useServices();
+  const { employees = [] } = useEmployees();
+  const navigate = useNavigate();
 
   return (
-    <>
-      {check2FA ? (
-        <div
-          style={{
-            backgroundColor: "#e1f5fe",
-            padding: "8px 12px",
-            borderRadius: "4px",
-            borderLeft: "4px solid #03a9f4",
-            margin: "5px 0",
-          }}
-        >
-          <span style={{ fontWeight: "500", color: "black" }}>
-            Account security status:
-          </span>{" "}
-          <span style={{ color: "#2e7d32" }}>
-            Two-Factor Authentication (2FA) enabled
-          </span>
-        </div>
-      ) : (
-        <div
-          style={{
-            backgroundColor: "#fff8e1",
-            padding: "8px 12px",
-            borderRadius: "4px",
-            borderLeft: "4px solid #ff9800",
-            margin: "5px 0",
-          }}
-        >
-          <span style={{ color: "#ff9800", fontWeight: "500" }}>
-            Security advice:
-          </span>
-          <span style={{ color: "#5f5f5f" }}>
-            Enable 2-step authentication to better protect your account.
-            <Link
-              to="#"
-              onClick={() => setOpenSetup2FA(true)}
-              style={{
-                color: "#1976d2",
-                marginLeft: "5px",
-                textDecoration: "underline",
-                cursor: "pointer",
-              }}
-            >
-              Turn it on now
-            </Link>
-          </span>
-        </div>
-      )}
-      <Setup2FA
-        isOpen={openSetup2FA}
-        toggleOpen={setOpenSetup2FA}
-        handleSuccessSetup2FA={handleSuccessSetup2FA}
-      />
-      <div className="mm-wrapper">
-        <div className="mm-page mm-slideout" id="mm-0">
-          <div className="page-wrapper">
-            <div className="preloader" style={{ display: "none" }}></div>
+    <HomeWrapper $isDark={isDarkMode}>
+      {/* 1. HERO SECTION */}
+      <HeroSection $isDark={isDarkMode}>
+        <HeroContainer>
+          <HeroContent $isDark={isDarkMode}>
+            <div className="badge">
+              <Sparkles size={16} /> Nha Khoa Kỹ Thuật Cao Chuẩn Quốc Tế
+            </div>
+            <h1>
+              Nụ Cười Tỏa Sáng, <br />
+              <span className="highlight">Tự Tin Tỏa Sắc</span> Mỗi Ngày
+            </h1>
+            <p className="subtitle">
+              Trải nghiệm dịch vụ chăm sóc răng miệng 5 sao với công nghệ vô trùng
+              áp lực dương, máy chụp phim 3D kỹ thuật số và đội ngũ Bác sĩ chuyên
+              khoa đầu ngành Răng Hàm Mặt.
+            </p>
+            <div className="cta-group">
+              <PrimaryButton to="/booking">
+                <Calendar size={18} />
+                <span>Đặt Lịch Khám Nhanh</span>
+              </PrimaryButton>
+              <SecondaryButton to="/shop" $isDark={isDarkMode}>
+                <span>Xem Bảng Giá Dịch Vụ</span>
+                <ArrowRight size={16} />
+              </SecondaryButton>
+            </div>
+          </HeroContent>
 
-            <header className="main-header header-style-one">
-              <div className="header-top">
-                <div className="auto-container">
-                  <div className="inner-container">
-                    <div className="top-left">
-                      <ul className="contact-list clearfix">
-                        <li>
-                          <i className="flaticon-hospital-1"></i>66 Hùng Vương,
-                          Hue, Vietnam{" "}
-                        </li>
-                        <li>
-                          <i className="flaticon-back-in-time"></i>Mon - Sat
-                          8.00 - 18.00. Sunday CLOSED
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="top-right">
-                      <ul className="social-icon-one">
-                        <li>
-                          <a href="#">
-                            <span className="fab fa-facebook-f"></span>
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#">
-                            <span className="fab fa-twitter"></span>
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#">
-                            <span className="fab fa-skype"></span>
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#">
-                            <span className="fab fa-linkedin-in"></span>
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
+          <HeroVisual $isDark={isDarkMode}>
+            <div className="card-banner">
+              <img
+                src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
+                alt="Modern Dental Clinic"
+              />
+            </div>
+            <div className="floating-badge">
+              <div className="icon-star">
+                <Star size={24} fill="#f59e0b" />
+              </div>
+              <div className="info">
+                <h5>4.9 / 5.0</h5>
+                <p>15,000+ Đánh giá hài lòng</p>
+              </div>
+            </div>
+          </HeroVisual>
+        </HeroContainer>
+      </HeroSection>
+
+      {/* 2. STATS BAR */}
+      <StatsSection>
+        <StatsCard $isDark={isDarkMode}>
+          <div className="stat-col">
+            <span className="num">15,000+</span>
+            <span className="label">Nụ cười được phục hồi</span>
+          </div>
+          <div className="stat-col">
+            <span className="num">20+</span>
+            <span className="label">Bác sĩ chuyên khoa I & II</span>
+          </div>
+          <div className="stat-col">
+            <span className="num">100%</span>
+            <span className="label">Vô trùng chuẩn Autoclave</span>
+          </div>
+          <div className="stat-col">
+            <span className="num">10+</span>
+            <span className="label">Năm uy tín & đồng hành</span>
+          </div>
+        </StatsCard>
+      </StatsSection>
+
+      {/* 3. TẠI SAO CHỌN DENTIST PRO */}
+      <SectionWrapper>
+        <SectionHeader $isDark={isDarkMode}>
+          <span className="tag">Ưu thế vượt trội</span>
+          <h2>Vì Sao 15.000+ Khách Hàng Tin Tưởng?</h2>
+          <p>
+            Chúng tôi ứng dụng công nghệ tiên tiến nhất từ Đức và Hoa Kỳ mang đến
+            trải nghiệm điều trị nha khoa êm ái, an toàn tuyệt đối.
+          </p>
+        </SectionHeader>
+
+        <FeaturesGrid>
+          <FeatureCard $isDark={isDarkMode}>
+            <div className="icon-wrap">
+              <Stethoscope size={28} />
+            </div>
+            <h3>Bác Sĩ Chuyên Môn Cao</h3>
+            <p>
+              100% đội ngũ bác sĩ tốt nghiệp Đại Học Y Dược, liên tục tu nghiệp
+              chuyên sâu tại Thụy Sĩ, Mỹ và Hàn Quốc.
+            </p>
+          </FeatureCard>
+
+          <FeatureCard $isDark={isDarkMode}>
+            <div className="icon-wrap">
+              <ShieldCheck size={28} />
+            </div>
+            <h3>Vô Trùng Chuẩn Y Tế</h3>
+            <p>
+              Hệ thống phòng mổ vô trùng áp lực dương và thiết bị hấp sấy Autoclave
+              tiêu diệt 99.9% vi khuẩn, ngăn ngừa lây nhiễm chéo.
+            </p>
+          </FeatureCard>
+
+          <FeatureCard $isDark={isDarkMode}>
+            <div className="icon-wrap">
+              <Award size={28} />
+            </div>
+            <h3>Bảo Hành Chính Hãng</h3>
+            <p>
+              Cam kết sử dụng trụ Implant Straumann, Nobel Biocare và răng sứ Cercon,
+              Lava chính hãng có thẻ bảo hành toàn cầu.
+            </p>
+          </FeatureCard>
+
+          <FeatureCard $isDark={isDarkMode}>
+            <div className="icon-wrap">
+              <HeartHandshake size={28} />
+            </div>
+            <h3>Trả Góp 0% Lãi Suất</h3>
+            <p>
+              Hỗ trợ chia nhỏ đợt thanh toán cho dịch vụ Niềng răng và Trồng Implant,
+              giảm nhẹ gánh nặng tài chính cho gia đình.
+            </p>
+          </FeatureCard>
+        </FeaturesGrid>
+      </SectionWrapper>
+
+      {/* 4. DỊCH VỤ NỔI BẬT */}
+      <SectionWrapper>
+        <SectionHeader $isDark={isDarkMode}>
+          <span className="tag">Dịch vụ nha khoa</span>
+          <h2>Các Dịch Vụ Mũi Nhọn Của Chúng Tôi</h2>
+          <p>
+            Đa dạng các giải pháp chăm sóc nụ cười từ điều trị tổng quát đến thẩm
+            mỹ phục hình chuyên sâu.
+          </p>
+        </SectionHeader>
+
+        <ServicesGrid>
+          {(services.length > 0 ? services.slice(0, 6) : [
+            {
+              _id: "1",
+              nameService: "Trồng Răng Implant Kỹ Thuật Số",
+              summary: "Phục hồi răng mất trọn đời bằng trụ Titanium cao cấp nhập khẩu Thụy Sĩ, ăn nhai như răng thật.",
+              durationMinutes: 45,
+              priceService: 15000000,
+            },
+            {
+              _id: "2",
+              nameService: "Niềng Răng Trong Suốt Invisalign",
+              summary: "Chỉnh nha vô hình công nghệ Mỹ, tính thẩm mỹ cao, tháo lắp linh hoạt, không đau đớn.",
+              durationMinutes: 30,
+              priceService: 45000000,
+            },
+            {
+              _id: "3",
+              nameService: "Bọc Răng Sứ Thẩm Mỹ Nano",
+              summary: "Khắc phục răng ố vàng, sứt mẻ, tạo dáng nụ cười chuẩn tỷ lệ vàng chỉ sau 2 lần hẹn.",
+              durationMinutes: 60,
+              priceService: 3500000,
+            },
+            {
+              _id: "4",
+              nameService: "Nhổ Răng Khôn Sóng Siêu Âm Piezotome",
+              summary: "Kỹ thuật nhổ răng không xâm lấn, lành thương nhanh chóng, hạn chế tối đa cảm giác đau nhức.",
+              durationMinutes: 20,
+              priceService: 1200000,
+            },
+            {
+              _id: "5",
+              nameService: "Tẩy Trắng Răng Laser Whitening",
+              summary: "Bật tông trắng sáng chỉ sau 45 phút điều trị bằng công nghệ ánh sáng Laser an toàn cho men răng.",
+              durationMinutes: 45,
+              priceService: 1800000,
+            },
+            {
+              _id: "6",
+              nameService: "Điều Trị Tủy Vi Phẫu Không Đau",
+              summary: "Làm sạch ống tủy triệt để dưới kính hiển vi chuyên dụng, chấm dứt cơn đau nhức răng cấp tính.",
+              durationMinutes: 40,
+              priceService: 1500000,
+            },
+          ]).map((svc) => (
+            <ServiceCard key={svc._id} $isDark={isDarkMode}>
+              <div className="img-holder">
+                <img
+                  src={getImageUrl(
+                    svc.photoService,
+                    "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=600&q=80"
+                  )}
+                  alt={svc.nameService}
+                  onError={(e) =>
+                    handleImageError(
+                      e,
+                      "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=600&q=80"
+                    )
+                  }
+                />
+                <div className="duration-tag">
+                  <Clock size={12} />
+                  <span>{svc.durationMinutes || 30} phút</span>
                 </div>
               </div>
 
-              <div className="header-lower">
-                <div className="auto-container">
-                  <div className="main-box">
-                    <div className="logo-box">
-                      <div className="logo">
-                        <Link to="/home">
-                          <img
-                            src="/images/logo.png"
-                            alt=""
-                            title=""
-                            loading="lazy"
-                          />
-                        </Link>
-                      </div>
-                    </div>
+              <div className="card-body">
+                <h4>{svc.nameService}</h4>
+                <p className="summary">{svc.summary}</p>
 
-                    <div className="nav-outer">
-                      <nav className="nav main-menu">
-                        <ul className="navigation" id="navbar">
-                          <li className="current dropdown">
-                            <Link to="/home">
-                              <span>Home</span>
-                            </Link>
-                          </li>
-                          <li className="dropdown">
-                            <Link to="/shop">
-                              <span>Shop</span>
-                            </Link>
-                          </li>
-                          <li className="dropdown">
-                            <Link to="/blog">
-                              <span>Blog</span>
-                            </Link>
-                          </li>
-                          <li>
-                            <Link to="/contact">
-                              <span>Contact</span>
-                            </Link>
-                          </li>
-                          {useInfoFromLocalStorage ? (
-                            <>
-                              <li>
-                                <span
-                                  style={{
-                                    marginRight: "5px",
-                                    display: "inline-block",
-                                    width: "230px",
-                                  }}
-                                >
-                                  {formatEmail}{" "}
-                                  <span
-                                    style={{
-                                      fontSize: "20px",
-                                      marginRight: "5px",
-                                    }}
-                                  >
-                                    👋
-                                  </span>
-                                </span>
-                              </li>
-                              <li
-                                style={avatarContainerStyle}
-                              >
-                                <img
-                                  src={
-                                    userInfo?.image ||
-                                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle fill='%23e2e8f0' cx='50' cy='50' r='50'/%3E%3Ccircle fill='%2394a3b8' cx='50' cy='38' r='18'/%3E%3Cellipse fill='%2394a3b8' cx='50' cy='88' rx='28' ry='24'/%3E%3C/svg%3E"
-                                  }
-                                  alt="User"
-                                  loading="lazy"
-                                  style={avatarStyle}
-                                  onClick={() => setShowUserMenu(!showUserMenu)}
-                                />
-                                <div style={userMenuStyle} ref={userMenuRef}>
-                                  <Link
-                                    to="/account/profile"
-                                    style={menuItemStyle}
-                                    onClick={() => setShowUserMenu(false)}
-                                  >
-                                    <i
-                                      className="fas fa-user"
-                                      style={{
-                                        marginRight: "10px",
-                                        width: "20px",
-                                      }}
-                                    ></i>
-                                    My Account
-                                  </Link>
-
-                                  <Link
-                                    to="/account/appointments"
-                                    style={menuItemStyle}
-                                    onClick={() => setShowUserMenu(false)}
-                                  >
-                                    <i
-                                      className="fas fa-calendar-check"
-                                      style={{
-                                        marginRight: "10px",
-                                        width: "20px",
-                                      }}
-                                    ></i>
-                                    My Appointments
-                                  </Link>
-
-                                  <Link
-                                    to="/account/orders"
-                                    style={menuItemStyle}
-                                    onClick={() => setShowUserMenu(false)}
-                                  >
-                                    <i
-                                      className="fas fa-shopping-bag"
-                                      style={{
-                                        marginRight: "10px",
-                                        width: "20px",
-                                      }}
-                                    ></i>
-                                    My Orders
-                                  </Link>
-
-                                  <div style={dividerStyle}></div>
-
-                                  <div
-                                    style={menuItemStyle}
-                                    onClick={toggleDarkMode}
-                                  >
-                                    <i
-                                      className={
-                                        darkMode ? "fas fa-sun" : "fas fa-moon"
-                                      }
-                                      style={{
-                                        marginRight: "10px",
-                                        width: "20px",
-                                      }}
-                                    ></i>
-                                    {darkMode ? "Light Mode" : "Dark Mode"}
-                                    <span style={{ float: "right" }}>
-                                      <div
-                                        style={{
-                                          width: "40px",
-                                          height: "20px",
-                                          backgroundColor: darkMode
-                                            ? "#2196F3"
-                                            : "#ccc",
-                                          borderRadius: "10px",
-                                          position: "relative",
-                                          transition: "0.3s",
-                                        }}
-                                      >
-                                        <div
-                                          style={{
-                                            position: "absolute",
-                                            width: "16px",
-                                            height: "16px",
-                                            backgroundColor: "#fff",
-                                            borderRadius: "50%",
-                                            top: "2px",
-                                            left: darkMode ? "22px" : "2px",
-                                            transition: "0.3s",
-                                          }}
-                                        ></div>
-                                      </div>
-                                    </span>
-                                  </div>
-
-                                  <div style={dividerStyle}></div>
-
-                                  <div
-                                    style={{
-                                      padding: "10px 16px",
-                                      color: darkMode ? "#e2e8f0" : "#1e293b",
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        marginRight: "10px",
-                                        width: "20px",
-                                        display: "inline-block",
-                                      }}
-                                    >
-                                      <i className="fas fa-language"></i>
-                                    </span>
-                                    Language:
-                                    <div style={{ marginTop: "5px" }}>
-                                      <button
-                                        onClick={() => changeLanguage("vi")}
-                                        style={{
-                                          padding: "2px 8px",
-                                          marginRight: "5px",
-                                          backgroundColor:
-                                            currentLanguage === "vi"
-                                              ? "#2196F3"
-                                              : "#e0e0e0",
-                                          color:
-                                            currentLanguage === "vi"
-                                              ? "#fff"
-                                              : "#333",
-                                          border: "none",
-                                          borderRadius: "4px",
-                                          cursor: "pointer",
-                                        }}
-                                      >
-                                        VI
-                                      </button>
-                                      <button
-                                        onClick={() => changeLanguage("en")}
-                                        style={{
-                                          padding: "2px 8px",
-                                          backgroundColor:
-                                            currentLanguage === "en"
-                                              ? "#2196F3"
-                                              : "#e0e0e0",
-                                          color:
-                                            currentLanguage === "en"
-                                              ? "#fff"
-                                              : "#333",
-                                          border: "none",
-                                          borderRadius: "4px",
-                                          cursor: "pointer",
-                                        }}
-                                      >
-                                        EN
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  <div style={dividerStyle}></div>
-
-                                  <div
-                                    style={{
-                                      ...menuItemStyle,
-                                      color: "#f44336",
-                                    }}
-                                    onClick={handleLogout}
-                                  >
-                                    <i
-                                      className="fas fa-sign-out-alt"
-                                      style={{
-                                        marginRight: "10px",
-                                        width: "20px",
-                                      }}
-                                    ></i>
-                                    Logout
-                                  </div>
-                                </div>
-                              </li>
-                            </>
-                          ) : (
-                            <li>
-                              <Link to="/login">
-                                <span>Login</span>
-                              </Link>
-                            </li>
-                          )}
-                        </ul>
-                      </nav>
-
-                      <div className="outer-box">
-                        <a
-                          href="appointment.html"
-                          id="appointment-btn"
-                          className="theme-btn btn-style-one text-decoration-none"
-                        >
-                          <span className="btn-title ">Appointment</span>
-                          <span></span> <span></span> <span></span>{" "}
-                          <span></span> <span></span>
-                        </a>
-                      </div>
-                    </div>
+                <div className="price-row">
+                  <div className="price">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(svc.priceDiscount || svc.priceService || 0)}
                   </div>
-                </div>
-              </div>
-
-              <div className="sticky-header">
-                <div className="auto-container">
-                  <div className="main-box">
-                    <div className="logo-box">
-                      <div className="logo">
-                        <a href="index.html">
-                          <img
-                            src="/images/logo.png"
-                            alt=""
-                            title=""
-                            loading="lazy"
-                          />
-                        </a>
-                      </div>
-                    </div>
-
-                    <nav className="nav main-menu">
-                      <ul className="navigation" id="navbar">
-                        <li>
-                          <span>Home</span>
-                        </li>
-
-                        <li>
-                          <span>Blog</span>
-                        </li>
-                        <li className="dropdown">
-                          <span>Shop</span>
-                        </li>
-                        <li>
-                          <a href="contact.html">Contact</a>
-                        </li>
-                      </ul>
-                    </nav>
-
-                    <div className="outer-box">
-                      <button className="search-btn">
-                        <span className="fa fa-search"></span>
-                      </button>
-                      <a
-                        href="appointment.html"
-                        id="appointment-btn"
-                        className="theme-btn btn-style-one"
-                      >
-                        <span className="btn-title text-decoration-none ">
-                          Appointment
-                        </span>
-                        <span></span> <span></span> <span></span> <span></span>{" "}
-                        <span></span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mobile-header">
-                <div className="logo">
-                  <a href="index.html">
-                    <img
-                      src="/images/logo.png"
-                      alt=""
-                      title=""
-                      loading="lazy"
-                    />
-                  </a>
-                </div>
-
-                <div className="nav-outer clearfix">
-                  <div className="outer-box">
-                    <div className="search-box">
-                      <button className="search-btn mobile-search-btn">
-                        <i className="flaticon-magnifying-glass"></i>
-                      </button>
-                    </div>
-
-                    <a
-                      href="#nav-mobile"
-                      className="mobile-nav-toggler navbar-trigger"
-                    >
-                      <span className="fa fa-bars"></span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div className="search-popup">
-                <span className="search-back-drop"></span>
-                <button className="close-search">
-                  <span className="fa fa-times"></span>
-                </button>
-
-                <div className="search-inner">
-                  <form
-                    method="post"
-                    action="https://skyethemes.com/html/2022/medicoz/blog-showcase.html"
+                  <PrimaryButton
+                    to={`/booking?serviceId=${svc._id}`}
+                    style={{ padding: "0.8rem 1.6rem", fontSize: "1.3rem" }}
                   >
-                    <div className="form-group">
-                      <input
-                        type="search"
-                        name="search-field"
-                        defaultValue=""
-                        placeholder="Search..."
-                        required=""
-                      />
-                      <button type="submit">
-                        <i className="flaticon-magnifying-glass"></i>
-                      </button>
-                    </div>
-                  </form>
+                    <span>Đặt Hẹn</span>
+                    <ChevronRight size={14} />
+                  </PrimaryButton>
                 </div>
               </div>
-            </header>
+            </ServiceCard>
+          ))}
+        </ServicesGrid>
 
-            <section className="banner-section-one">
-              <div className="banner-carousel owl-carousel owl-theme default-arrows dark owl-loaded owl-drag">
-                <div
-                  className="owl-stage-outer owl-height"
-                  style={{ height: "780px" }}
-                >
-                  <div
-                    className="owl-stage"
+        <div style={{ textAlign: "center", marginTop: "4rem" }}>
+          <SecondaryButton to="/shop" $isDark={isDarkMode}>
+            <span>Xem Tất Cả Dịch Vụ & Bảng Giá Chi Tiết</span>
+            <ArrowRight size={18} />
+          </SecondaryButton>
+        </div>
+      </SectionWrapper>
+
+      {/* 5. ĐỘI NGŨ BÁC SĨ */}
+      <SectionWrapper id="doctors">
+        <SectionHeader $isDark={isDarkMode}>
+          <span className="tag">Đội ngũ chuyên gia</span>
+          <h2>Bác Sĩ Răng Hàm Mặt Giàu Kinh Nghiệm</h2>
+          <p>
+            Được dẫn dắt bởi các chuyên gia tu nghiệp quốc tế, tận tâm vì nụ cười
+            và sức khỏe của từng bệnh nhân.
+          </p>
+        </SectionHeader>
+
+        <DoctorsGrid>
+          {(employees.length > 0 ? employees.slice(0, 4) : [
+            {
+              _id: "doc1",
+              name: "BS. CKI Nguyễn Văn Minh",
+              experience: "15 năm kinh nghiệm",
+              description: "Chuyên gia cấy ghép Implant & Phục hình sứ",
+            },
+            {
+              _id: "doc2",
+              name: "ThS. BS Trần Thị Mai",
+              experience: "12 năm kinh nghiệm",
+              description: "Chuyên gia Chỉnh nha & Niềng răng Invisalign",
+            },
+            {
+              _id: "doc3",
+              name: "BS. CKI Lê Quang Huy",
+              experience: "10 năm kinh nghiệm",
+              description: "Chuyên gia Tiểu phẫu & Nhổ răng khôn Piezotome",
+            },
+            {
+              _id: "doc4",
+              name: "BS. Hoàng Bảo Ngọc",
+              experience: "8 năm kinh nghiệm",
+              description: "Chuyên gia Nha khoa Thẩm mỹ & Tẩy trắng răng",
+            },
+          ]).map((doc, idx) => (
+            <DoctorCard key={doc._id} $isDark={isDarkMode}>
+              <img
+                src={
+                  doc.photo ||
+                  [
+                    "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1594824813515-5334c93540eb?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=500&q=80",
+                  ][idx % 4]
+                }
+                alt={doc.name}
+                className="doc-avatar"
+              />
+              <div className="doc-info">
+                <h4>{doc.name}</h4>
+                <span className="exp">{doc.experience || "Bác sĩ Chuyên Khoa"}</span>
+                <p className="bio">{doc.description || "Tận tâm, chu đáo và giàu kinh nghiệm điều trị lâm sàng."}</p>
+                <div style={{ marginTop: "1rem" }}>
+                  <Link
+                    to="/booking"
                     style={{
-                      transform: "translate3d(-3038px, 0px, 0px)",
-                      transition: "all",
-                      width: "9114px",
+                      color: "#0284c7",
+                      fontWeight: 700,
+                      fontSize: "1.3rem",
+                      textDecoration: "none",
                     }}
                   >
-                    <div
-                      className="owl-item cloned"
-                      style={{ width: "1519px" }}
-                    >
-                      <div
-                        className="slide-item"
-                        style={{
-                          backgroundImage: `url('/images/main-slider/1.jpg')`,
-                        }}
-                      >
-                        <div className="auto-container">
-                          <div className="content-outer">
-                            <div className="content-box">
-                              <span className="title">
-                                Welcome to our Medical Care Center
-                              </span>
-                              <h2>
-                                We take care our <br />
-                                patients health
-                              </h2>
-                              <div className="text">
-                                I realized that becoming a doctor, I can only
-                                help a small community. <br />
-                                But by becoming a doctor, I can help my whole
-                                country.{" "}
-                              </div>
-                              <div className="btn-box">
-                                <a
-                                  href="about-us.html"
-                                  className="theme-btn btn-style-one"
-                                >
-                                  <span className="btn-title">About Us</span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                                <a
-                                  href="departments.html"
-                                  className="theme-btn btn-style-two"
-                                >
-                                  <span className="btn-title">
-                                    Our Services
-                                  </span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="owl-item cloned"
-                      style={{ width: "1519px" }}
-                    >
-                      <div
-                        className="slide-item"
-                        style={{
-                          backgroundImage: `url('/images/main-slider/2.jpg')`,
-                        }}
-                      >
-                        <div className="auto-container">
-                          <div className="content-outer">
-                            <div className="content-box">
-                              <span className="title">
-                                Welcome to our Medical Care Center
-                              </span>
-                              <h2>
-                                We take care our <br />
-                                patients health
-                              </h2>
-                              <div className="text">
-                                I realized that becoming a doctor, I can only
-                                help a small community. <br />
-                                But by becoming a doctor, I can help my whole
-                                country.{" "}
-                              </div>
-                              <div className="btn-box">
-                                <a
-                                  href="about-us.html"
-                                  className="theme-btn btn-style-one"
-                                >
-                                  <span className="btn-title">About Us</span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                                <a
-                                  href="departments.html"
-                                  className="theme-btn btn-style-two"
-                                >
-                                  <span className="btn-title">
-                                    Our Services
-                                  </span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="owl-item active"
-                      style={{ width: "1519px" }}
-                    >
-                      <div
-                        className="slide-item"
-                        style={{
-                          backgroundImage: `url('/images/main-slider/1.jpg')`,
-                        }}
-                      >
-                        <div className="auto-container">
-                          <div className="content-outer">
-                            <div className="content-box">
-                              <span className="title">
-                                Welcome to our Medical Care Center
-                              </span>
-                              <h2>
-                                We take care our <br />
-                                patients health
-                              </h2>
-                              <div className="text">
-                                I realized that becoming a doctor, I can only
-                                help a small community. <br />
-                                But by becoming a doctor, I can help my whole
-                                country.{" "}
-                              </div>
-                              <div className="btn-box">
-                                <a
-                                  href="about-us.html"
-                                  className="theme-btn btn-style-one"
-                                >
-                                  <span className="btn-title">About Us</span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                                <a
-                                  href="departments.html"
-                                  className="theme-btn btn-style-two"
-                                >
-                                  <span className="btn-title">
-                                    Our Services
-                                  </span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="owl-item" style={{ width: "1519px" }}>
-                      <div
-                        className="slide-item"
-                        style={{
-                          backgroundImage: `url('/images/main-slider/2.jpg')`,
-                        }}
-                      >
-                        <div className="auto-container">
-                          <div className="content-outer">
-                            <div className="content-box">
-                              <span className="title">
-                                Welcome to our Medical Care Center
-                              </span>
-                              <h2>
-                                We take care our <br />
-                                patients health
-                              </h2>
-                              <div className="text">
-                                I realized that becoming a doctor`&lsquo;` I can
-                                only help a small community. <br />
-                                But by becoming a doctor, I can help my whole
-                                country.
-                              </div>
-                              <div className="btn-box">
-                                <a
-                                  href="about-us.html"
-                                  className="theme-btn btn-style-one"
-                                >
-                                  <span className="btn-title">About Us</span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                                <a
-                                  href="departments.html"
-                                  className="theme-btn btn-style-two"
-                                >
-                                  <span className="btn-title">
-                                    Our Services
-                                  </span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="owl-item cloned"
-                      style={{ width: "1519px" }}
-                    >
-                      <div
-                        className="slide-item"
-                        style={{
-                          backgroundImage: `url('/images/main-slider/1.jpg')`,
-                        }}
-                      >
-                        <div className="auto-container">
-                          <div className="content-outer">
-                            <div className="content-box">
-                              <span className="title">
-                                Welcome to our Medical Care Center
-                              </span>
-                              <h2>
-                                We take care our <br />
-                                patients health
-                              </h2>
-                              <div className="text">
-                                I realized that becoming a doctor, I can only
-                                help a small community. <br />
-                                But by becoming a doctor, I can help my whole
-                                country.{" "}
-                              </div>
-                              <div className="btn-box">
-                                <a
-                                  href="about-us.html"
-                                  className="theme-btn btn-style-one"
-                                >
-                                  <span className="btn-title">About Us</span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                                <a
-                                  href="departments.html"
-                                  className="theme-btn btn-style-two"
-                                >
-                                  <span className="btn-title">
-                                    Our Services
-                                  </span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="owl-item cloned"
-                      style={{ width: "1519px" }}
-                    >
-                      <div
-                        className="slide-item"
-                        style={{
-                          backgroundImage: `url('/images/main-slider/2.jpg')`,
-                        }}
-                      >
-                        <div className="auto-container">
-                          <div className="content-outer">
-                            <div className="content-box">
-                              <span className="title">
-                                Welcome to our Medical Care Center
-                              </span>
-                              <h2>
-                                We take care our <br />
-                                patients health
-                              </h2>
-                              <div className="text">
-                                I realized that becoming a doctor, I can only
-                                help a small community. <br />
-                                But by becoming a doctor, I can help my whole
-                                country.{" "}
-                              </div>
-                              <div className="btn-box">
-                                <a
-                                  href="about-us.html"
-                                  className="theme-btn btn-style-one"
-                                >
-                                  <span className="btn-title">About Us</span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                                <a
-                                  href="departments.html"
-                                  className="theme-btn btn-style-two"
-                                >
-                                  <span className="btn-title">
-                                    Our Services
-                                  </span>
-                                  <span></span> <span></span> <span></span>{" "}
-                                  <span></span> <span></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="owl-nav">
-                  <div className="owl-prev">
-                    <span className="fa fa-angle-left"></span>
-                  </div>
-                  <div className="owl-next">
-                    <span className="fa fa-angle-right"></span>
-                  </div>
-                </div>
-                <div className="owl-dots">
-                  <div className="owl-dot active">
-                    <span></span>
-                  </div>
-                  <div className="owl-dot">
-                    <span></span>
-                  </div>
+                    Đặt lịch khám cùng Bác sĩ →
+                  </Link>
                 </div>
               </div>
-            </section>
-            <Suspense fallback={<Spinner />}>
-              <HomeFeatures />
-              <HomeAbout />
-              <HomeServices />
-              <HomeTeam />
-              <HomeAppointment />
-              <section className="testimonial-section">
-                <div className="auto-container">
-                  <div className="sec-title text-center">
-                    <span className="title">HAPPY Patient</span>
-                    <h2>What Says Our Patients</h2>
-                    <span className="divider">
-                      <svg viewBox="0 0 300.08 300.08">
-                        <path d="m293.26 184.14h-82.877l-12.692-76.138c-.546-3.287-3.396-5.701-6.718-5.701-.034 0-.061 0-.089 0-3.369.027-6.199 2.523-6.677 5.845l-12.507 87.602-14.874-148.69c-.355-3.43-3.205-6.056-6.643-6.138-.048 0-.096 0-.143 0-3.39 0-6.274 2.489-6.752 5.852l-19.621 137.368h-9.405l-12.221-42.782c-.866-3.028-3.812-5.149-6.8-4.944-3.13.109-5.777 2.332-6.431 5.395l-8.941 42.332h-73.049c-3.771 0-6.82 3.049-6.82 6.82 0 3.778 3.049 6.82 6.82 6.82h78.566c3.219 0 6.002-2.251 6.67-5.408l4.406-20.856 6.09 21.313c.839 2.939 3.526 4.951 6.568 4.951h20.46c3.396 0 6.274-2.489 6.752-5.845l12.508-87.596 14.874 148.683c.355 3.437 3.205 6.056 6.643 6.138h.143c3.39 0 6.274-2.489 6.752-5.845l14.227-99.599 6.397 38.362c.546 3.287 3.396 5.702 6.725 5.702h88.66c3.771 0 6.82-3.049 6.82-6.82-.001-3.772-3.05-6.821-6.821-6.821z"></path>
-                      </svg>
-                    </span>
-                  </div>
+            </DoctorCard>
+          ))}
+        </DoctorsGrid>
+      </SectionWrapper>
 
-                  <div className="testimonial-outer">
-                    <div className="client-testimonial-carousel owl-carousel owl-theme owl-loaded owl-drag">
-                      <div className="owl-stage-outer">
-                        <div
-                          className="owl-stage"
-                          style={{
-                            transform: "translate3d(-3200px, 0px, 0px)",
-                            transition: "0.5s",
-                            width: "8800px",
-                          }}
-                        >
-                          <div
-                            className="owl-item cloned"
-                            style={{ width: "800px" }}
-                          >
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className="owl-item cloned"
-                            style={{ width: "800px" }}
-                          >
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className="owl-item cloned"
-                            style={{ width: "800px" }}
-                          >
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="owl-item" style={{ width: "800px" }}>
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className="owl-item active"
-                            style={{ width: "800px" }}
-                          >
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="owl-item" style={{ width: "800px" }}>
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="owl-item" style={{ width: "800px" }}>
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="owl-item" style={{ width: "800px" }}>
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className="owl-item cloned"
-                            style={{ width: "800px" }}
-                          >
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className="owl-item cloned"
-                            style={{ width: "800px" }}
-                          >
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            className="owl-item cloned"
-                            style={{ width: "800px" }}
-                          >
-                            <div className="testimonial-block">
-                              <div className="inner-box">
-                                <div className="text">
-                                  Medical Centre is a great place to get all of
-                                  your medical needs. I came in for a check up
-                                  and did not wait more than 5 minutes before I
-                                  was seen. I can only imagine the type of
-                                  service you get for more serious issues.
-                                  Thanks!
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="owl-nav">
-                        <div className="owl-prev">
-                          <span className="fa fa-angle-left"></span>
-                        </div>
-                        <div className="owl-next">
-                          <span className="fa fa-angle-right"></span>
-                        </div>
-                      </div>
-                      <div className="owl-dots">
-                        <div className="owl-dot">
-                          <span></span>
-                        </div>
-                        <div className="owl-dot active">
-                          <span></span>
-                        </div>
-                        <div className="owl-dot">
-                          <span></span>
-                        </div>
-                        <div className="owl-dot">
-                          <span></span>
-                        </div>
-                        <div className="owl-dot">
-                          <span></span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="client-thumb-outer">
-                      <div className="client-thumbs-carousel owl-carousel owl-theme owl-loaded owl-drag">
-                        <div className="owl-stage-outer">
-                          <div
-                            className="owl-stage"
-                            style={{
-                              transition: "0.25s",
-                              width: "1430px",
-                              transform: "translate3d(-780px, 0px, 0px)",
-                            }}
-                          >
-                            <div
-                              className="owl-item cloned"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-3.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item cloned"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-2.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item cloned"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-3.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-1.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-2.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-3.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item active center"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-2.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-3.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item cloned"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-1.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item cloned"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-2.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div
-                              className="owl-item cloned"
-                              style={{ width: "130px" }}
-                            >
-                              <div className="thumb-item">
-                                <figure className="thumb-box">
-                                  <img
-                                    src="/images/resource/testi-thumb-3.jpg"
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                </figure>
-                                <div className="author-info">
-                                  <span className="icon fa fa-quote-left"></span>
-                                  <div className="author-name">Lara Croft</div>
-                                  <div className="designation">
-                                    Restaurant Owner
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="owl-nav disabled">
-                          <div className="owl-prev">
-                            <span className="icon flaticon-left-arrow-2"></span>
-                          </div>
-                          <div className="owl-next">
-                            <span className="icon flaticon-right-arrow-1"></span>
-                          </div>
-                        </div>
-                        <div className="owl-dots disabled"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              <HomePricing />
-              <HomeNews />
-              <HomeClients />
-
-              <HomeFooter />
-            </Suspense>
+      {/* 6. CTA BANNER CUỐI TRANG */}
+      <SectionWrapper>
+        <CTABanner>
+          <div className="content">
+            <h2>Sẵn Sàng Cho Nụ Cười Tỏa Sáng?</h2>
+            <p>
+              Đặt lịch hẹn ngay hôm nay để nhận ngay gói khám tổng quát & chụp phim
+              CT Cone Beam miễn phí trị giá 500.000 VNĐ!
+            </p>
           </div>
-        </div>
-      </div>
-      {userInfo && userInfo.role === "user" && <Chat />}
-      {showRequire2FA && (
-        <Require2FA handleSuccessVerify2FA={handleSuccessVerify2FA} />
-      )}
-    </>
+          <Link to="/booking" className="btn-white">
+            Đặt Lịch Khám Ngay
+          </Link>
+        </CTABanner>
+      </SectionWrapper>
+    </HomeWrapper>
   );
 }
-
-export default Home;

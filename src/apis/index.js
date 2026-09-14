@@ -145,7 +145,10 @@ export const handleGetShiftsByDayAndDate = async (dayOfWeek, date) => {
 };
 
 export const handleGetAvailableSlots = async ({ date, serviceId, employeeId }) => {
-  const dateKey = date.toISOString().slice(0, 10);
+  const dateKey =
+    date instanceof Date
+      ? date.toISOString().slice(0, 10)
+      : String(date).slice(0, 10);
   const params = new URLSearchParams({
     date: dateKey,
     serviceId: String(serviceId),
@@ -155,7 +158,7 @@ export const handleGetAvailableSlots = async ({ date, serviceId, employeeId }) =
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/availability/slots?${params.toString()}`
   );
-  return res.data.data;
+  return res.data?.data || [];
 };
 
 export const handleSearchPatients = async ({ q, limit = 10 }) => {
@@ -280,14 +283,19 @@ export const handleGetMe = async () => {
   return res.data.data.data;
 };
 export const handleUpdateMe = async (formDataToSend) => {
+  const isFormData =
+    typeof FormData !== "undefined" && formDataToSend instanceof FormData;
+
   const res = await authorizedAxiosInstance.patch(
     `${API_ROOT}/api/v1/accounts/updateMe`,
     formDataToSend,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    isFormData
+      ? {
+          headers: {
+            "Content-Type": undefined,
+          },
+        }
+      : undefined
   );
   return res.data.data.data;
 };
@@ -374,6 +382,19 @@ export const handleCreateMessage = async (data) => {
   return res.data.data.data;
 };
 
+export const handleUploadChatMedia = async (formData) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/messages/upload`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return res.data.data;
+};
+
 export const handleGetShifts = async () => {
   const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/shifts`);
   return res.data.data.data;
@@ -384,6 +405,13 @@ export const handleCreateShift = async (data) => {
     data
   );
   return res.data.data.data;
+};
+export const handleCreateBatchShifts = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/shifts/batch`,
+    data
+  );
+  return res.data.data;
 };
 export const handleUpdateShift = async (data, shiftID) => {
   const res = await authorizedAxiosInstance.patch(
@@ -474,3 +502,62 @@ export const handleGetReviewsByPeriod = async (period) => {
   );
   return res.data.data;
 };
+
+export const handleGetFacilities = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/facilities`);
+  return res.data.data.data;
+};
+
+export const handleGetFacilityById = async (facilityID) => {
+  const res = await authorizedAxiosInstance.get(
+    `${API_ROOT}/api/v1/facilities/${facilityID}`
+  );
+  return res.data.data.data;
+};
+
+export const handleAddFacility = async (data) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/facilities`,
+    data
+  );
+  return res.data.data.data;
+};
+
+export const handleUpdateFacility = async (data, facilityID) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/facilities/${facilityID}`,
+    data
+  );
+  return res.data.data.data;
+};
+
+export const handleDeleteFacility = async (facilityID) => {
+  const res = await authorizedAxiosInstance.delete(
+    `${API_ROOT}/api/v1/facilities/${facilityID}`
+  );
+  return res.data;
+};
+
+export const handleGetSettings = async () => {
+  const res = await authorizedAxiosInstance.get(`${API_ROOT}/api/v1/settings`);
+  return res.data.data.data;
+};
+
+export const handleUpdateSettings = async (newSettingsData) => {
+  const res = await authorizedAxiosInstance.patch(
+    `${API_ROOT}/api/v1/settings`,
+    newSettingsData
+  );
+  return res.data.data.data;
+};
+
+export const handleResetSettings = async () => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/settings/reset`
+  );
+  return res.data.data.data;
+};
+
+
+
+

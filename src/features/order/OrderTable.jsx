@@ -1,3 +1,5 @@
+import styled from "styled-components";
+import { PackageX, Search } from "lucide-react";
 import Spinner from "../../components/admin/Spinner";
 import OrderRow from "./OrderRow";
 import { useOrders } from "./useOrders";
@@ -7,8 +9,41 @@ import { useSearchParams } from "react-router-dom";
 import Pagination from "../../components/admin/Pagination";
 import { PAGE_SIZE } from "../../utils/constants";
 
+const EmptyStateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  gap: 1.2rem;
+  background: var(--color-grey-0);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+
+  svg {
+    width: 4.8rem;
+    height: 4.8rem;
+    color: var(--color-grey-300);
+  }
+
+  h3 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--color-grey-700);
+    margin: 0;
+  }
+
+  p {
+    font-size: 1.3rem;
+    color: var(--color-grey-400);
+    margin: 0;
+    max-width: 32rem;
+  }
+`;
+
 function OrderTable() {
-  const { isLoading, error, orders } = useOrders();
+  const { isLoading, error, orders = [] } = useOrders();
   const [searchParams] = useSearchParams();
 
   if (isLoading) return <Spinner />;
@@ -20,10 +55,20 @@ function OrderTable() {
     );
 
   const safeOrders = orders || [];
-  let filteredOrders;
+
+  if (safeOrders.length === 0) {
+    return (
+      <EmptyStateContainer>
+        <PackageX />
+        <h3>Chưa có đơn hàng nào</h3>
+        <p>Hệ thống chưa ghi nhận đơn thanh toán dịch vụ nào.</p>
+      </EmptyStateContainer>
+    );
+  }
+
+  let filteredOrders = safeOrders;
   const filterValue = searchParams.get("status") || "all";
-  if (filterValue === "all") filteredOrders = safeOrders;
-  else if (filterValue === "successful")
+  if (filterValue === "successful")
     filteredOrders = safeOrders.filter(
       (o) => (o.status || "").toLowerCase() === "successful"
     );
@@ -35,13 +80,39 @@ function OrderTable() {
     filteredOrders = safeOrders.filter(
       (o) => (o.status || "").toLowerCase() === "processing"
     );
-  else filteredOrders = safeOrders;
+
+  // Search filter
+  const searchQuery = (searchParams.get("search") || "").trim().toLowerCase();
+  if (searchQuery) {
+    filteredOrders = filteredOrders.filter((o) => {
+      const customerName = (o.account?.name || "").toLowerCase();
+      const customerEmail = (o.account?.email || "").toLowerCase();
+      const orderId = (o._id || "").toLowerCase();
+      const serviceName = (o.service?.[0]?.nameService || "").toLowerCase();
+      return (
+        customerName.includes(searchQuery) ||
+        customerEmail.includes(searchQuery) ||
+        orderId.includes(searchQuery) ||
+        serviceName.includes(searchQuery)
+      );
+    });
+  }
+
+  if (filteredOrders.length === 0) {
+    return (
+      <EmptyStateContainer>
+        <Search />
+        <h3>Không tìm thấy đơn hàng phù hợp</h3>
+        <p>Thử thay đổi bộ lọc trạng thái hoặc từ khóa tìm kiếm.</p>
+      </EmptyStateContainer>
+    );
+  }
 
   const sortBy = searchParams.get("sortBy") || "createAt-desc";
   const [field, direction] = sortBy.split("-");
   const modifier = direction === "asc" ? 1 : -1;
 
-  const sortedOrders = [...(filteredOrders || [])].sort((a, b) => {
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
     if (field === "customerName") {
       return ((a.account?.name || "").localeCompare(b.account?.name || "")) * modifier;
     } else if (field === "createAt" || field === "createdAt") {
@@ -69,32 +140,23 @@ function OrderTable() {
   const endIndex = startIndex + PAGE_SIZE;
   const paginatedOrders = sortedOrders.slice(startIndex, endIndex);
 
-  if (safeOrders.length === 0) {
-    return (
-      <div style={{ textAlign: "center", padding: "2rem", color: "var(--color-grey-600)" }}>
-        No orders available
-      </div>
-    );
-  }
-
   return (
     <Menus>
-      <Table columns="1fr 1fr 1fr 1fr 1fr 1fr 1fr">
+      <Table columns="1fr 1.6fr 1.2fr 1fr 1.2fr 0.6fr">
         <Table.Header>
-          <div>Customer</div>
-          <div>Service</div>
-          <div>Status</div>
-          <div>Total Price</div>
-          <div>Payment Method</div>
-          <div>Order Date</div>
-          <div></div>
+          <div>Mã đơn hàng</div>
+          <div>Khách hàng</div>
+          <div>Dịch vụ</div>
+          <div>Trạng thái</div>
+          <div>Tổng tiền</div>
+          <div>Thao tác</div>
         </Table.Header>
         <Table.Body
           data={paginatedOrders}
           render={(order) => <OrderRow order={order} key={order._id} />}
         />
         <Table.Footer>
-          <Pagination count={sortedOrders?.length || 0} />
+          <Pagination count={filteredOrders.length} />
         </Table.Footer>
       </Table>
     </Menus>

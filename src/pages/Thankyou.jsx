@@ -1,4 +1,7 @@
+import { getImageUrl } from "../utils/imageHelper";
+
 function Thankyou() {
+  const service = {};
   return (
     <div className="sidebar-page-container">
       <div className="auto-container">
@@ -11,7 +14,7 @@ function Thankyou() {
                     <div className="image-column col-md-6 col-sm-12">
                       <figure className="image-box">
                         <img
-                          src={service.photoService.url}
+                          src={getImageUrl(service?.photoService)}
                           alt=""
                           loading="lazy"
                         />

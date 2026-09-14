@@ -1,24 +1,26 @@
 import { lazy } from "react";
+import styled from "styled-components";
 
-const Heading = lazy(() => import("../../components/admin/Heading"));
-const Row = lazy(() => import("../../components/admin/Row"));
-const DashboardFilter = lazy(() =>
-  import("../../features/dashboard/DashboardFilter")
+const DashboardHeader = lazy(() =>
+  import("../../features/dashboard/DashboardHeader")
 );
 const DashboardLayout = lazy(() =>
   import("../../features/dashboard/DashboardLayout")
 );
 
+const DashboardWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2.4rem;
+  width: 100%;
+`;
+
 function Dashboard() {
   return (
-    <>
-      <Row type="horizontal">
-        <Heading as="h1">Dashboard</Heading>
-        <DashboardFilter />
-      </Row>
-
+    <DashboardWrapper>
+      <DashboardHeader />
       <DashboardLayout />
-    </>
+    </DashboardWrapper>
   );
 }
 

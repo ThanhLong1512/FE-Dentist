@@ -1,25 +1,32 @@
 import Filter from "../../components/admin/Filter";
 import SortBy from "../../components/admin/SortBy";
-import TableOperations from "../../components/admin/TableOperations";
+import TableOperations, { OperationsGroup } from "../../components/admin/TableOperations";
+import SearchBar from "../../components/admin/SearchBar";
+
 function PatientOperations() {
   return (
     <TableOperations>
-      <Filter
-        filterField="gender"
-        options={[
-          { value: "all", label: "All" },
-          { value: "male", label: "Male" },
-          { value: "female", label: "Female" },
-        ]}
-      />
-      <SortBy
-        options={[
-          { value: "name-asc", label: "Sort by name (A-Z)" },
-          { value: "name-desc", label: "Sort by name (Z-A)" },
-          { value: "yearOfBirth-asc", label: "Sort by year (low first)" },
-          { value: "yearOfBirth-desc", label: "Sort by year (high first)" },
-        ]}
-      />
+      <SearchBar placeholder="Tìm theo tên, sđt, địa chỉ..." searchKey="q" />
+
+      <OperationsGroup>
+        <Filter
+          filterField="gender"
+          options={[
+            { value: "all", label: "Tất cả giới tính" },
+            { value: "male", label: "Nam" },
+            { value: "female", label: "Nữ" },
+          ]}
+        />
+
+        <SortBy
+          options={[
+            { value: "name-asc", label: "Tên (A-Z)" },
+            { value: "name-desc", label: "Tên (Z-A)" },
+            { value: "yearOfBirth-asc", label: "Năm sinh (tăng dần)" },
+            { value: "yearOfBirth-desc", label: "Năm sinh (giảm dần)" },
+          ]}
+        />
+      </OperationsGroup>
     </TableOperations>
   );
 }

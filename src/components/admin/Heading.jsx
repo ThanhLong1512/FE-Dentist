@@ -6,11 +6,14 @@ import styled, { css } from "styled-components";
 // `;
 
 const Heading = styled.h1`
+  color: var(--color-grey-800);
+  letter-spacing: -0.5px;
+
   ${(props) =>
     props.as === "h1" &&
     css`
-      font-size: 3rem;
-      font-weight: 600;
+      font-size: 2.6rem;
+      font-weight: 700;
     `}
 
   ${(props) =>
@@ -23,11 +26,11 @@ const Heading = styled.h1`
     ${(props) =>
     props.as === "h3" &&
     css`
-      font-size: 2rem;
-      font-weight: 500;
+      font-size: 1.8rem;
+      font-weight: 600;
     `}
     
-  line-height: 1.4;
+  line-height: 1.3;
 `;
 
 export default Heading;

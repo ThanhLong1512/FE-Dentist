@@ -36,66 +36,75 @@ const GlobalStyles = createGlobalStyle`
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0px 0.6rem 2.4rem rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 2.4rem 3.2rem rgba(0, 0, 0, 0.12);
-  
+  --shadow-elevation: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 25px rgba(14, 165, 233, 0.25);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(226, 232, 240, 0.8);
 
-    --image-grayscale: 0;
+  --image-grayscale: 0;
   --image-opacity: 100%;
   }
   
   &.dark-mode {
-    --color-grey-0: #18212f;
---color-grey-50: #111827;
---color-grey-100: #1f2937;
---color-grey-200: #374151;
---color-grey-300: #4b5563;
---color-grey-400: #6b7280;
---color-grey-500: #9ca3af;
---color-grey-600: #d1d5db;
---color-grey-700: #e5e7eb;
---color-grey-800: #f3f4f6;
---color-grey-900: #f9fafb;
+    --color-grey-0: #0f172a;
+    --color-grey-50: #1e293b;
+    --color-grey-100: #334155;
+    --color-grey-200: #475569;
+    --color-grey-300: #64748b;
+    --color-grey-400: #94a3b8;
+    --color-grey-500: #cbd5e1;
+    --color-grey-600: #e2e8f0;
+    --color-grey-700: #f1f5f9;
+    --color-grey-800: #f8fafc;
+    --color-grey-900: #ffffff;
 
---color-blue-100: #075985;
---color-blue-700: #e0f2fe;
---color-green-100: #166534;
---color-green-700: #dcfce7;
---color-yellow-100: #854d0e;
---color-yellow-700: #fef9c3;
---color-silver-100: #374151;
---color-silver-700: #f3f4f6;
---color-indigo-100: #3730a3;
---color-indigo-700: #e0e7ff;
+    --color-blue-100: #075985;
+    --color-blue-700: #e0f2fe;
+    --color-green-100: #166534;
+    --color-green-700: #dcfce7;
+    --color-yellow-100: #854d0e;
+    --color-yellow-700: #fef9c3;
+    --color-silver-100: #334155;
+    --color-silver-700: #f1f5f9;
+    --color-indigo-100: #3730a3;
+    --color-indigo-700: #e0e7ff;
 
---color-red-100: #fee2e2;
---color-red-700: #b91c1c;
---color-red-800: #991b1b;
+    --color-red-100: #7f1d1d;
+    --color-red-700: #fecaca;
+    --color-red-800: #fee2e2;
 
---backdrop-color: rgba(0, 0, 0, 0.3);
+    --backdrop-color: rgba(0, 0, 0, 0.4);
 
---shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
---shadow-md: 0px 0.6rem 2.4rem rgba(0, 0, 0, 0.3);
---shadow-lg: 0 2.4rem 3.2rem rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0px 0.6rem 2.4rem rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 2.4rem 3.2rem rgba(0, 0, 0, 0.4);
+    --shadow-elevation: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 25px rgba(14, 165, 233, 0.4);
+    --glass-bg: rgba(15, 23, 42, 0.85);
+    --glass-border: rgba(51, 65, 85, 0.7);
 
---image-grayscale: 10%;
---image-opacity: 90%;
+    --image-grayscale: 10%;
+    --image-opacity: 90%;
   }
   
-  /* Indigo */
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --color-brand-800: #3730a3;
-  --color-brand-900: #312e81;
+  /* Brand Medical Cyan/Blue Palette */
+  --color-brand-50: #f0f9ff;
+  --color-brand-100: #e0f2fe;
+  --color-brand-200: #bae6fd;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+  --color-brand-800: #075985;
+  --color-brand-900: #0c4a6e;
+  --color-brand-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  --color-brand-gradient-hover: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
   
-  --border-radius-tiny: 3px;
-  --border-radius-sm: 5px;
-  --border-radius-md: 7px;
-  --border-radius-lg: 9px;
-
-
+  --border-radius-tiny: 4px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 20px;
+  --border-radius-full: 9999px;
 }
 
 *,
@@ -114,20 +123,24 @@ html {
 }
 
 body {
-  font-family: "Poppins", sans-serif;
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   color: var(--color-grey-700);
   background-color: var(--color-grey-0);
   transition: color 0.3s, background-color 0.3s;
   min-height: 100vh;
   line-height: 1.5;
   font-size: 1.6rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 input,
 button,
 textarea,
 select {
-  font: inherit;
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: inherit;
   color: inherit;
 }
 
@@ -167,15 +180,18 @@ ul {
   list-style: none;
 }
 
-p,
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  letter-spacing: -0.02em;
+}
+
+p {
   overflow-wrap: break-word;
-  hyphens: auto;
 }
 
 img {

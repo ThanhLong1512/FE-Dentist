@@ -25,8 +25,9 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-const PLACEHOLDER_IMG =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'%3E%3Crect fill='%23f1f5f9' width='400' height='300'/%3E%3Ctext fill='%2394a3b8' font-family='sans-serif' font-size='18' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EDịch vụ%3C/text%3E%3C/svg%3E";
+import { getImageUrl, handleImageError, PLACEHOLDER_SERVICE_IMG } from "../utils/imageHelper";
+
+const PLACEHOLDER_IMG = PLACEHOLDER_SERVICE_IMG;
 
 function DetailService() {
   const { ServiceID } = useParams();
@@ -196,7 +197,11 @@ function DetailService() {
         {/* Hero + Info */}
         <section className="ds-hero">
           <div className="ds-hero-image">
-            <img src={imgUrl} alt={service.nameService} />
+            <img
+              src={getImageUrl(service.photoService)}
+              alt={service.nameService}
+              onError={handleImageError}
+            />
           </div>
           <div className="ds-hero-content">
             <h1 className="ds-title">{service.nameService}</h1>
@@ -444,8 +449,9 @@ function DetailService() {
                   }
                 >
                   <img
-                    src={s.photoService?.url || PLACEHOLDER_IMG}
+                    src={getImageUrl(s.photoService)}
                     alt={s.nameService}
+                    onError={handleImageError}
                   />
                   <div className="ds-related-info">
                     <h4>{s.nameService}</h4>

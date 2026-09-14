@@ -1,9 +1,13 @@
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { ShieldCheck, UserPlus, UserCheck } from "lucide-react";
+
 import Input from "../../components/admin/Input";
 import Form from "../../components/admin/Form";
 import Button from "../../components/admin/Button";
-import FormRow from "../../components/admin/FormRow";
+import Select from "../../components/admin/Select";
+import FormRow, { FormGrid } from "../../components/admin/FormRow";
+import FormHeader from "../../components/admin/FormHeader";
 import { useCreateAccount } from "./useCreateAccount";
 import { useEditAccount } from "./useEditAccount";
 
@@ -49,13 +53,10 @@ function CreateAccountForm({ accountToEdit = {}, onCloseModal }) {
       require_2FA: data.require_2FA === "true" || data.require_2FA === true,
     };
 
-    // Only include password fields when creating new account
     if (!isEditSession) {
       accountData.password = data.password;
       accountData.passwordConfirm = data.passwordConfirm;
     }
-
-    console.log("Submitting account data:", accountData);
 
     if (isEditSession) {
       editAccount(
@@ -65,6 +66,7 @@ function CreateAccountForm({ accountToEdit = {}, onCloseModal }) {
         },
         {
           onSuccess: () => {
+            toast.success("Cập nhật tài khoản thành công!");
             reset();
             onCloseModal?.();
           },
@@ -73,6 +75,7 @@ function CreateAccountForm({ accountToEdit = {}, onCloseModal }) {
     } else {
       createAccount(accountData, {
         onSuccess: () => {
+          toast.success("Tạo tài khoản mới thành công!");
           reset();
           onCloseModal?.();
         },
@@ -81,26 +84,23 @@ function CreateAccountForm({ accountToEdit = {}, onCloseModal }) {
   }
 
   function onError(errors) {
-    console.log("Form errors:", errors);
     const firstError = Object.values(errors)[0];
     if (firstError?.message) {
       toast.error(firstError.message);
     }
   }
 
-  // Email validation
   function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return "Please enter a valid email address";
+      return "Địa chỉ email không đúng định dạng";
     }
     return true;
   }
 
-  // Password confirmation validation
   function validatePasswordConfirm(value) {
     if (!isEditSession && value !== password) {
-      return "Passwords do not match";
+      return "Mật khẩu xác nhận không khớp";
     }
     return true;
   }
@@ -110,159 +110,121 @@ function CreateAccountForm({ accountToEdit = {}, onCloseModal }) {
       onSubmit={handleSubmit(onSubmit, onError)}
       type={onCloseModal ? "modal" : "regular"}
     >
-      <FormRow label="Full Name" error={errors?.name?.message}>
-        <Input
-          type="text"
-          id="name"
-          disabled={isWorking}
-          {...register("name", {
-            required: "Full name is required",
-            minLength: {
-              value: 2,
-              message: "Name must be at least 2 characters",
-            },
-            maxLength: {
-              value: 50,
-              message: "Name cannot exceed 50 characters",
-            },
-          })}
-        />
-      </FormRow>
+      <FormHeader
+        icon={isEditSession ? <UserCheck /> : <UserPlus />}
+        title={isEditSession ? "Cập nhật tài khoản" : "Tạo tài khoản người dùng"}
+        subtitle="Quản lý thông tin đăng nhập và phân quyền truy cập hệ thống phòng khám."
+      />
 
-      <FormRow label="Email Address" error={errors?.email?.message}>
-        <Input
-          type="email"
-          id="email"
-          disabled={isWorking}
-          {...register("email", {
-            required: "Email is required",
-            validate: validateEmail,
-          })}
-        />
-      </FormRow>
+      <FormGrid>
+        <FormRow label="Họ và tên chủ tài khoản" required error={errors?.name?.message}>
+          <Input
+            type="text"
+            id="name"
+            placeholder="Ví dụ: Nguyễn Văn C"
+            disabled={isWorking}
+            {...register("name", {
+              required: "Vui lòng nhập họ và tên",
+              minLength: {
+                value: 2,
+                message: "Tên phải có ít nhất 2 ký tự",
+              },
+              maxLength: {
+                value: 50,
+                message: "Tên không được vượt quá 50 ký tự",
+              },
+            })}
+          />
+        </FormRow>
+
+        <FormRow label="Địa chỉ Email (Đăng nhập)" required error={errors?.email?.message}>
+          <Input
+            type="email"
+            id="email"
+            placeholder="user@example.com"
+            disabled={isWorking}
+            {...register("email", {
+              required: "Vui lòng nhập email",
+              validate: validateEmail,
+            })}
+          />
+        </FormRow>
+      </FormGrid>
 
       {!isEditSession && (
-        <>
-          <FormRow label="Password" error={errors?.password?.message}>
+        <FormGrid>
+          <FormRow label="Mật khẩu khởi tạo" required error={errors?.password?.message}>
             <Input
               type="password"
               id="password"
+              placeholder="Tối thiểu 8 ký tự..."
               disabled={isWorking}
               {...register("password", {
-                required: "Password is required",
+                required: "Vui lòng nhập mật khẩu",
                 minLength: {
                   value: 8,
-                  message: "Password must be at least 8 characters",
+                  message: "Mật khẩu phải có ít nhất 8 ký tự",
                 },
                 pattern: {
                   value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                  message:
-                    "Password must contain uppercase, lowercase and number",
+                  message: "Mật khẩu phải bao gồm chữ hoa, chữ thường và chữ số",
                 },
               })}
             />
           </FormRow>
 
           <FormRow
-            label="Confirm Password"
+            label="Xác nhận mật khẩu"
+            required
             error={errors?.passwordConfirm?.message}
           >
             <Input
               type="password"
               id="passwordConfirm"
+              placeholder="Nhập lại mật khẩu..."
               disabled={isWorking}
               {...register("passwordConfirm", {
-                required: "Please confirm your password",
+                required: "Vui lòng xác nhận mật khẩu",
                 validate: validatePasswordConfirm,
               })}
             />
           </FormRow>
-        </>
+        </FormGrid>
       )}
 
-      <FormRow label="Role" error={errors?.role?.message}>
-        <select
+      <FormRow label="Vai trò / Phân quyền hệ thống" required error={errors?.role?.message}>
+        <Select
           id="role"
           disabled={isWorking}
-          style={{
-            width: "100%",
-            padding: "0.8rem 1.2rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.5rem",
-            fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f9fafb" : "white",
-            cursor: isWorking ? "not-allowed" : "pointer",
-          }}
           {...register("role", {
-            required: "Please select a role",
+            required: "Vui lòng chọn vai trò",
           })}
-        >
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
+          options={[
+            { value: "user", label: "Người dùng / Khách hàng (User)" },
+            { value: "admin", label: "Quản trị viên hệ thống (Admin)" },
+          ]}
+        />
       </FormRow>
-
-      {/* <FormRow label="Account Status" error={errors?.isLocked?.message}>
-        <select
-          id="isLocked"
-          disabled={isWorking}
-          style={{
-            width: "100%",
-            padding: "0.8rem 1.2rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.5rem",
-            fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f9fafb" : "white",
-            cursor: isWorking ? "not-allowed" : "pointer",
-          }}
-          {...register("isLocked")}
-        >
-          <option value={false}>Active</option>
-          <option value={true}>Locked</option>
-        </select>
-      </FormRow> */}
-
-      {/* <FormRow
-        label="Two-Factor Authentication"
-        error={errors?.require_2FA?.message}
-      >
-        <select
-          id="require_2FA"
-          disabled={isWorking}
-          style={{
-            width: "100%",
-            padding: "0.8rem 1.2rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.5rem",
-            fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f9fafb" : "white",
-            cursor: isWorking ? "not-allowed" : "pointer",
-          }}
-          {...register("require_2FA")}
-        >
-          <option value={false}>Not Required</option>
-          <option value={true}>Required</option>
-        </select>
-      </FormRow> */}
 
       <FormRow>
         <Button
           variation="secondary"
           type="button"
+          disabled={isWorking}
           onClick={() => {
             onCloseModal?.();
           }}
         >
-          Cancel
+          Hủy bỏ
         </Button>
         <Button type="submit" disabled={isWorking}>
           {isWorking
             ? isEditSession
-              ? "Updating..."
-              : "Creating..."
+              ? "Đang cập nhật..."
+              : "Đang tạo..."
             : isEditSession
-            ? "Update Account"
-            : "Create Account"}
+            ? "Cập nhật tài khoản"
+            : "Tạo tài khoản mới"}
         </Button>
       </FormRow>
     </Form>

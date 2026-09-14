@@ -10,10 +10,23 @@ const StyledModal = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: var(--color-grey-0);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 3.2rem 4rem;
-  transition: all 0.5s;
+  border-radius: var(--border-radius-xl);
+  border: 1px solid var(--color-grey-200);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35);
+  padding: 3.2rem 3.6rem;
+  max-height: 88vh;
+  overflow-y: auto;
+  max-width: 95vw;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1001;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-grey-300);
+    border-radius: 4px;
+  }
 `;
 
 const Overlay = styled.div`
@@ -22,35 +35,46 @@ const Overlay = styled.div`
   left: 0;
   width: 100%;
   height: 100vh;
-  background-color: var(--backdrop-color);
-  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 1000;
-  transition: all 0.5s;
+  transition: all 0.3s;
 `;
 
-const Button = styled.button`
-  background: none;
-  border: none;
-  padding: 0.4rem;
-  border-radius: var(--border-radius-sm);
-  transform: translateX(0.8rem);
-  transition: all 0.2s;
+const CloseButton = styled.button`
+  background: var(--color-grey-100);
+  border: 1px solid var(--color-grey-200);
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
-  top: 1.2rem;
-  right: 1.9rem;
+  top: 1.6rem;
+  right: 1.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-grey-500);
+  z-index: 50;
 
   &:hover {
-    background-color: var(--color-grey-100);
+    background-color: var(--color-red-100);
+    color: var(--color-red-700);
+    border-color: var(--color-red-100);
+    transform: scale(1.06);
   }
 
   & svg {
-    width: 2.4rem;
-    height: 2.4rem;
-    color: var(--color-grey-500);
+    width: 2rem;
+    height: 2rem;
   }
 `;
+
 const ModalContext = createContext();
-function Modal({ children, onClose }) {
+
+function Modal({ children }) {
   const [openName, setOpenName] = useState("");
   const close = () => {
     setOpenName("");
@@ -62,10 +86,12 @@ function Modal({ children, onClose }) {
     </ModalContext.Provider>
   );
 }
+
 function Open({ opens: openWindowName, children }) {
   const { open } = useContext(ModalContext);
   return cloneElement(children, { onClick: () => open(openWindowName) });
 }
+
 function Window({ children, name }) {
   const { openName, close } = useContext(ModalContext);
   const ref = useOutsideClick(close);
@@ -73,15 +99,16 @@ function Window({ children, name }) {
   return createPortal(
     <Overlay>
       <StyledModal ref={ref}>
-        <Button onClick={close}>
+        <CloseButton onClick={close} title="Đóng cửa sổ">
           <HiXMark />
-        </Button>
+        </CloseButton>
         <div>{cloneElement(children, { onCloseModal: close })}</div>
       </StyledModal>
     </Overlay>,
     document.body
   );
 }
+
 Modal.Open = Open;
 Modal.Window = Window;
 

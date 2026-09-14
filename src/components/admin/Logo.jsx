@@ -11,7 +11,55 @@ const StyledLogo = styled.div`
   }
 `;
 
-function Logo() {
+function Logo({ isCollapsed = false }) {
+  if (isCollapsed) {
+    return (
+      <StyledLogo $isCollapsed={true}>
+        <svg
+          viewBox="0 0 100 120"
+          style={{ width: "3.8rem", height: "4.6rem" }}
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+        >
+          <title>Chesse Dental</title>
+          <defs>
+            <linearGradient id="toothGradSmall" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="50%" stopColor="#f0fdfa" />
+              <stop offset="100%" stopColor="#e0f2fe" />
+            </linearGradient>
+            <radialGradient id="glowSmall" cx="50%" cy="30%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
+              <stop offset="70%" stopColor="#ffffff" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <g transform="translate(15, 10)">
+            <path
+              d="M35 15 C45 8, 55 8, 65 15 C72 22, 72 35, 70 48 C68 62, 62 75, 52 85 C45 92, 25 92, 18 85 C8 75, 2 62, 0 48 C-2 35, -2 22, 5 15 C15 8, 25 8, 35 15 Z"
+              fill="url(#toothGradSmall)"
+              stroke="#0284c7"
+              strokeWidth="2.5"
+            />
+            <ellipse cx="25" cy="35" rx="12" ry="20" fill="url(#glowSmall)" />
+            <path
+              d="M18 85 L15 95 C15 98, 18 100, 21 100 L24 95 Z"
+              fill="url(#toothGradSmall)"
+              stroke="#0284c7"
+              strokeWidth="2.5"
+            />
+            <path
+              d="M52 85 L49 95 C49 98, 52 100, 55 100 L58 95 Z"
+              fill="url(#toothGradSmall)"
+              stroke="#0284c7"
+              strokeWidth="2.5"
+            />
+          </g>
+        </svg>
+      </StyledLogo>
+    );
+  }
+
   return (
     <StyledLogo>
       <svg

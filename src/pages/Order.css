@@ -1,0 +1,556 @@
+/* =========================================================
+   ORDERS PAGE STYLES - DENTAL HEALTHCARE THEME
+   Light & Dark Mode Compatible
+   ========================================================= */
+
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header Section */
+.orders-header-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.orders-header-info h1 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.orders-header-info p {
+  margin: 0;
+  font-size: 13.5px;
+  color: #64748b;
+}
+
+.btn-explore-services {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-explore-services:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+  color: #ffffff;
+}
+
+/* Stats Overview */
+.orders-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.order-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s;
+}
+
+.order-stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon-bubble {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon-bubble.blue {
+  background: #f0f9ff;
+  color: #0284c7;
+}
+
+.stat-icon-bubble.green {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.stat-icon-bubble.amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.stat-icon-bubble.purple {
+  background: #faf5ff;
+  color: #9333ea;
+}
+
+.stat-text-info span {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.stat-text-info strong {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* Filter Tabs */
+.orders-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.filter-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.filter-pill-btn:hover {
+  background: #f0f9ff;
+  color: #0284c7;
+}
+
+.filter-pill-btn.active {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.filter-count-badge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.filter-pill-btn.active .filter-count-badge {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+/* Orders List */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.order-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.order-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+}
+
+.order-card-header {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.order-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order-id-badge {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.order-date-text {
+  font-size: 12.5px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.order-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.order-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.order-badge-pill.status-paid,
+.order-badge-pill.status-completed {
+  background: #ecfdf5;
+  color: #10b981;
+  border: 1px solid #a7f3d0;
+}
+
+.order-badge-pill.status-processing,
+.order-badge-pill.status-pending {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.order-badge-pill.status-cancelled {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.order-badge-pill.payment-method {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* Order Services Items */
+.order-services-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-service-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-service-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.order-service-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.order-service-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.order-service-info {
+  min-width: 0;
+}
+
+.order-service-name {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.order-service-summary {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  color: #64748b;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.order-service-unit {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.order-service-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.order-service-amount {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0284c7;
+}
+
+/* Order Footer Summary */
+.order-card-footer {
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.order-customer-info {
+  font-size: 12.5px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.order-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.order-total-price-wrap {
+  font-size: 13.5px;
+  color: #475569;
+}
+
+.order-total-price-wrap strong {
+  font-size: 18px;
+  color: #0284c7;
+  font-weight: 800;
+  margin-left: 6px;
+}
+
+.btn-book-order-svc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #0284c7;
+  color: #ffffff;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-book-order-svc:hover {
+  background: #0369a1;
+  color: #ffffff;
+}
+
+/* Empty State */
+.orders-empty-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 56px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.orders-empty-icon-bubble {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f0f9ff;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 16px rgba(2, 132, 199, 0.15);
+}
+
+.orders-empty-card h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.orders-empty-card p {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #64748b;
+  max-width: 460px;
+  line-height: 1.6;
+}
+
+/* ================= DARK MODE ================= */
+html.dark-mode .orders-header-card,
+html.dark-mode .order-stat-card,
+html.dark-mode .orders-filter-bar,
+html.dark-mode .order-card,
+html.dark-mode .orders-empty-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+}
+
+html.dark-mode .orders-header-info h1,
+html.dark-mode .stat-text-info strong,
+html.dark-mode .order-service-name,
+html.dark-mode .orders-empty-card h2 {
+  color: #f8fafc;
+}
+
+html.dark-mode .orders-header-info p,
+html.dark-mode .stat-text-info span,
+html.dark-mode .order-date-text,
+html.dark-mode .order-service-summary,
+html.dark-mode .order-customer-info,
+html.dark-mode .order-total-price-wrap,
+html.dark-mode .orders-empty-card p {
+  color: #94a3b8;
+}
+
+html.dark-mode .order-card-header,
+html.dark-mode .order-card-footer {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode .order-service-item {
+  border-color: #334155;
+}
+
+html.dark-mode .order-service-img {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode .order-id-badge {
+  background: rgba(2, 132, 199, 0.2);
+  color: #38bdf8;
+}
+
+html.dark-mode .filter-pill-btn {
+  color: #94a3b8;
+}
+
+html.dark-mode .filter-pill-btn:hover {
+  background: rgba(2, 132, 199, 0.15);
+  color: #38bdf8;
+}
+
+html.dark-mode .filter-pill-btn.active {
+  background: rgba(2, 132, 199, 0.25);
+  color: #38bdf8;
+}
+
+html.dark-mode .filter-count-badge {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+html.dark-mode .filter-pill-btn.active .filter-count-badge {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+html.dark-mode .order-badge-pill.payment-method {
+  background: #334155;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+html.dark-mode .orders-empty-icon-bubble {
+  background: rgba(2, 132, 199, 0.2);
+  color: #38bdf8;
+}
+
+@media (max-width: 768px) {
+  .orders-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .order-service-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-service-price {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 540px) {
+  .orders-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

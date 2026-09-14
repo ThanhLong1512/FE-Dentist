@@ -1,9 +1,10 @@
 import styled from "styled-components";
 import { useState } from "react";
-import { HiEye, HiArrowPath } from "react-icons/hi2";
+import { HiEye, HiArrowPath, HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import Modal from "../../components/admin/Modal";
 import Table from "../../components/admin/Table";
 import Menus from "../../components/admin/Menus";
+import PatientEMRModal from "../dentalRecord/PatientEMRModal";
 import { useUpdateAppointmentStatus } from "./useUpdateAppointmentStatus";
 import { useRescheduleAppointment } from "./useRescheduleAppointment";
 import {
@@ -185,6 +186,13 @@ function AppointmentRow({ appointment }) {
                 <Modal.Open opens="view-appointment">
                   <Menus.Button icon={<HiEye />}>View Details</Menus.Button>
                 </Modal.Open>
+                {patient?._id && (
+                  <Modal.Open opens="emr-appointment">
+                    <Menus.Button icon={<HiOutlineClipboardDocumentList />}>
+                      Khám bệnh / Bệnh án
+                    </Menus.Button>
+                  </Modal.Open>
+                )}
                 {STATUS_ACTIONS.map((action) => (
                   <Menus.Button
                     key={action.status}
@@ -198,6 +206,11 @@ function AppointmentRow({ appointment }) {
                   <Menus.Button icon={<HiArrowPath />}>Đổi lịch</Menus.Button>
                 </Modal.Open>
               </Menus.List>
+              {patient?._id && (
+                <Modal.Window name="emr-appointment">
+                  <PatientEMRModal patient={patient} />
+                </Modal.Window>
+              )}
               <Modal.Window name="view-appointment">
                 <div>
                   <h3>Appointment Details</h3>

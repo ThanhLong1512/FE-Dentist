@@ -13,11 +13,22 @@ const Spinner = lazy(() => import("../../components/admin/Spinner"));
 function Booking() {
   return (
     <Suspense fallback={<Spinner />}>
-      <Row type="horizontal">
-        <Heading as="h1">Appointment</Heading>
-        <AppointmentOperations />
+      <Row
+        type="horizontal"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "1.2rem",
+          marginBottom: "0.8rem",
+        }}
+      >
+        <Heading as="h1">Lịch hẹn khám (Appointments)</Heading>
       </Row>
-      <Row>
+
+      <Row style={{ display: "flex", flexDirection: "column", gap: "1.6rem" }}>
+        <AppointmentOperations />
         <AppointmentTable />
       </Row>
     </Suspense>

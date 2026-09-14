@@ -1,28 +1,32 @@
 import Filter from "../../components/admin/Filter";
 import SortBy from "../../components/admin/SortBy";
-import TableOperations from "../../components/admin/TableOperations";
+import TableOperations, { OperationsGroup } from "../../components/admin/TableOperations";
+import SearchBar from "../../components/admin/SearchBar";
 
 function EmployeeOperations() {
   return (
     <TableOperations>
-      <Filter
-        filterField="gender"
-        options={[
-          { value: "all", label: "All" },
-          { value: "male", label: "Male" },
-          { value: "female", label: "Female" },
-        ]}
-      />
-      <SortBy
-        options={[
-          { value: "name-asc", label: "Sort by name (A-Z)" },
-          { value: "name-desc", label: "Sort by name (Z-A)" },
-          { value: "email-asc", label: "Sort by email (A-Z)" },
-          { value: "email-desc", label: "Sort by email (Z-A)" },
-          { value: "phoneNumber-asc", label: "Sort by phone (A-Z)" },
-          { value: "phoneNumber-desc", label: "Sort by phone (Z-A)" },
-        ]}
-      />
+      <SearchBar placeholder="Tìm kiếm theo tên, email, sđt..." searchKey="search" />
+
+      <OperationsGroup>
+        <Filter
+          filterField="gender"
+          options={[
+            { value: "all", label: "Tất cả giới tính" },
+            { value: "male", label: "Nam" },
+            { value: "female", label: "Nữ" },
+          ]}
+        />
+
+        <SortBy
+          options={[
+            { value: "name-asc", label: "Tên (A-Z)" },
+            { value: "name-desc", label: "Tên (Z-A)" },
+            { value: "email-asc", label: "Email (A-Z)" },
+            { value: "phoneNumber-asc", label: "SĐT (tăng dần)" },
+          ]}
+        />
+      </OperationsGroup>
     </TableOperations>
   );
 }

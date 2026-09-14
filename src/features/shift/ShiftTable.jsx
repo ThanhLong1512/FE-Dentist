@@ -1,3 +1,5 @@
+import styled from "styled-components";
+import { CalendarX, Search } from "lucide-react";
 import Spinner from "../../components/admin/Spinner";
 import ShiftRow from "./ShiftRow";
 import { useShifts } from "./useShifts";
@@ -7,95 +9,127 @@ import { useSearchParams } from "react-router-dom";
 import Pagination from "../../components/admin/Pagination";
 import { PAGE_SIZE } from "../../utils/constants";
 
+const EmptyStateContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  gap: 1.2rem;
+  background: var(--color-grey-0);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+
+  svg {
+    width: 4.8rem;
+    height: 4.8rem;
+    color: var(--color-grey-300);
+  }
+
+  h3 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--color-grey-700);
+    margin: 0;
+  }
+
+  p {
+    font-size: 1.3rem;
+    color: var(--color-grey-400);
+    margin: 0;
+    max-width: 32rem;
+  }
+`;
+
 function ShiftTable() {
-  const { isLoading, shifts } = useShifts();
+  const { isLoading, shifts = [] } = useShifts();
   const [searchParams] = useSearchParams();
 
   if (isLoading) return <Spinner />;
 
-  if (!shifts || shifts.length === 0) {
+  const allShifts = shifts || [];
+
+  if (allShifts.length === 0) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "2rem",
-          color: "#6b7280",
-        }}
-      >
-        No shifts available
-      </div>
+      <EmptyStateContainer>
+        <CalendarX />
+        <h3>Chưa có ca trực nào</h3>
+        <p>Hệ thống chưa có dữ liệu ca trực của bác sĩ.</p>
+      </EmptyStateContainer>
     );
   }
 
-  let filteredShifts;
-
   // 1) FILTER
+  let filteredShifts = allShifts;
   const filterValue = searchParams.get("status") || "all";
-  if (filterValue === "all") filteredShifts = shifts;
   if (filterValue === "available")
-    filteredShifts = shifts.filter((shift) => !shift.isBooked);
+    filteredShifts = filteredShifts.filter((shift) => !shift.isBooked);
   if (filterValue === "booked")
-    filteredShifts = shifts.filter((shift) => shift.isBooked);
-
-  // Filter by employee gender if needed
-  const genderFilter = searchParams.get("gender") || "all";
-  if (genderFilter === "male")
-    filteredShifts = filteredShifts.filter(
-      (shift) => shift.employee && shift.employee.gender === false
-    );
-  if (genderFilter === "female")
-    filteredShifts = filteredShifts.filter(
-      (shift) => shift.employee && shift.employee.gender === true
-    );
+    filteredShifts = filteredShifts.filter((shift) => shift.isBooked);
 
   // Filter by day of week
   const dayFilter = searchParams.get("day") || "all";
   if (dayFilter !== "all") {
     filteredShifts = filteredShifts.filter(
-      (shift) => shift.DayOfWeek.toLowerCase() === dayFilter.toLowerCase()
+      (shift) => shift.DayOfWeek && shift.DayOfWeek.toLowerCase() === dayFilter.toLowerCase()
     );
   }
 
-  // 2) SORT
+  // 2) SEARCH FILTER
+  const searchQuery = (searchParams.get("search") || "").trim().toLowerCase();
+  if (searchQuery) {
+    filteredShifts = filteredShifts.filter((shift) => {
+      const docName = (shift.employee?.name || "").toLowerCase();
+      const serviceName = (shift.employee?.service?.nameService || "").toLowerCase();
+      const day = (shift.DayOfWeek || "").toLowerCase();
+      return docName.includes(searchQuery) || serviceName.includes(searchQuery) || day.includes(searchQuery);
+    });
+  }
+
+  if (filteredShifts.length === 0) {
+    return (
+      <EmptyStateContainer>
+        <Search />
+        <h3>Không tìm thấy ca trực phù hợp</h3>
+        <p>Thử thay đổi bộ lọc thứ trong tuần hoặc từ khóa tìm kiếm.</p>
+      </EmptyStateContainer>
+    );
+  }
+
+  // 3) SORT
   const sortBy = searchParams.get("sortBy") || "DayOfWeek-asc";
   const [field, direction] = sortBy.split("-");
   const modifier = direction === "asc" ? 1 : -1;
 
-  const sortedShifts = filteredShifts?.sort((a, b) => {
-    if (field === "employeeName") {
+  const dayOrder = {
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 7,
+  };
+
+  const sortedShifts = [...filteredShifts].sort((a, b) => {
+    if (field === "DayOfWeek") {
+      const dayA = dayOrder[a.DayOfWeek?.toLowerCase()] || 0;
+      const dayB = dayOrder[b.DayOfWeek?.toLowerCase()] || 0;
+      return (dayA - dayB) * modifier;
+    } else if (field === "employeeName") {
       const nameA = a.employee?.name || "";
       const nameB = b.employee?.name || "";
       return nameA.localeCompare(nameB) * modifier;
-    } else if (field === "StartTime" || field === "EndTime") {
-      // Convert time string to minutes for comparison
-      const timeToMinutes = (timeStr) => {
-        const [hours, minutes] = timeStr.split(":").map(Number);
-        return hours * 60 + minutes;
-      };
-      return (timeToMinutes(a[field]) - timeToMinutes(b[field])) * modifier;
-    } else if (field === "DayOfWeek") {
-      // Sort by day of week order
-      const dayOrder = {
-        Monday: 1,
-        Tuesday: 2,
-        Wednesday: 3,
-        Thursday: 4,
-        Friday: 5,
-        Saturday: 6,
-        Sunday: 7,
-      };
-      return ((dayOrder[a[field]] || 0) - (dayOrder[b[field]] || 0)) * modifier;
+    } else if (field === "StartTime") {
+      return (a.StartTime || "").localeCompare(b.StartTime || "") * modifier;
     } else if (field === "isBooked") {
-      return (Number(a[field]) - Number(b[field])) * modifier;
-    } else {
-      // For other string fields
-      return (
-        String(a[field] || "").localeCompare(String(b[field] || "")) * modifier
-      );
+      return (Number(a.isBooked) - Number(b.isBooked)) * modifier;
     }
+    return 0;
   });
 
-  // 3) PAGINATION
+  // 4) PAGINATION
   const currentPage = !searchParams.get("page")
     ? 1
     : Number(searchParams.get("page"));
@@ -106,19 +140,20 @@ function ShiftTable() {
 
   return (
     <Menus>
-      <Table columns="1fr 1fr 0.8fr 0.8fr 0.8fr 0.6fr 1fr">
+      <Table columns="1.8fr 1.2fr 1.2fr 1.2fr 1fr 0.6fr">
         <Table.Header>
-          <div>Employee</div>
-          <div>Service</div>
-          <div>Day</div>
-          <div>Start Time</div>
-          <div>End Time</div>
-          <div>Status</div>
-          <div>Actions</div>
+          <div>Bác sĩ</div>
+          <div>Thứ trong tuần</div>
+          <div>Giờ bắt đầu</div>
+          <div>Giờ kết thúc</div>
+          <div>Trạng thái</div>
+          <div>Thao tác</div>
         </Table.Header>
         <Table.Body
           data={paginatedShifts}
-          render={(shift) => <ShiftRow shift={shift} key={shift._id} />}
+          render={(shift) => (
+            <ShiftRow shift={shift} key={shift._id} />
+          )}
         />
         <Table.Footer>
           <Pagination count={filteredShifts.length} />

@@ -115,7 +115,7 @@ body {
   background: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-font-smoothing: antialiased;
-  font-family: "Open Sans", sans-serif;
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 a {
@@ -139,9 +139,9 @@ h6 {
   position: relative;
   margin: 0px;
   background: none;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2em;
-  font-family: "Titillium Web", sans-serif;
+  font-family: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 h1 {

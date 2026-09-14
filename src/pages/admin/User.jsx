@@ -13,13 +13,24 @@ const CreateAccount = lazy(() =>
 function User() {
   return (
     <>
-      <Row type="horizontal">
-        <Heading as="h1">Users</Heading>
-        <AccountOperations />
-      </Row>
-      <Row>
-        <AccountTable />
+      <Row
+        type="horizontal"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "1.2rem",
+          marginBottom: "0.8rem",
+        }}
+      >
+        <Heading as="h1">Quản lý Tài khoản (Users)</Heading>
         <CreateAccount />
+      </Row>
+
+      <Row style={{ display: "flex", flexDirection: "column", gap: "1.6rem" }}>
+        <AccountOperations />
+        <AccountTable />
       </Row>
     </>
   );

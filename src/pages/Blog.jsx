@@ -1,3 +1,5 @@
+import "./Blog.css";
+
 function Blog() {
   return (
     <div className="sidebar-page-container">

@@ -1,33 +1,33 @@
 import Filter from "../../components/admin/Filter";
 import SortBy from "../../components/admin/SortBy";
-import TableOperations from "../../components/admin/TableOperations";
+import TableOperations, { OperationsGroup } from "../../components/admin/TableOperations";
+import SearchBar from "../../components/admin/SearchBar";
 
 function OrderOperations() {
   return (
     <TableOperations>
-      <Filter
-        filterField="status"
-        options={[
-          { value: "all", label: "All Orders" },
-          { value: "successful", label: "Successful" },
-          { value: "processing", label: "Processing" },
-          { value: "cancelled", label: "Cancelled" },
-        ]}
-      />
-      <SortBy
-        options={[
-          { value: "createAt-desc", label: "Sort by date (newest first)" },
-          { value: "createAt-asc", label: "Sort by date (oldest first)" },
-          { value: "customerName-asc", label: "Sort by customer name (A-Z)" },
-          { value: "customerName-desc", label: "Sort by customer name (Z-A)" },
-          { value: "totalPrice-desc", label: "Sort by price (high first)" },
-          { value: "totalPrice-asc", label: "Sort by price (low first)" },
-          { value: "status-asc", label: "Sort by status (A-Z)" },
-          { value: "status-desc", label: "Sort by status (Z-A)" },
-          { value: "service-asc", label: "Sort by service (A-Z)" },
-          { value: "service-desc", label: "Sort by service (Z-A)" },
-        ]}
-      />
+      <SearchBar placeholder="Tìm kiếm theo mã đơn, khách hàng..." searchKey="search" />
+
+      <OperationsGroup>
+        <Filter
+          filterField="status"
+          options={[
+            { value: "all", label: "Tất cả đơn" },
+            { value: "successful", label: "Thành công" },
+            { value: "processing", label: "Đang xử lý" },
+            { value: "cancelled", label: "Đã hủy" },
+          ]}
+        />
+        <SortBy
+          options={[
+            { value: "createAt-desc", label: "Ngày đặt (mới nhất)" },
+            { value: "createAt-asc", label: "Ngày đặt (cũ nhất)" },
+            { value: "customerName-asc", label: "Tên khách hàng (A-Z)" },
+            { value: "totalPrice-desc", label: "Tổng tiền (cao trước)" },
+            { value: "totalPrice-asc", label: "Tổng tiền (thấp trước)" },
+          ]}
+        />
+      </OperationsGroup>
     </TableOperations>
   );
 }

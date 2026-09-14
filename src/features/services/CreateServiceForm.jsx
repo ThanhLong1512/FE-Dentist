@@ -1,13 +1,120 @@
 import { useForm } from "react-hook-form";
 import { useState, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
+import styled from "styled-components";
+import { Sparkles, UploadCloud, X, Image as ImageIcon, CheckCircle } from "lucide-react";
 
 import Input from "../../components/admin/Input";
 import Form from "../../components/admin/Form";
 import Button from "../../components/admin/Button";
 import { Textarea } from "../../components/admin/Textarea";
-import FormRow from "../../components/admin/FormRow";
+import FormRow, { FormGrid } from "../../components/admin/FormRow";
+import FormHeader from "../../components/admin/FormHeader";
 import { useCreateService } from "./useCreateService";
 import { useEditService } from "./useEditService";
+
+const UploadContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+`;
+
+const DropzoneBox = styled.div`
+  border: 2px dashed ${(props) => (props.$hasImage ? "var(--color-brand-400)" : "var(--color-grey-300)")};
+  border-radius: var(--border-radius-md);
+  padding: 2rem;
+  background: var(--color-grey-50);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    border-color: var(--color-brand-500);
+    background: var(--color-brand-50);
+  }
+
+  .upload-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: var(--color-grey-100);
+    color: var(--color-brand-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  &:hover .upload-icon {
+    transform: scale(1.1);
+    background: var(--color-brand-100);
+  }
+
+  .upload-text {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    .primary {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--color-grey-800);
+    }
+
+    .secondary {
+      font-size: 1.2rem;
+      color: var(--color-grey-400);
+    }
+  }
+`;
+
+const PreviewWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-grey-200);
+  box-shadow: var(--shadow-sm);
+
+  img {
+    width: 100%;
+    height: 16rem;
+    object-fit: cover;
+    display: block;
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.9);
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s;
+
+    &:hover {
+      background: #dc2626;
+      transform: scale(1.1);
+    }
+  }
+`;
 
 function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
   const { isCreating, createService } = useCreateService();
@@ -53,26 +160,20 @@ function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
 
   function onSubmit(data) {
     if (!isEditSession && !selectedFile) {
-      toast.error("Please select a service photo");
+      toast.error("Vui lòng tải lên hình ảnh cho dịch vụ nha khoa");
       return;
     }
 
     const formData = new FormData();
-
-    formData.append("nameService", data.nameService);
-    formData.append("Unit", data.Unit);
+    formData.append("nameService", data.nameService.trim());
+    formData.append("Unit", data.Unit.trim());
     formData.append("priceService", String(data.priceService));
     formData.append("priceDiscount", String(data.priceDiscount || 0));
-    formData.append("summary", data.summary || "");
-    formData.append("description", data.description || "");
+    formData.append("summary", data.summary ? data.summary.trim() : "");
+    formData.append("description", data.description ? data.description.trim() : "");
+
     if (selectedFile) {
       formData.append("photoService", selectedFile);
-    } else if (!isEditSession) {
-      toast.error("Please select a service photo");
-      return;
-    }
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
     }
 
     if (isEditSession) {
@@ -83,6 +184,7 @@ function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
         },
         {
           onSuccess: () => {
+            toast.success("Cập nhật dịch vụ thành công!");
             handleReset();
             onCloseModal?.();
           },
@@ -91,6 +193,7 @@ function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
     } else {
       createService(formData, {
         onSuccess: () => {
+          toast.success("Thêm dịch vụ mới thành công!");
           handleReset();
           onCloseModal?.();
         },
@@ -101,40 +204,20 @@ function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
   function onError(errors) {
     const firstError = Object.values(errors)[0];
     if (firstError?.message) {
-      alert(firstError.message);
+      toast.error(firstError.message);
     }
   }
 
   function handleImageChange(e) {
     const file = e.target.files[0];
-    console.log("Selected file:", file);
-
     if (file) {
       if (!file.type.startsWith("image/")) {
-        alert("Please select an image file");
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-        setSelectedFile(null);
-        setImagePreview(
-          isEditSession && serviceToEdit.photoService?.url
-            ? serviceToEdit.photoService.url
-            : null
-        );
+        toast.error("Vui lòng chỉ chọn tệp hình ảnh (JPEG, PNG, WEBP)");
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File size must be less than 5MB");
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-        setSelectedFile(null);
-        setImagePreview(
-          isEditSession && serviceToEdit.photoService?.url
-            ? serviceToEdit.photoService.url
-            : null
-        );
+      if (file.size > 8 * 1024 * 1024) {
+        toast.error("Kích thước hình ảnh tối đa là 8MB");
         return;
       }
 
@@ -148,13 +231,8 @@ function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
     }
   }
 
-  function openFileDialog() {
-    if (fileInputRef.current && !isWorking) {
-      fileInputRef.current.click();
-    }
-  }
-
-  function removeImage() {
+  function removeImage(e) {
+    e.stopPropagation();
     if (isEditSession && serviceToEdit.photoService?.url) {
       setImagePreview(serviceToEdit.photoService.url);
       setSelectedFile(null);
@@ -187,153 +265,118 @@ function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
       onSubmit={handleSubmit(onSubmit, onError)}
       type={onCloseModal ? "modal" : "regular"}
     >
-      <FormRow label="Service name" error={errors?.nameService?.message}>
-        <Input
-          type="text"
-          id="nameService"
-          disabled={isWorking}
-          {...register("nameService", {
-            required: "This field is required",
-            minLength: {
-              value: 2,
-              message: "Service name must be at least 2 characters",
-            },
-          })}
-        />
-      </FormRow>
+      <FormHeader
+        icon={<Sparkles />}
+        title={isEditSession ? "Cập nhật dịch vụ nha khoa" : "Thêm dịch vụ nha khoa mới"}
+        subtitle="Thiết lập thông tin dịch vụ, đơn vị tính, giá niêm yết và chính sách ưu đãi."
+      />
 
-      <FormRow label="Unit" error={errors?.Unit?.message}>
-        <Input
-          type="text"
-          id="Unit"
-          disabled={isWorking}
-          placeholder="e.g., Session, Visit, Treatment"
-          {...register("Unit", {
-            required: "This field is required",
-          })}
-        />
-      </FormRow>
+      <FormGrid>
+        <FormRow label="Tên dịch vụ nha khoa" required error={errors?.nameService?.message}>
+          <Input
+            type="text"
+            id="nameService"
+            placeholder="Ví dụ: Tẩy trắng răng Laser Whitening"
+            disabled={isWorking}
+            {...register("nameService", {
+              required: "Vui lòng nhập tên dịch vụ",
+              minLength: {
+                value: 2,
+                message: "Tên dịch vụ phải có ít nhất 2 ký tự",
+              },
+            })}
+          />
+        </FormRow>
 
-      <FormRow label="Service price" error={errors?.priceService?.message}>
-        <Input
-          type="number"
-          id="priceService"
-          disabled={isWorking}
-          step="0.01"
-          {...register("priceService", {
-            required: "This field is required",
-            min: {
-              value: 1,
-              message: "Price should be at least 1",
-            },
-            valueAsNumber: true,
-          })}
-        />
-      </FormRow>
+        <FormRow label="Đơn vị tính" required error={errors?.Unit?.message}>
+          <Input
+            type="text"
+            id="Unit"
+            placeholder="Ví dụ: Liệu trình, Răng, Ca, Gói..."
+            disabled={isWorking}
+            {...register("Unit", {
+              required: "Vui lòng nhập đơn vị tính",
+            })}
+          />
+        </FormRow>
+      </FormGrid>
 
-      <FormRow label="Discount price" error={errors?.priceDiscount?.message}>
-        <Input
-          type="number"
-          id="priceDiscount"
-          disabled={isWorking}
-          step="0.01"
-          {...register("priceDiscount", {
-            valueAsNumber: true,
-            validate: (value) => {
-              const servicePrice = getValues().priceService;
-              if (value && value < 0) {
-                return "Discount price cannot be negative";
-              }
-              if (value && servicePrice && value >= servicePrice) {
-                return "Discount price should be less than service price";
-              }
-              return true;
-            },
-          })}
-        />
-      </FormRow>
+      <FormGrid>
+        <FormRow label="Giá dịch vụ (VNĐ)" required error={errors?.priceService?.message}>
+          <Input
+            type="number"
+            id="priceService"
+            placeholder="Ví dụ: 1500000"
+            disabled={isWorking}
+            step="1000"
+            {...register("priceService", {
+              required: "Vui lòng nhập giá dịch vụ",
+              min: {
+                value: 1,
+                message: "Giá dịch vụ phải lớn hơn 0",
+              },
+              valueAsNumber: true,
+            })}
+          />
+        </FormRow>
 
-      <FormRow label="Summary" error={errors?.summary?.message}>
+        <FormRow label="Giá khuyến mãi / Ưu đãi (VNĐ)" error={errors?.priceDiscount?.message}>
+          <Input
+            type="number"
+            id="priceDiscount"
+            placeholder="Ví dụ: 1200000 (Để 0 nếu không giảm)"
+            disabled={isWorking}
+            step="1000"
+            {...register("priceDiscount", {
+              valueAsNumber: true,
+              validate: (value) => {
+                const servicePrice = getValues().priceService;
+                if (value && value < 0) {
+                  return "Giá giảm không được âm";
+                }
+                if (value && servicePrice && Number(value) >= Number(servicePrice)) {
+                  return "Giá khuyến mãi phải nhỏ hơn giá gốc";
+                }
+                return true;
+              },
+            })}
+          />
+        </FormRow>
+      </FormGrid>
+
+      <FormRow label="Tóm tắt ngắn gọn" error={errors?.summary?.message}>
         <Input
           type="text"
           id="summary"
+          placeholder="Mô tả tóm tắt nổi bật (Ví dụ: Công nghệ châu Âu không ê buốt)"
           disabled={isWorking}
-          placeholder="Brief summary of the service"
           {...register("summary", {
             maxLength: {
               value: 200,
-              message: "Summary cannot exceed 200 characters",
+              message: "Tóm tắt không được vượt quá 200 ký tự",
             },
           })}
         />
       </FormRow>
 
-      <FormRow label="Description" error={errors?.description?.message}>
+      <FormRow label="Mô tả chi tiết liệu trình" required error={errors?.description?.message}>
         <Textarea
           id="description"
           disabled={isWorking}
-          placeholder="Detailed description of the service"
+          placeholder="Quy trình thực hiện, cam kết chất lượng, bảo hành và lưu ý sau điều trị..."
           rows={4}
           {...register("description", {
-            required: "This field is required",
+            required: "Vui lòng nhập mô tả chi tiết dịch vụ",
             maxLength: {
-              value: 1000,
-              message: "Description cannot exceed 1000 characters",
+              value: 1500,
+              message: "Mô tả không được vượt quá 1500 ký tự",
             },
           })}
         />
       </FormRow>
 
-      <FormRow label="Service photo" error={errors?.photoService?.message}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {imagePreview && (
-            <div
-              style={{
-                position: "relative",
-                display: "inline-block",
-                marginBottom: "1rem",
-              }}
-            >
-              <img
-                src={imagePreview}
-                alt="Service preview"
-                style={{
-                  width: "200px",
-                  height: "150px",
-                  objectFit: "cover",
-                  borderRadius: "8px",
-                  border: "2px solid #e2e8f0",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                }}
-              />
-              <button
-                type="button"
-                onClick={removeImage}
-                disabled={isWorking}
-                style={{
-                  position: "absolute",
-                  top: "-8px",
-                  right: "-8px",
-                  width: "24px",
-                  height: "24px",
-                  borderRadius: "50%",
-                  border: "none",
-                  backgroundColor: "#ef4444",
-                  color: "white",
-                  cursor: isWorking ? "not-allowed" : "pointer",
-                  fontSize: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                }}
-                title="Remove image"
-              >
-                ×
-              </button>
-            </div>
-          )}
-
+      <FormRow label="Hình ảnh đại diện dịch vụ" error={errors?.photoService?.message}>
+        <UploadContainer>
           <input
             ref={fileInputRef}
             type="file"
@@ -343,131 +386,56 @@ function CreateServiceForm({ serviceToEdit = {}, onCloseModal }) {
             disabled={isWorking}
           />
 
-          <div
-            style={{
-              display: "flex",
-              gap: "0.5rem",
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              type="button"
-              onClick={openFileDialog}
-              disabled={isWorking}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "10px 16px",
-                backgroundColor: isWorking
-                  ? "#6b7280"
-                  : imagePreview
-                  ? "#10b981"
-                  : "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: isWorking ? "not-allowed" : "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-                textAlign: "center",
-                transition: "all 0.2s ease",
-                userSelect: "none",
-                opacity: isWorking ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!isWorking) {
-                  e.target.style.backgroundColor = imagePreview
-                    ? "#059669"
-                    : "#2563eb";
-                  e.target.style.transform = "translateY(-1px)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isWorking) {
-                  e.target.style.backgroundColor = imagePreview
-                    ? "#10b981"
-                    : "#3b82f6";
-                  e.target.style.transform = "translateY(0)";
-                }
-              }}
-            >
-              <span style={{ fontSize: "16px" }}>
-                {imagePreview ? "✓" : "📁"}
-              </span>
-              {isEditSession
-                ? imagePreview
-                  ? "Change Photo"
-                  : "Choose Photo"
-                : imagePreview
-                ? "Photo Selected"
-                : "Choose Photo"}
-            </span>
-
-            {selectedFile && (
-              <span
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  padding: "4px 8px",
-                  backgroundColor: "#f3f4f6",
-                  borderRadius: "4px",
-                  maxWidth: "200px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
+          {imagePreview ? (
+            <PreviewWrapper>
+              <img src={imagePreview} alt="Hình ảnh dịch vụ" />
+              <button
+                type="button"
+                className="remove-btn"
+                onClick={removeImage}
+                disabled={isWorking}
+                title="Gỡ ảnh này"
               >
-                {selectedFile.name}
-              </span>
-            )}
-          </div>
-          <input
-            type="hidden"
-            {...register("photoService", {
-              validate: () => {
-                if (!isEditSession && !selectedFile) {
-                  return "Please select a service photo";
-                }
-                return true;
-              },
-            })}
-          />
-
-          <div style={{ fontSize: "12px", color: "#6b7280" }}>
-            <p style={{ margin: 0 }}>
-              • Supported formats: JPG, PNG, GIF, WebP
-            </p>
-            <p style={{ margin: 0 }}>• Maximum file size: 5MB</p>
-            <p style={{ margin: 0 }}>• Recommended dimensions: 600x400px</p>
-            {!isEditSession && (
-              <p style={{ margin: 0, color: "#ef4444", fontWeight: "500" }}>
-                • Photo is required for new services
-              </p>
-            )}
-          </div>
-        </div>
+                <X size={16} />
+              </button>
+            </PreviewWrapper>
+          ) : (
+            <DropzoneBox
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              $hasImage={Boolean(imagePreview)}
+            >
+              <div className="upload-icon">
+                <UploadCloud size={24} />
+              </div>
+              <div className="upload-text">
+                <span className="primary">Nhấp để tải ảnh lên hoặc kéo thả vào đây</span>
+                <span className="secondary">Hỗ trợ PNG, JPG, WEBP (Tối đa 8MB)</span>
+              </div>
+            </DropzoneBox>
+          )}
+        </UploadContainer>
       </FormRow>
 
       <FormRow>
         <Button
           variation="secondary"
           type="button"
+          disabled={isWorking}
           onClick={() => {
             onCloseModal?.();
           }}
         >
-          Cancel
+          Hủy bỏ
         </Button>
         <Button type="submit" disabled={isWorking}>
           {isWorking
             ? isEditSession
-              ? "Updating..."
-              : "Creating..."
+              ? "Đang cập nhật..."
+              : "Đang tạo mới..."
             : isEditSession
-            ? "Update Service"
-            : "Create Service"}
+            ? "Cập nhật dịch vụ"
+            : "Lưu dịch vụ mới"}
         </Button>
       </FormRow>
     </Form>

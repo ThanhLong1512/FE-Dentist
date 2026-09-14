@@ -13,6 +13,7 @@ import GlobalStyles from "../styles/GlobalStyles";
 import { lazy } from "react";
 import Shop from "./pages/Shop";
 import Home from "./pages/Home";
+import Booking from "./pages/Booking";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -35,7 +36,7 @@ const Patient = lazy(() => import("./pages/admin/Patient"));
 const Service = lazy(() => import("./pages/admin/Service"));
 const Shift = lazy(() => import("./pages/admin/Shift"));
 const Employee = lazy(() => import("./pages/admin/Employee"));
-const Booking = lazy(() => import("./pages/admin/Booking"));
+const AdminBooking = lazy(() => import("./pages/admin/Booking"));
 const User = lazy(() => import("./pages/admin/User"));
 const Setting = lazy(() => import("./pages/admin/Setting"));
 const Facility = lazy(() => import("./pages/admin/Facility"));
@@ -66,18 +67,15 @@ function App() {
       <LanguageProvider>
         <QueryClientProvider client={queryClient}>
           <ThemeSync />
-          <ReactQueryDevtools
-            initialIsOpen={false}
-            buttonPosition="bottom-left"
-          />
           <GlobalStyles />
           <BrowserRouter>
             <Suspense fallback={<Spinner />}>
               <Routes>
                 <Route index element={<Navigate replace to="home" />} />
-                <Route path="home" element={<Home />} />
                 {/* Client */}
                 <Route element={<AppLayout />}>
+                  <Route path="home" element={<Home />} />
+                  <Route path="booking" element={<Booking />} />
                   <Route path="blog" element={<Blog />} />
                   <Route path="contact" element={<Contact />} />
                   <Route element={<UnauthorizedRoutes />}>
@@ -113,7 +111,7 @@ function App() {
                   <Route path="admin/patients" element={<Patient />} />
                   <Route path="admin/services" element={<Service />} />
                   <Route path="admin/shifts" element={<Shift />} />
-                  <Route path="admin/appointments" element={<Booking />} />
+                  <Route path="admin/appointments" element={<AdminBooking />} />
                   <Route path="admin/orders" element={<Orders />} />
                   <Route path="admin/users" element={<User />} />
                   <Route path="admin/facilities" element={<Facility />} />

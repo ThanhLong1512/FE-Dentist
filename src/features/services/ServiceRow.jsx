@@ -11,6 +11,7 @@ import Modal from "../../components/admin/Modal";
 import ConfirmDelete from "../../components/admin/ConfirmDelete";
 import Table from "../../components/admin/Table";
 import Menus from "../../components/admin/Menus";
+import { getImageUrl, handleImageError } from "../../utils/imageHelper";
 
 const Img = styled.img`
   display: block;
@@ -59,7 +60,11 @@ function ServiceRow({ service }) {
   return (
     <>
       <Table.Row>
-        <Img src={photoService.url} />
+        <Img
+          src={getImageUrl(photoService)}
+          alt={nameService}
+          onError={handleImageError}
+        />
         <Cabin>{nameService}</Cabin>
         <div>{Unit}</div>
         <Price>{formatCurrency(priceService)}</Price>

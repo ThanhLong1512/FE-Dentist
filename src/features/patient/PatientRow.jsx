@@ -3,11 +3,12 @@ import { useState } from "react";
 
 import CreatePatientForm from "./CreatePatientForm";
 import { useDeletePatient } from "./useDeletePatient";
-import { HiPencil, HiTrash } from "react-icons/hi2";
+import { HiPencil, HiTrash, HiOutlineClipboardDocumentList } from "react-icons/hi2";
 import Modal from "../../components/admin/Modal";
 import ConfirmDelete from "../../components/admin/ConfirmDelete";
 import Table from "../../components/admin/Table";
 import Menus from "../../components/admin/Menus";
+import PatientEMRModal from "../dentalRecord/PatientEMRModal";
 
 const PatientName = styled.div`
   font-size: 1.6rem;
@@ -52,6 +53,11 @@ function PatientRow({ patient }) {
             <Menus.Menu>
               <Menus.Toggle id={patientID} />
               <Menus.List id={patientID}>
+                <Modal.Open opens="emr-patient">
+                  <Menus.Button icon={<HiOutlineClipboardDocumentList />}>
+                    Bệnh án & Sơ đồ răng
+                  </Menus.Button>
+                </Modal.Open>
                 <Modal.Open opens="edit-patient">
                   <Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
                 </Modal.Open>
@@ -59,6 +65,9 @@ function PatientRow({ patient }) {
                   <Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
                 </Modal.Open>
               </Menus.List>
+              <Modal.Window name="emr-patient">
+                <PatientEMRModal patient={patient} />
+              </Modal.Window>
               <Modal.Window name="edit-patient">
                 <CreatePatientForm patientToEdit={patient} />
               </Modal.Window>

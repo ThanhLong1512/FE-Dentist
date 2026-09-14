@@ -15,13 +15,24 @@ const EmployeeOperations = lazy(() =>
 function Employee() {
   return (
     <>
-      <Row type="horizontal">
-        <Heading as="h1">Employee</Heading>
-        <EmployeeOperations />
-      </Row>
-      <Row>
-        <EmployeeTable />
+      <Row
+        type="horizontal"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "1.2rem",
+          marginBottom: "0.8rem",
+        }}
+      >
+        <Heading as="h1">Nhân sự & Bác sĩ (Employees)</Heading>
         <CreateEmployee />
+      </Row>
+
+      <Row style={{ display: "flex", flexDirection: "column", gap: "1.6rem" }}>
+        <EmployeeOperations />
+        <EmployeeTable />
       </Row>
     </>
   );

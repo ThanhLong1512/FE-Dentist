@@ -385,3 +385,114 @@ html.dark-mode .news-section p {
 html.dark-mode .mobile-header {
   background-color: #1e293b !important;
 }
+
+/* Blog / Cẩm nang page */
+html.dark-mode .sidebar-page-container {
+  background-color: #0b1329 !important;
+}
+
+html.dark-mode .news-block .inner-box {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark-mode .news-block .lower-content {
+  background-color: #1e293b !important;
+  border-top: 1px solid #334155 !important;
+}
+
+html.dark-mode .news-block .lower-content h3 a,
+html.dark-mode .news-block .lower-content h4 a {
+  color: #f8fafc !important;
+}
+
+html.dark-mode .news-block .lower-content h3 a:hover,
+html.dark-mode .news-block .lower-content h4 a:hover {
+  color: #38bdf8 !important;
+}
+
+html.dark-mode .news-block .lower-content p,
+html.dark-mode .news-block .lower-content .text {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .news-block .lower-content .post-info {
+  color: #64748b !important;
+}
+
+html.dark-mode .news-block .lower-content .post-info li {
+  color: #94a3b8 !important;
+}
+
+html.dark-mode .news-block .lower-content .post-info li span {
+  color: #38bdf8 !important;
+}
+
+html.dark-mode .sidebar-page-container .sidebar {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark-mode .sidebar-title h3 {
+  color: #f8fafc !important;
+  border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .sidebar-title h3::after {
+  background: #38bdf8 !important;
+}
+
+html.dark-mode .sidebar-widget.search-box input {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark-mode .sidebar-widget.search-box input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+}
+
+html.dark-mode .sidebar-widget.search-box button {
+  color: #38bdf8 !important;
+}
+
+html.dark-mode .sidebar-widget.categories li a {
+  color: #cbd5e1 !important;
+  border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .sidebar-widget.categories li a:hover {
+  color: #38bdf8 !important;
+}
+
+html.dark-mode .sidebar-widget.popular-posts .post {
+  border-bottom-color: #334155 !important;
+}
+
+html.dark-mode .sidebar-widget.popular-posts .post h4 a {
+  color: #f1f5f9 !important;
+}
+
+html.dark-mode .sidebar-widget.popular-posts .post h4 a:hover {
+  color: #38bdf8 !important;
+}
+
+html.dark-mode .sidebar-widget.popular-posts .post-info {
+  color: #64748b !important;
+}
+
+html.dark-mode .sidebar-widget.tags .popular-tags li a {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.dark-mode .sidebar-widget.tags .popular-tags li a:hover {
+  background-color: #0284c7 !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+

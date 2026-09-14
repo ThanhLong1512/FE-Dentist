@@ -1,9 +1,13 @@
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { Clock, CalendarCheck } from "lucide-react";
+
 import Input from "../../components/admin/Input";
 import Form from "../../components/admin/Form";
 import Button from "../../components/admin/Button";
-import FormRow from "../../components/admin/FormRow";
+import Select from "../../components/admin/Select";
+import FormRow, { FormGrid } from "../../components/admin/FormRow";
+import FormHeader from "../../components/admin/FormHeader";
 import { useCreateShift } from "./useCreateShift";
 import { useEditShift } from "./useEditShift";
 import { useEmployees } from "../employee/useEmployees";
@@ -19,7 +23,7 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
 
   const defaultValues = isEditSession
     ? {
-        employee: editValues.employee?._id || "",
+        employee: editValues.employee?._id || editValues.employee || "",
         DayOfWeek: editValues.DayOfWeek || "Monday",
         StartTime: editValues.StartTime || "",
         EndTime: editValues.EndTime || "",
@@ -28,8 +32,8 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
     : {
         employee: "",
         DayOfWeek: "Monday",
-        StartTime: "",
-        EndTime: "",
+        StartTime: "08:00",
+        EndTime: "12:00",
         isBooked: false,
       };
 
@@ -39,7 +43,6 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
   const { errors } = formState;
 
   const startTime = watch("StartTime");
-  const endTime = watch("EndTime");
 
   function onSubmit(data) {
     const shiftData = {
@@ -50,8 +53,6 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
       isBooked: data.isBooked === "true" || data.isBooked === true,
     };
 
-    console.log("Submitting shift data:", shiftData);
-
     if (isEditSession) {
       editShift(
         {
@@ -60,6 +61,7 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
         },
         {
           onSuccess: () => {
+            toast.success("Cập nhật ca trực thành công!");
             reset();
             onCloseModal?.();
           },
@@ -68,6 +70,7 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
     } else {
       createShift(shiftData, {
         onSuccess: () => {
+          toast.success("Thêm ca trực mới thành công!");
           reset();
           onCloseModal?.();
         },
@@ -76,14 +79,12 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
   }
 
   function onError(errors) {
-    console.log("Form errors:", errors);
     const firstError = Object.values(errors)[0];
     if (firstError?.message) {
       toast.error(firstError.message);
     }
   }
 
-  // Validate time logic
   function validateEndTime(value) {
     if (!startTime || !value) return true;
 
@@ -91,17 +92,16 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
     const endMinutes = timeToMinutes(value);
 
     if (endMinutes <= startMinutes) {
-      return "End time must be after start time";
+      return "Giờ kết thúc phải sau giờ bắt đầu";
     }
 
     const duration = endMinutes - startMinutes;
     if (duration < 30) {
-      return "Shift must be at least 30 minutes long";
+      return "Ca trực phải kéo dài tối thiểu 30 phút";
     }
 
     if (duration > 480) {
-      // 8 hours
-      return "Shift cannot be longer than 8 hours";
+      return "Ca trực không được kéo dài quá 8 tiếng";
     }
 
     return true;
@@ -117,144 +117,128 @@ function CreateShiftForm({ shiftToEdit = {}, onCloseModal }) {
       onSubmit={handleSubmit(onSubmit, onError)}
       type={onCloseModal ? "modal" : "regular"}
     >
-      <FormRow label="Employee" error={errors?.employee?.message}>
-        <select
-          id="employee"
-          disabled={isWorking}
-          style={{
-            width: "100%",
-            padding: "0.8rem 1.2rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.5rem",
-            fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f9fafb" : "white",
-            cursor: isWorking ? "not-allowed" : "pointer",
-          }}
-          {...register("employee", {
-            required: "Please select an employee",
-          })}
-        >
-          <option value="">Select an employee...</option>
-          {employees.map((employee) => (
-            <option key={employee._id} value={employee._id}>
-              {employee.name} - {employee.service?.nameService || "No Service"}
-            </option>
-          ))}
-        </select>
-      </FormRow>
+      <FormHeader
+        icon={isEditSession ? <CalendarCheck /> : <Clock />}
+        title={isEditSession ? "Cập nhật ca trực bác sĩ" : "Đăng ký ca trực đơn lẻ"}
+        subtitle="Thiết lập thời gian khám chữa bệnh và phân công bác sĩ trong tuần."
+      />
 
-      <FormRow label="Day of Week" error={errors?.DayOfWeek?.message}>
-        <select
-          id="DayOfWeek"
-          disabled={isWorking}
-          style={{
-            width: "100%",
-            padding: "0.8rem 1.2rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.5rem",
-            fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f9fafb" : "white",
-            cursor: isWorking ? "not-allowed" : "pointer",
-          }}
-          {...register("DayOfWeek", {
-            required: "Please select a day",
-          })}
-        >
-          <option value="Monday">Monday</option>
-          <option value="Tuesday">Tuesday</option>
-          <option value="Wednesday">Wednesday</option>
-          <option value="Thursday">Thursday</option>
-          <option value="Friday">Friday</option>
-          <option value="Saturday">Saturday</option>
-          <option value="Sunday">Sunday</option>
-        </select>
-      </FormRow>
+      <FormGrid>
+        <FormRow label="Bác sĩ phụ trách" required error={errors?.employee?.message}>
+          <Select
+            id="employee"
+            disabled={isWorking}
+            {...register("employee", {
+              required: "Vui lòng chọn bác sĩ",
+            })}
+          >
+            <option value="">-- Chọn bác sĩ --</option>
+            {employees.map((employee) => (
+              <option key={employee._id} value={employee._id}>
+                {employee.name} {employee.service?.nameService ? `(${employee.service.nameService})` : ""}
+              </option>
+            ))}
+          </Select>
+        </FormRow>
 
-      <FormRow label="Start Time" error={errors?.StartTime?.message}>
-        <Input
-          type="time"
-          id="StartTime"
-          disabled={isWorking}
-          {...register("StartTime", {
-            required: "This field is required",
-            validate: {
-              businessHours: (value) => {
-                const minutes = timeToMinutes(value);
-                const startBusiness = 7 * 60; // 7:00 AM
-                const endBusiness = 22 * 60; // 10:00 PM
+        <FormRow label="Thứ trong tuần" required error={errors?.DayOfWeek?.message}>
+          <Select
+            id="DayOfWeek"
+            disabled={isWorking}
+            {...register("DayOfWeek", {
+              required: "Vui lòng chọn ngày trong tuần",
+            })}
+            options={[
+              { value: "Monday", label: "Thứ Hai (Monday)" },
+              { value: "Tuesday", label: "Thứ Ba (Tuesday)" },
+              { value: "Wednesday", label: "Thứ Tư (Wednesday)" },
+              { value: "Thursday", label: "Thứ Năm (Thursday)" },
+              { value: "Friday", label: "Thứ Sáu (Friday)" },
+              { value: "Saturday", label: "Thứ Bảy (Saturday)" },
+              { value: "Sunday", label: "Chủ Nhật (Sunday)" },
+            ]}
+          />
+        </FormRow>
+      </FormGrid>
 
-                if (minutes < startBusiness || minutes > endBusiness) {
-                  return "Start time must be between 07:00 and 22:00";
-                }
-                return true;
+      <FormGrid>
+        <FormRow label="Giờ bắt đầu" required error={errors?.StartTime?.message}>
+          <Input
+            type="time"
+            id="StartTime"
+            disabled={isWorking}
+            {...register("StartTime", {
+              required: "Vui lòng chọn giờ bắt đầu",
+              validate: {
+                businessHours: (value) => {
+                  const minutes = timeToMinutes(value);
+                  const startBusiness = 7 * 60;
+                  const endBusiness = 22 * 60;
+                  if (minutes < startBusiness || minutes > endBusiness) {
+                    return "Giờ bắt đầu phải trong khung làm việc (07:00 - 22:00)";
+                  }
+                  return true;
+                },
               },
-            },
-          })}
-        />
-      </FormRow>
+            })}
+          />
+        </FormRow>
 
-      <FormRow label="End Time" error={errors?.EndTime?.message}>
-        <Input
-          type="time"
-          id="EndTime"
-          disabled={isWorking}
-          {...register("EndTime", {
-            required: "This field is required",
-            validate: {
-              businessHours: (value) => {
-                const minutes = timeToMinutes(value);
-                const startBusiness = 7 * 60; // 7:00 AM
-                const endBusiness = 22 * 60; // 10:00 PM
-
-                if (minutes < startBusiness || minutes > endBusiness) {
-                  return "End time must be between 07:00 and 22:00";
-                }
-                return true;
+        <FormRow label="Giờ kết thúc" required error={errors?.EndTime?.message}>
+          <Input
+            type="time"
+            id="EndTime"
+            disabled={isWorking}
+            {...register("EndTime", {
+              required: "Vui lòng chọn giờ kết thúc",
+              validate: {
+                businessHours: (value) => {
+                  const minutes = timeToMinutes(value);
+                  const startBusiness = 7 * 60;
+                  const endBusiness = 22 * 60;
+                  if (minutes < startBusiness || minutes > endBusiness) {
+                    return "Giờ kết thúc phải trong khung làm việc (07:00 - 22:00)";
+                  }
+                  return true;
+                },
+                afterStartTime: validateEndTime,
               },
-              afterStartTime: validateEndTime,
-            },
-          })}
-        />
-      </FormRow>
+            })}
+          />
+        </FormRow>
+      </FormGrid>
 
-      <FormRow label="Booking Status" error={errors?.isBooked?.message}>
-        <select
+      <FormRow label="Trạng thái ca trực" error={errors?.isBooked?.message}>
+        <Select
           id="isBooked"
           disabled={isWorking}
-          style={{
-            width: "100%",
-            padding: "0.8rem 1.2rem",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.5rem",
-            fontSize: "1.4rem",
-            backgroundColor: isWorking ? "#f9fafb" : "white",
-            cursor: isWorking ? "not-allowed" : "pointer",
-          }}
           {...register("isBooked")}
-        >
-          <option value={false}>Available</option>
-          <option value={true}>Booked</option>
-        </select>
+          options={[
+            { value: "false", label: "Còn trống (Sẵn sàng tiếp nhận bệnh nhân)" },
+            { value: "true", label: "Đã kín lịch / Đã có bệnh nhân đặt" },
+          ]}
+        />
       </FormRow>
 
       <FormRow>
         <Button
           variation="secondary"
           type="button"
+          disabled={isWorking}
           onClick={() => {
             onCloseModal?.();
           }}
         >
-          Cancel
+          Hủy bỏ
         </Button>
         <Button type="submit" disabled={isWorking}>
           {isWorking
             ? isEditSession
-              ? "Updating..."
-              : "Creating..."
+              ? "Đang cập nhật..."
+              : "Đang lưu..."
             : isEditSession
-            ? "Update Shift"
-            : "Create Shift"}
+            ? "Cập nhật ca trực"
+            : "Đăng ký ca trực"}
         </Button>
       </FormRow>
     </Form>
