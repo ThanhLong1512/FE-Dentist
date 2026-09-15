@@ -1,0 +1,595 @@
+/* ==========================================================================
+   FACILITY MAP & BRANCH NETWORK STYLES
+   ========================================================================== */
+
+.facility-map-wrapper {
+  width: 100%;
+  margin: 3.2rem 0;
+  border-radius: 2rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.facility-map-header {
+  padding: 2.4rem 2.8rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.facility-map-title-group h3 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.facility-map-title-group h3 .title-icon {
+  color: #0284c7;
+}
+
+.facility-map-title-group p {
+  font-size: 1.35rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* City Filter Tabs */
+.facility-city-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f1f5f9;
+  padding: 0.4rem;
+  border-radius: 1.2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.city-tab-btn {
+  padding: 0.7rem 1.4rem;
+  border-radius: 0.8rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+}
+
+.city-tab-btn:hover:not(.active) {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.city-tab-btn.active {
+  background: #ffffff;
+  color: #0284c7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.city-tab-badge {
+  font-size: 1.1rem;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.city-tab-btn.active .city-tab-badge {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+/* Main Split Body */
+.facility-map-body {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  min-height: 520px;
+}
+
+/* Branch List Panel */
+.facility-list-panel {
+  border-right: 1px solid #f1f5f9;
+  max-height: 580px;
+  overflow-y: auto;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  background: #ffffff;
+}
+
+/* Custom Scrollbar for list */
+.facility-list-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.facility-list-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.facility-list-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+/* Branch Card */
+.facility-card {
+  padding: 1.6rem;
+  border-radius: 1.4rem;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.facility-card:hover {
+  transform: translateY(-2px);
+  border-color: #93c5fd;
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.1);
+  background: #ffffff;
+}
+
+.facility-card.active {
+  border-color: #0284c7;
+  background: #f0f9ff;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.15);
+}
+
+.facility-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.facility-card-name {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.facility-card.active .facility-card-name {
+  color: #0369a1;
+}
+
+.facility-code-pill {
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  border-radius: 0.6rem;
+  background: #e2e8f0;
+  color: #334155;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.facility-card.active .facility-code-pill {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.facility-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 1.25rem;
+  color: #475569;
+}
+
+.facility-meta-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  line-height: 1.4;
+}
+
+.facility-meta-icon {
+  color: #0284c7;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.facility-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  width: fit-content;
+  margin-top: 0.4rem;
+}
+
+.facility-status-tag.active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.facility-status-tag.maintenance {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* Card Action Footer */
+.facility-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.btn-directions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #0284c7;
+  text-decoration: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.6rem;
+  background: rgba(2, 132, 199, 0.08);
+  transition: all 0.2s ease;
+}
+
+.btn-directions:hover {
+  background: rgba(2, 132, 199, 0.18);
+  color: #0369a1;
+}
+
+/* Map Container Area */
+.facility-map-canvas-container {
+  position: relative;
+  width: 100%;
+  min-height: 520px;
+  background: #e2e8f0;
+}
+
+.facility-leaflet-map {
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  z-index: 1;
+}
+
+/* Custom Marker Pin CSS */
+.custom-leaflet-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+}
+
+.marker-pin-bubble {
+  width: 42px;
+  height: 42px;
+  border-radius: 50% 50% 50% 0;
+  background: #0284c7;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45);
+  border: 2px solid #ffffff;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.marker-pin-bubble .marker-icon {
+  transform: rotate(45deg);
+  color: #ffffff;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marker-pin-bubble.is-active {
+  background: #2563eb;
+  transform: rotate(-45deg) scale(1.15);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.6);
+  border-color: #facc15;
+}
+
+.marker-pin-bubble.is-maintenance {
+  background: #f59e0b;
+}
+
+/* Leaflet Popup Styling */
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 1.4rem;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e2e8f0;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: normal;
+  width: 280px !important;
+}
+
+.facility-popup-card {
+  padding: 1.6rem;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.facility-popup-badge {
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.4rem;
+  background: #e0f2fe;
+  color: #0284c7;
+  margin-bottom: 0.6rem;
+}
+
+.facility-popup-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.8rem;
+  line-height: 1.3;
+}
+
+.facility-popup-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 1.25rem;
+  color: #475569;
+  margin-bottom: 1.4rem;
+}
+
+.facility-popup-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  line-height: 1.35;
+}
+
+.facility-popup-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  border-radius: 0.8rem;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+}
+
+.facility-popup-btn:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+  color: #ffffff;
+}
+
+/* Empty State */
+.facility-empty-state {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 1.4rem;
+}
+
+/* ==========================================================================
+   DARK MODE ADAPTATION
+   ========================================================================== */
+
+html.dark-mode .facility-map-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+}
+
+html.dark-mode .facility-map-header {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  border-color: #334155;
+}
+
+html.dark-mode .facility-map-title-group h3 {
+  color: #f8fafc;
+}
+
+html.dark-mode .facility-map-title-group h3 .title-icon {
+  color: #38bdf8;
+}
+
+html.dark-mode .facility-map-title-group p {
+  color: #94a3b8;
+}
+
+html.dark-mode .facility-city-tabs {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode .city-tab-btn {
+  color: #94a3b8;
+}
+
+html.dark-mode .city-tab-btn:hover:not(.active) {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark-mode .city-tab-btn.active {
+  background: #1e293b;
+  color: #38bdf8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+html.dark-mode .city-tab-badge {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+html.dark-mode .city-tab-btn.active .city-tab-badge {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+}
+
+html.dark-mode .facility-list-panel {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode .facility-list-panel::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+html.dark-mode .facility-card {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark-mode .facility-card:hover {
+  background: #162032;
+  border-color: #0284c7;
+}
+
+html.dark-mode .facility-card.active {
+  background: #172554;
+  border-color: #38bdf8;
+  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.15);
+}
+
+html.dark-mode .facility-card-name {
+  color: #f8fafc;
+}
+
+html.dark-mode .facility-card.active .facility-card-name {
+  color: #38bdf8;
+}
+
+html.dark-mode .facility-code-pill {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+html.dark-mode .facility-card.active .facility-code-pill {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+html.dark-mode .facility-card-meta {
+  color: #94a3b8;
+}
+
+html.dark-mode .facility-meta-icon {
+  color: #38bdf8;
+}
+
+html.dark-mode .facility-card-actions {
+  border-top-color: #334155;
+}
+
+html.dark-mode .btn-directions {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+html.dark-mode .btn-directions:hover {
+  background: rgba(56, 189, 248, 0.22);
+  color: #7dd3fc;
+}
+
+/* Dark Mode Tiles Filter for OpenStreetMap */
+html.dark-mode .facility-leaflet-map .leaflet-tile-pane {
+  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.35);
+}
+
+html.dark-mode .leaflet-popup-content-wrapper {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark-mode .facility-popup-card {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+html.dark-mode .facility-popup-title {
+  color: #f8fafc;
+}
+
+html.dark-mode .facility-popup-info {
+  color: #cbd5e1;
+}
+
+html.dark-mode .facility-popup-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .facility-map-body {
+    grid-template-columns: 1fr;
+  }
+
+  .facility-list-panel {
+    border-right: none;
+    border-bottom: 1px solid #f1f5f9;
+    max-height: 360px;
+  }
+
+  .facility-map-canvas-container {
+    min-height: 420px;
+  }
+
+  .facility-leaflet-map {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .facility-map-header {
+    padding: 1.8rem 1.6rem;
+  }
+
+  .facility-city-tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .city-tab-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.6rem 0.8rem;
+    font-size: 1.2rem;
+  }
+}

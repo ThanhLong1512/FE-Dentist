@@ -15,6 +15,7 @@ import Shop from "./pages/Shop";
 import Home from "./pages/Home";
 import Booking from "./pages/Booking";
 import Contact from "./pages/Contact";
+import Facilities from "./pages/Facilities";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Blog from "./pages/Blog";
@@ -78,8 +79,13 @@ function App() {
                   <Route path="booking" element={<Booking />} />
                   <Route path="blog" element={<Blog />} />
                   <Route path="contact" element={<Contact />} />
+                  <Route path="facilities" element={<Facilities />} />
                   <Route element={<UnauthorizedRoutes />}>
                     <Route path="login" element={<Login />} />
+                    <Route
+                      path="register"
+                      element={<Login defaultTab="register" />}
+                    />
                   </Route>
                   <Route path="shop" element={<Shop />} />
                   <Route

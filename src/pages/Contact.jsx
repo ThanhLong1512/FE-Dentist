@@ -9,6 +9,8 @@ import { useServices } from "../features/services/useServices";
 import { useAvailableSlots } from "../features/booking/useAvailableSlots";
 import { useHoldAppointment } from "../features/appointment/useHoldAppointment";
 import SlotPicker from "../features/booking/SlotPicker";
+import FacilityMap from "../components/map/FacilityMap";
+import { Phone, Mail, Clock, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import "./Contact.css";
 
 function Contact() {
@@ -248,16 +250,53 @@ function Contact() {
 
           <aside className="contact-info-section">
             <div className="contact-info-card">
-              <h3>Thông tin liên hệ</h3>
+              <h3>Hỗ Trợ & Tư Vấn</h3>
               <div className="contact-info-list">
                 <div className="contact-info-item">
-                  <span className="contact-info-label">Địa chỉ</span>
-                  <span className="contact-info-value">Phòng khám (demo)</span>
+                  <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <Phone size={15} color="#0284c7" />
+                    <span>Hotline Đặt Hẹn</span>
+                  </div>
+                  <span className="contact-info-value">
+                    <a href="tel:02873001234" style={{ color: "#0284c7", fontWeight: 700, textDecoration: "none" }}>
+                      028 7300 1234 (24/7)
+                    </a>
+                  </span>
+                </div>
+
+                <div className="contact-info-item">
+                  <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <Mail size={15} color="#0284c7" />
+                    <span>Email Chăm Sóc Khách Hàng</span>
+                  </div>
+                  <span className="contact-info-value">contact@dentistpro.vn</span>
+                </div>
+
+                <div className="contact-info-item">
+                  <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <Clock size={15} color="#0284c7" />
+                    <span>Thời Gian Làm Việc</span>
+                  </div>
+                  <span className="contact-info-value">Thứ 2 - CN: 08:00 - 20:00</span>
+                </div>
+
+                <div className="contact-info-item">
+                  <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <ShieldCheck size={15} color="#0284c7" />
+                    <span>Cam Kết Dịch Vụ</span>
+                  </div>
+                  <span className="contact-info-value">100% Khử trùng chuẩn Châu Âu, phác đồ rõ ràng</span>
                 </div>
               </div>
             </div>
           </aside>
         </div>
+
+        {/* BẢN ĐỒ TƯƠNG TÁC VÀ MẠNG LƯỚI CƠ SỞ */}
+        <FacilityMap
+          title="Bản Đồ Mạng Lưới Chi Nhánh"
+          subtitle="Chọn cơ sở để định vị trực tiếp trên bản đồ và nhận chỉ đường nhanh nhất"
+        />
       </div>
     </div>
   );

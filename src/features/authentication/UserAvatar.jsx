@@ -97,11 +97,12 @@ function UserAvatar() {
 
   const initials = userInfo.name
     ? userInfo.name
-        .split(" ")
+        .trim()
+        .split(/\s+/)
         .map((n) => n[0])
         .join("")
         .toUpperCase()
-        .slice(0, 2)
+        .slice(-2)
     : "AD";
 
   const showImage = userInfo.image && !imgError;

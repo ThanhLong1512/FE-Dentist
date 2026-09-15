@@ -21,10 +21,6 @@ export const getImageUrl = (imageSource, fallback = PLACEHOLDER_SERVICE_IMG) => 
 
   const trimmed = url.trim();
 
-  // Dead Cloudinary URLs fallback to placeholder
-  if (trimmed.includes("res.cloudinary.com")) {
-    return fallback;
-  }
 
   // Already an absolute URL or data URI
   if (

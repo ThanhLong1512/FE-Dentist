@@ -274,7 +274,24 @@ const UserAvatarBtn = styled.button`
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #0284c7;
+    flex-shrink: 0;
   }
+`;
+
+const UserInitialsAvatar = styled.div`
+  width: 3.8rem;
+  height: 3.8rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.4rem;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+  border: 2px solid #0284c7;
+  flex-shrink: 0;
 `;
 
 const UserDropdown = styled.div`
@@ -502,6 +519,7 @@ const MobileDrawer = styled.div`
 
 export default function Navbar() {
   const [userInfo, setUserInfo] = useState(null);
+  const [avatarError, setAvatarError] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -517,6 +535,7 @@ export default function Navbar() {
     if (stored) {
       try {
         setUserInfo(JSON.parse(stored));
+        setAvatarError(false);
       } catch {
         setUserInfo(null);
       }
@@ -539,6 +558,7 @@ export default function Navbar() {
       if (updated) {
         try {
           setUserInfo(JSON.parse(updated));
+          setAvatarError(false);
         } catch {
           setUserInfo(null);
         }
@@ -609,6 +629,9 @@ export default function Navbar() {
           <NavItem to="/blog" $isDark={isDarkMode}>
             Cẩm nang
           </NavItem>
+          <NavItem to="/facilities" $isDark={isDarkMode}>
+            Hệ thống cơ sở
+          </NavItem>
           <NavItem to="/contact" $isDark={isDarkMode}>
             Liên hệ
           </NavItem>
@@ -646,24 +669,37 @@ export default function Navbar() {
           {/* Tài khoản người dùng */}
           {userInfo ? (
             <UserMenuWrapper ref={dropdownRef}>
-              <UserAvatarBtn
-                type="button"
-                onClick={() => setShowUserDropdown((prev) => !prev)}
-                title="Tài khoản của bạn"
-              >
-                <img
-                  src={
-                    (userInfo.photo && !userInfo.photo.includes("cloudinary.com") ? userInfo.photo : null) ||
-                    (userInfo.image && !userInfo.image.includes("cloudinary.com") ? userInfo.image : null) ||
-                    "/images/resource/avatar-1.jpg"
-                  }
-                  alt={userInfo.name || "User"}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = "/images/resource/avatar-1.jpg";
-                  }}
-                />
-              </UserAvatarBtn>
+              {(() => {
+                const avatarSrc = userInfo.image || userInfo.photo;
+                const userInitials = userInfo.name
+                  ? userInfo.name
+                      .trim()
+                      .split(/\s+/)
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(-2)
+                  : "AD";
+                const showUserImage = Boolean(avatarSrc && !avatarError);
+
+                return (
+                  <UserAvatarBtn
+                    type="button"
+                    onClick={() => setShowUserDropdown((prev) => !prev)}
+                    title="Tài khoản của bạn"
+                  >
+                    {showUserImage ? (
+                      <img
+                        src={avatarSrc}
+                        alt={userInfo.name || "User"}
+                        onError={() => setAvatarError(true)}
+                      />
+                    ) : (
+                      <UserInitialsAvatar>{userInitials}</UserInitialsAvatar>
+                    )}
+                  </UserAvatarBtn>
+                );
+              })()}
 
               {showUserDropdown && (
                 <UserDropdown $isDark={isDarkMode}>
@@ -813,6 +849,9 @@ export default function Navbar() {
             </NavLink>
             <NavLink to="/blog" onClick={() => setShowMobileMenu(false)}>
               Cẩm nang nha khoa
+            </NavLink>
+            <NavLink to="/facilities" onClick={() => setShowMobileMenu(false)}>
+              Hệ thống cơ sở
             </NavLink>
             <NavLink to="/contact" onClick={() => setShowMobileMenu(false)}>
               Liên hệ
