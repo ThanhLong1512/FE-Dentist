@@ -133,11 +133,12 @@ const HeroContent = styled.div`
 const PrimaryButton = styled(Link)`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.8rem;
   padding: 1.4rem 2.8rem;
   border-radius: 999px;
   background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-  color: #ffffff;
+  color: #ffffff !important;
   font-size: 1.55rem;
   font-weight: 700;
   text-decoration: none;
@@ -146,34 +147,118 @@ const PrimaryButton = styled(Link)`
   white-space: nowrap;
   flex-shrink: 0;
 
+  span {
+    color: #ffffff !important;
+  }
+
+  svg {
+    color: #ffffff !important;
+    transition: transform 0.2s ease;
+  }
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(14, 165, 233, 0.45);
     background: linear-gradient(135deg, #0284c7 0%, #1d4ed8 100%);
+    color: #ffffff !important;
+
+    span {
+      color: #ffffff !important;
+    }
+
+    svg {
+      color: #ffffff !important;
+      transform: translateX(3px);
+    }
   }
 `;
 
 const SecondaryButton = styled(Link)`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.8rem;
   padding: 1.4rem 2.6rem;
   border-radius: 999px;
-  background: ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
-  color: ${(props) => (props.$isDark ? "#f8fafc" : "#1e293b")};
+  background: ${(props) => (props.$isDark ? "rgba(30, 41, 59, 0.85)" : "#ffffff")};
+  color: ${(props) => (props.$isDark ? "#f8fafc" : "#1e293b")} !important;
   font-size: 1.55rem;
   font-weight: 700;
   text-decoration: none;
-  border: 1px solid
+  border: 1.5px solid
     ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   transition: all 0.25s ease;
   white-space: nowrap;
   flex-shrink: 0;
 
+  span {
+    color: inherit;
+    transition: color 0.25s ease;
+  }
+
+  svg {
+    color: inherit;
+    transition: transform 0.2s ease;
+  }
+
   &:hover {
-    background: ${(props) => (props.$isDark ? "#334155" : "#f1f5f9")};
+    background: ${(props) => (props.$isDark ? "#1e293b" : "#f1f5f9")};
+    color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
+    border-color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
     transform: translateY(-2px);
+    box-shadow: ${(props) =>
+      props.$isDark
+        ? "0 6px 20px rgba(56, 189, 248, 0.2)"
+        : "0 6px 18px rgba(2, 132, 199, 0.15)"};
+
+    span {
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
+    }
+
+    svg {
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
+      transform: translateX(3px);
+    }
+  }
+`;
+
+const CardDetailButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  background: ${(props) =>
+    props.$isDark ? "rgba(255, 255, 255, 0.08)" : "#f1f5f9"};
+  color: ${(props) => (props.$isDark ? "#f1f5f9" : "#334155")} !important;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid
+    ${(props) =>
+      props.$isDark ? "rgba(255, 255, 255, 0.18)" : "#cbd5e1"};
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  span {
+    color: inherit;
+    transition: color 0.25s ease;
+  }
+
+  &:hover {
+    background: #0284c7;
+    color: #ffffff !important;
+    border-color: #0284c7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+
+    span {
+      color: #ffffff !important;
+    }
   }
 `;
 
@@ -383,8 +468,15 @@ const FeatureCard = styled.div`
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-    border-color: #0284c7;
+    box-shadow: ${(props) =>
+      props.$isDark
+        ? "0 12px 30px rgba(0, 0, 0, 0.35)"
+        : "0 12px 30px rgba(0, 0, 0, 0.08)"};
+    border-color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
+
+    h3 {
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
+    }
   }
 
   .icon-wrap {
@@ -403,6 +495,7 @@ const FeatureCard = styled.div`
     font-weight: 700;
     margin: 0;
     color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+    transition: color 0.2s ease;
   }
 
   p {
@@ -430,7 +523,10 @@ const ServiceCard = styled.div`
     ${(props) => (props.$isDark ? "#334155" : "#e2e8f0")};
   border-radius: 1.8rem;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: ${(props) =>
+    props.$isDark
+      ? "0 8px 24px rgba(0, 0, 0, 0.3)"
+      : "0 8px 24px rgba(0, 0, 0, 0.04)"};
   transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
@@ -438,11 +534,14 @@ const ServiceCard = styled.div`
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
-    border-color: #0284c7;
+    box-shadow: ${(props) =>
+      props.$isDark
+        ? "0 16px 36px rgba(0, 0, 0, 0.45)"
+        : "0 16px 36px rgba(0, 0, 0, 0.08)"};
+    border-color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
 
     h4 {
-      color: #0284c7;
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
     }
   }
 
@@ -516,11 +615,13 @@ const ServiceCard = styled.div`
         ${(props) => (props.$isDark ? "#334155" : "#f1f5f9")};
       padding-top: 1.4rem;
       margin-top: auto;
+      gap: 1rem;
 
       .price {
         font-size: 1.9rem;
         font-weight: 800;
-        color: #0284c7;
+        color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
+        white-space: nowrap;
       }
     }
   }
@@ -545,7 +646,15 @@ const DoctorCard = styled.div`
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.07);
+    box-shadow: ${(props) =>
+      props.$isDark
+        ? "0 14px 30px rgba(0, 0, 0, 0.35)"
+        : "0 14px 30px rgba(0, 0, 0, 0.07)"};
+    border-color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
+
+    h4 {
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
+    }
   }
 
   .doc-avatar {
@@ -566,18 +675,35 @@ const DoctorCard = styled.div`
       font-weight: 700;
       margin: 0;
       color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+      transition: color 0.2s ease;
     }
 
     span.exp {
       font-size: 1.3rem;
       font-weight: 600;
-      color: #0284c7;
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
     }
 
     p.bio {
       font-size: 1.3rem;
       color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
       margin: 0;
+    }
+
+    .doctor-book-link {
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
+      font-weight: 700;
+      font-size: 1.35rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+
+      &:hover {
+        color: ${(props) => (props.$isDark ? "#7dd3fc" : "#0369a1")} !important;
+        transform: translateX(4px);
+      }
     }
   }
 `;
@@ -619,7 +745,7 @@ const CTABanner = styled.div`
     padding: 1.5rem 3rem;
     border-radius: 999px;
     background: #ffffff;
-    color: #0284c7;
+    color: #0284c7 !important;
     font-size: 1.6rem;
     font-weight: 800;
     text-decoration: none;
@@ -630,6 +756,7 @@ const CTABanner = styled.div`
     &:hover {
       transform: scale(1.04);
       background: #f8fafc;
+      color: #0369a1 !important;
     }
   }
 `;
@@ -888,18 +1015,17 @@ export default function Home() {
                     )}
                   </div>
                   <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
-                    <SecondaryButton
+                    <CardDetailButton
                       to={`/shop/${svc._id}`}
                       $isDark={isDarkMode}
                       onClick={(e) => e.stopPropagation()}
-                      style={{ padding: "0.8rem 1.4rem", fontSize: "1.25rem", borderRadius: "999px" }}
                     >
                       <span>{t("home.viewDetail")}</span>
-                    </SecondaryButton>
+                    </CardDetailButton>
                     <PrimaryButton
                       to={`/booking?serviceId=${svc._id}`}
                       onClick={(e) => e.stopPropagation()}
-                      style={{ padding: "0.8rem 1.6rem", fontSize: "1.3rem" }}
+                      style={{ padding: "0.75rem 1.6rem", fontSize: "1.3rem" }}
                     >
                       <span>{t("home.bookNow")}</span>
                       <ChevronRight size={14} />
@@ -950,12 +1076,7 @@ export default function Home() {
                 <div style={{ marginTop: "1rem" }}>
                   <Link
                     to="/booking"
-                    style={{
-                      color: "#0284c7",
-                      fontWeight: 700,
-                      fontSize: "1.3rem",
-                      textDecoration: "none",
-                    }}
+                    className="doctor-book-link"
                   >
                     {t("home.bookDoctor")} →
                   </Link>

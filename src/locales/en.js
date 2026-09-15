@@ -149,6 +149,7 @@ export default {
     servicesDesc: "Complete range of dental specialties from cosmetic smile makeovers to advanced dental restoration and general care.",
     durationMinutes: "mins",
     bookNow: "Book Now",
+    viewDetail: "View Details",
     viewAllServices: "View All Services & Detailed Pricing",
     doctorsTag: "Expert Medical Team",
     doctorsTitle: "Distinguished Dental & Maxillofacial Specialists",

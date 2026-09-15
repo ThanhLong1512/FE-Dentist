@@ -149,6 +149,7 @@ export default {
     servicesDesc: "Đầy đủ các chuyên khoa từ nha khoa thẩm mỹ, phục hình chuyên sâu đến điều trị bệnh lý tổng quát.",
     durationMinutes: "phút",
     bookNow: "Đặt Hẹn",
+    viewDetail: "Xem chi tiết",
     viewAllServices: "Xem Tất Cả Dịch Vụ & Bảng Giá Chi Tiết",
     doctorsTag: "Đội ngũ chuyên gia",
     doctorsTitle: "Bác Sĩ Răng Hàm Mặt Giàu Kinh Nghiệm",

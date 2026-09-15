@@ -149,6 +149,7 @@ export default {
     servicesDesc: "涵盖微创美学修复、数字化种植牙、隐形正畸及综合齿科全科诊疗。",
     durationMinutes: "分钟",
     bookNow: "立即预约",
+    viewDetail: "查看详情",
     viewAllServices: "查看全部诊疗项目与收费明细",
     doctorsTag: "专家医疗团队",
     doctorsTitle: "资深口腔颌面专家团队",
