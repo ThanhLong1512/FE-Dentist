@@ -23,6 +23,7 @@ import { useCreateShift } from "./useCreateShift";
 import { useEmployees } from "../employee/useEmployees";
 import Button from "../../components/admin/Button";
 import Input from "../../components/admin/Input";
+import ConfirmModal from "../../components/ConfirmModal";
 
 const Container = styled.div`
   display: flex;
@@ -608,6 +609,7 @@ function WeeklyScheduleGrid({ shifts = [] }) {
   const [showDoctorPool, setShowDoctorPool] = useState(true);
   const [activeOverDay, setActiveOverDay] = useState(null);
   const [draggingShiftId, setDraggingShiftId] = useState(null);
+  const [confirmDeleteShiftId, setConfirmDeleteShiftId] = useState(null);
 
   // Quick Assign Modal state
   const [assignModal, setAssignModal] = useState({
@@ -627,9 +629,7 @@ function WeeklyScheduleGrid({ shifts = [] }) {
   };
 
   const handleDelete = (shiftId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa ca làm việc này?")) {
-      deleteShift(shiftId);
-    }
+    setConfirmDeleteShiftId(shiftId);
   };
 
   // --- DRAG HANDLERS FOR SHIFTS ---
@@ -1003,6 +1003,23 @@ function WeeklyScheduleGrid({ shifts = [] }) {
           </QuickAssignCard>
         </ModalOverlay>
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(confirmDeleteShiftId)}
+        onClose={() => setConfirmDeleteShiftId(null)}
+        onConfirm={() => {
+          if (confirmDeleteShiftId) {
+            deleteShift(confirmDeleteShiftId);
+            setConfirmDeleteShiftId(null);
+          }
+        }}
+        title="Xác nhận xóa ca làm việc"
+        message="Bạn có chắc chắn muốn xóa ca làm việc này không? Thao tác này không thể hoàn tác."
+        confirmText="Xóa ca làm việc"
+        cancelText="Hủy"
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </Container>
   );
 }

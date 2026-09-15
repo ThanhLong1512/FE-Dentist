@@ -437,26 +437,49 @@
   line-height: 1.35;
 }
 
-.facility-popup-btn {
+.facility-popup-btn,
+.leaflet-container a.facility-popup-btn,
+.leaflet-popup-content a.facility-popup-btn,
+.leaflet-popup-content-wrapper a.facility-popup-btn {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  padding: 0.8rem;
-  border-radius: 0.8rem;
-  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-  color: #ffffff;
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.6rem !important;
+  padding: 0.85rem 1.4rem !important;
+  border-radius: 0.8rem !important;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+  color: #ffffff !important;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35) !important;
 }
 
-.facility-popup-btn:hover {
-  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
-  color: #ffffff;
+.facility-popup-btn *,
+.facility-popup-btn span,
+.leaflet-container a.facility-popup-btn span,
+.leaflet-popup-content a.facility-popup-btn span {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.facility-popup-btn:hover,
+.facility-popup-btn:focus,
+.leaflet-container a.facility-popup-btn:hover,
+.leaflet-popup-content a.facility-popup-btn:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.45) !important;
+}
+
+.facility-popup-btn:hover *,
+.facility-popup-btn:hover span,
+.leaflet-container a.facility-popup-btn:hover span,
+.leaflet-popup-content a.facility-popup-btn:hover span {
+  color: #ffffff !important;
 }
 
 /* Empty State */

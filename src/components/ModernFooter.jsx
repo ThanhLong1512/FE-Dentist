@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useLanguage } from "../context/LanguageContext";
+import { toast } from "react-toastify";
 import CheeseLogo from "./CheeseLogo";
 
 const FooterWrapper = styled.footer`
@@ -343,7 +344,7 @@ export default function ModernFooter() {
           <NewsletterForm
             onSubmit={(e) => {
               e.preventDefault();
-              alert("Cảm ơn bạn đã đăng ký!");
+              toast.success("Cảm ơn bạn đã đăng ký nhận bản tin!");
             }}
           >
             <input

@@ -207,9 +207,10 @@ export default function FacilityMap({
             target="_blank"
             rel="noopener noreferrer"
             class="facility-popup-btn"
+            style="color: #ffffff !important; text-decoration: none !important;"
           >
-            <span>Chỉ đường trên Google Maps</span>
-            <span style="font-size: 14px;">↗</span>
+            <span style="color: #ffffff !important; font-weight: 700;">Chỉ đường trên Google Maps</span>
+            <span style="color: #ffffff !important; font-size: 14px; font-weight: 700;">↗</span>
           </a>
         </div>
       `;

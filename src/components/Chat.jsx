@@ -28,6 +28,7 @@ import {
 } from "../apis";
 import { SOCKET_URL, ADMIN_ID } from "../utils/constants";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { toast } from "react-toastify";
 import { useLanguage } from "../context/LanguageContext";
 
 // --- ANIMATIONS ---
@@ -985,12 +986,12 @@ export default function Chat() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Vui lòng chọn tệp hình ảnh!");
+      toast.warning("Vui lòng chọn tệp hình ảnh!");
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      alert("Dung lượng ảnh tối đa 10MB!");
+      toast.warning("Dung lượng ảnh tối đa 10MB!");
       return;
     }
 
@@ -1049,7 +1050,7 @@ export default function Chat() {
       }, 1000);
     } catch (err) {
       console.error("Microphone access denied:", err);
-      alert("Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt!");
+      toast.error("Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt!");
     }
   };
 
@@ -1147,7 +1148,7 @@ export default function Chat() {
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Trình duyệt của bạn chưa hỗ trợ nhận dạng giọng nói trực tiếp. Hãy dùng chức năng thu âm giọng nói bên cạnh!");
+      toast.info("Trình duyệt của bạn chưa hỗ trợ nhận dạng giọng nói trực tiếp. Hãy dùng chức năng thu âm giọng nói bên cạnh!");
       return;
     }
 
@@ -1200,7 +1201,7 @@ export default function Chat() {
     e?.preventDefault?.();
 
     if (!conservationId || !currentUserId) {
-      alert("Vui lòng đăng nhập để bắt đầu trò chuyện với Bác sĩ!");
+      toast.warning("Vui lòng đăng nhập để bắt đầu trò chuyện với Bác sĩ!");
       return;
     }
 

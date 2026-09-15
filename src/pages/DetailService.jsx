@@ -39,7 +39,13 @@ import {
 } from "../utils/dataTranslator";
 import Loading from "../components/Loading";
 import { setCountCart } from "../redux/slices/cartUiSlice";
-import { getImageUrl, handleImageError, PLACEHOLDER_SERVICE_IMG } from "../utils/imageHelper";
+import {
+  getImageUrl,
+  handleImageError,
+  PLACEHOLDER_SERVICE_IMG,
+  DEFAULT_AVATAR_IMG,
+} from "../utils/imageHelper";
+import ConfirmModal from "../components/ConfirmModal";
 
 function DetailService() {
   const { ServiceID } = useParams();
@@ -65,8 +71,11 @@ function DetailService() {
   const [editReviewId, setEditReviewId] = useState(null);
   const [editReviewText, setEditReviewText] = useState("");
   const [editReviewRating, setEditReviewRating] = useState(0);
+  const [deleteReviewId, setDeleteReviewId] = useState(null);
 
-  const userID = JSON.parse(localStorage.getItem("userInfo") || "null")?.id;
+  const user = JSON.parse(localStorage.getItem("userInfo") || "null");
+  const userID = user?.id || user?._id;
+  const userRole = user?.role;
 
   useEffect(() => {
     window.scrollTo({
@@ -82,9 +91,17 @@ function DetailService() {
   }, [dispatch]);
 
   const review = service?.reviews || [];
-  const hasReviewed = review.some(
-    (r) => r.account?._id === userID && r.service === service?._id
-  );
+  const hasReviewed = review.some((r) => {
+    const rAccountId = r.account?._id || r.account?.id || r.account;
+    const rServiceId = r.service?._id || r.service?.id || r.service;
+    const currentServiceId = service?._id || service?.id;
+    return (
+      userID &&
+      rAccountId &&
+      String(rAccountId) === String(userID) &&
+      String(rServiceId) === String(currentServiceId)
+    );
+  });
 
   const relatedServices = useMemo(() => {
     return (rawServices || [])
@@ -144,45 +161,67 @@ function DetailService() {
     mutationFn: (data) => handlePostReview(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service", ServiceID] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
       setReviewText("");
       setActiveStar(0);
       setActiveHoverStar(-1);
       setActiveTab("review");
       toast.success(t("toast.reviewSuccess"));
     },
-    onError: () => toast.error(t("toast.reviewFail")),
+    onError: (err) => {
+      const msg = err?.response?.data?.message || t("toast.reviewFail");
+      toast.error(msg);
+    },
   });
 
   const updateReviewMutation = useMutation({
     mutationFn: ({ id, data }) => handleUpdateReview(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service", ServiceID] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
       setEditReviewId(null);
       setEditReviewText("");
       setEditReviewRating(0);
       toast.success(t("toast.reviewUpdateSuccess"));
     },
-    onError: () => toast.error(t("toast.reviewUpdateFail")),
+    onError: (err) => {
+      const msg = err?.response?.data?.message || t("toast.reviewUpdateFail");
+      toast.error(msg);
+    },
   });
 
   const deleteReviewMutation = useMutation({
     mutationFn: (id) => handleDeleteReview(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service", ServiceID] });
+      queryClient.invalidateQueries({ queryKey: ["services"] });
+      setDeleteReviewId(null);
       toast.success(t("toast.reviewDeleteSuccess"));
     },
-    onError: () => toast.error(t("toast.reviewDeleteFail")),
+    onError: (err) => {
+      const msg = err?.response?.data?.message || t("toast.reviewDeleteFail");
+      toast.error(msg);
+    },
   });
 
   const handleReviewSubmit = (e) => {
     e.preventDefault();
+    if (!userID) {
+      toast.error("Vui lòng đăng nhập để đánh giá dịch vụ");
+      navigate("/login");
+      return;
+    }
     if (!service || !activeStar || activeStar < 0.5) {
       toast.error(t("toast.selectStars") || "Vui lòng chọn số sao đánh giá");
       return;
     }
+    if (!reviewText.trim()) {
+      toast.error("Vui lòng nhập nội dung đánh giá");
+      return;
+    }
     postReviewMutation.mutate({
       rating: activeStar,
-      review: reviewText,
+      review: reviewText.trim(),
       service: service._id,
     });
   };
@@ -190,16 +229,18 @@ function DetailService() {
   const handleUpdateReviewSubmit = (e) => {
     e.preventDefault();
     if (!editReviewId || editReviewRating < 1) return;
+    if (!editReviewText.trim()) {
+      toast.error("Nội dung đánh giá không thể để trống");
+      return;
+    }
     updateReviewMutation.mutate({
       id: editReviewId,
-      data: { rating: editReviewRating, review: editReviewText },
+      data: { rating: editReviewRating, review: editReviewText.trim() },
     });
   };
 
   const handleDeleteReviewClick = (reviewId) => {
-    if (window.confirm(t("detailService.confirmDelete"))) {
-      deleteReviewMutation.mutate(reviewId);
-    }
+    setDeleteReviewId(reviewId);
   };
 
   if (isLoading) return <Loading />;
@@ -462,127 +503,208 @@ function DetailService() {
                 <div className="ds-reviews-container">
                   {review.length > 0 ? (
                     <div className="ds-review-cards-list">
-                      {review.map((r) => (
-                        <div key={r._id} className="ds-single-review">
-                          <div className="reviewer-avatar">
-                            {(r.account?.email?.[0] || "?").toUpperCase()}
-                          </div>
-                          <div className="reviewer-content">
-                            <div className="reviewer-meta-row">
-                              <span className="reviewer-email">
-                                {r.account?.name || r.account?.email}
-                              </span>
-                              <span className="reviewer-date">
-                                {formatDate(r.createdAt)}
-                              </span>
+                      {review.map((r) => {
+                        const isReviewOwner =
+                          userID &&
+                          String(r.account?._id || r.account?.id || r.account) ===
+                            String(userID);
+                        const canDeleteReview = isReviewOwner || userRole === "admin";
+                        const avatarUrl = r.account?.photo || r.account?.image;
+                        const reviewerName =
+                          r.account?.name || r.account?.email || "Người dùng";
+                        const fallbackInitial = (
+                          r.account?.name?.[0] ||
+                          r.account?.email?.[0] ||
+                          "?"
+                        ).toUpperCase();
 
-                              {r.account?._id === userID && (
-                                <div className="reviewer-actions">
-                                  {editReviewId === r._id ? (
+                        return (
+                          <div key={r._id} className="ds-single-review">
+                            <div className="reviewer-avatar">
+                              {avatarUrl ? (
+                                <img
+                                  src={getImageUrl(avatarUrl, DEFAULT_AVATAR_IMG)}
+                                  alt={reviewerName}
+                                  className="reviewer-avatar-img"
+                                  onError={(e) =>
+                                    handleImageError(e, DEFAULT_AVATAR_IMG)
+                                  }
+                                />
+                              ) : (
+                                <span>{fallbackInitial}</span>
+                              )}
+                            </div>
+                            <div className="reviewer-content">
+                              <div className="reviewer-meta-row">
+                                <span className="reviewer-email">
+                                  {reviewerName}
+                                </span>
+                                <span className="reviewer-date">
+                                  {formatDate(r.createdAt)}
+                                </span>
+
+                                {canDeleteReview && (
+                                  <div className="reviewer-actions">
+                                    {editReviewId === r._id ? (
+                                      <button
+                                        type="button"
+                                        className="review-action-btn"
+                                        onClick={() => {
+                                          setEditReviewId(null);
+                                          setEditReviewText("");
+                                          setEditReviewRating(0);
+                                        }}
+                                      >
+                                        {t("detailService.cancel") || "Hủy"}
+                                      </button>
+                                    ) : (
+                                      <>
+                                        {isReviewOwner && (
+                                          <button
+                                            type="button"
+                                            className="review-action-btn"
+                                            onClick={() => {
+                                              setEditReviewId(r._id);
+                                              setEditReviewText(r.review);
+                                              setEditReviewRating(r.rating || 5);
+                                            }}
+                                            title={t("detailService.editReview")}
+                                          >
+                                            <Pencil size={14} />
+                                          </button>
+                                        )}
+                                        <button
+                                          type="button"
+                                          className="review-action-btn delete"
+                                          onClick={() =>
+                                            handleDeleteReviewClick(r._id)
+                                          }
+                                          title={t("detailService.deleteReview")}
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {editReviewId === r._id ? (
+                                <form
+                                  onSubmit={handleUpdateReviewSubmit}
+                                  className="ds-edit-review-form"
+                                >
+                                  <div className="edit-stars-row">
+                                    <span className="edit-stars-label">
+                                      {t("detailService.yourRating") || "Đánh giá:"}
+                                    </span>
+                                    <div
+                                      style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                      }}
+                                    >
+                                      <Rating
+                                        value={Number(editReviewRating || 0)}
+                                        precision={0.5}
+                                        onChange={(event, newValue) => {
+                                          setEditReviewRating(newValue || 0);
+                                        }}
+                                        size="medium"
+                                        sx={{
+                                          color: "#f59e0b",
+                                          "& .MuiRating-iconEmpty": {
+                                            color: isDarkMode
+                                              ? "#475569"
+                                              : "#cbd5e1",
+                                          },
+                                        }}
+                                      />
+                                      <span className="edit-stars-score">
+                                        {editReviewRating > 0
+                                          ? `${Number(editReviewRating).toFixed(1)} ⭐`
+                                          : "Chưa chọn"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <textarea
+                                    value={editReviewText}
+                                    onChange={(e) =>
+                                      setEditReviewText(e.target.value)
+                                    }
+                                    required
+                                    rows={3}
+                                    className="ds-edit-review-textarea"
+                                    placeholder={t(
+                                      "detailService.reviewPlaceholder"
+                                    )}
+                                  />
+                                  <div className="ds-edit-review-actions">
+                                    <button
+                                      type="submit"
+                                      disabled={updateReviewMutation.isLoading}
+                                      className="save-edit-btn"
+                                    >
+                                      {updateReviewMutation.isLoading
+                                        ? "Đang lưu..."
+                                        : t("detailService.update") ||
+                                          "Cập nhật"}
+                                    </button>
                                     <button
                                       type="button"
-                                      className="review-action-btn"
+                                      className="cancel-edit-btn"
                                       onClick={() => {
                                         setEditReviewId(null);
                                         setEditReviewText("");
                                         setEditReviewRating(0);
                                       }}
                                     >
-                                      {t("detailService.cancel")}
+                                      {t("detailService.cancel") || "Hủy"}
                                     </button>
-                                  ) : (
-                                    <>
-                                      <button
-                                        type="button"
-                                        className="review-action-btn"
-                                        onClick={() => {
-                                          setEditReviewId(r._id);
-                                          setEditReviewText(r.review);
-                                          setEditReviewRating(r.rating);
-                                        }}
-                                        title={t("detailService.editReview")}
-                                      >
-                                        <Pencil size={14} />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="review-action-btn delete"
-                                        onClick={() =>
-                                          handleDeleteReviewClick(r._id)
-                                        }
-                                        title={t("detailService.deleteReview")}
-                                      >
-                                        <Trash2 size={14} />
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
+                                  </div>
+                                </form>
+                              ) : (
+                                <>
+                                  <div
+                                    className="reviewer-stars"
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "6px",
+                                    }}
+                                  >
+                                    <Rating
+                                      value={Number(r.rating || 5)}
+                                      precision={0.5}
+                                      readOnly
+                                      size="small"
+                                      sx={{
+                                        color: "#f59e0b",
+                                        "& .MuiRating-iconEmpty": {
+                                          color: isDarkMode
+                                            ? "#475569"
+                                            : "#cbd5e1",
+                                        },
+                                      }}
+                                    />
+                                    <span
+                                      style={{
+                                        fontSize: "13px",
+                                        fontWeight: 700,
+                                        color: "#f59e0b",
+                                      }}
+                                    >
+                                      {Number(r.rating || 5).toFixed(1)}
+                                    </span>
+                                  </div>
+                                  <p className="reviewer-comment">{r.review}</p>
+                                </>
                               )}
                             </div>
-
-                            <div className="reviewer-stars" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <Rating
-                                value={Number(r.rating || 5)}
-                                precision={0.5}
-                                readOnly
-                                size="small"
-                                sx={{
-                                  color: "#f59e0b",
-                                  "& .MuiRating-iconEmpty": {
-                                    color: isDarkMode ? "#475569" : "#cbd5e1",
-                                  },
-                                }}
-                              />
-                              <span style={{ fontSize: "13px", fontWeight: 700, color: "#f59e0b" }}>
-                                {Number(r.rating || 5).toFixed(1)}
-                              </span>
-                            </div>
-
-                            {editReviewId === r._id ? (
-                              <form
-                                onSubmit={handleUpdateReviewSubmit}
-                                className="ds-edit-review-form"
-                              >
-                                <textarea
-                                  value={editReviewText}
-                                  onChange={(e) =>
-                                    setEditReviewText(e.target.value)
-                                  }
-                                  required
-                                  rows={3}
-                                />
-                                <div className="edit-stars-row" style={{ display: "flex", alignItems: "center", gap: "10px", margin: "10px 0" }}>
-                                  <Rating
-                                    value={Number(editReviewRating || 0)}
-                                    precision={0.5}
-                                    onChange={(event, newValue) => {
-                                      setEditReviewRating(newValue || 0);
-                                    }}
-                                    size="medium"
-                                    sx={{
-                                      color: "#f59e0b",
-                                      "& .MuiRating-iconEmpty": {
-                                        color: isDarkMode ? "#475569" : "#cbd5e1",
-                                      },
-                                    }}
-                                  />
-                                  <span style={{ fontSize: "14px", fontWeight: 700, color: "#f59e0b" }}>
-                                    {editReviewRating > 0 ? `${editReviewRating.toFixed(1)} ⭐` : "Chưa chọn"}
-                                  </span>
-                                </div>
-                                <button
-                                  type="submit"
-                                  className="save-edit-btn"
-                                >
-                                  {t("detailService.update")}
-                                </button>
-                              </form>
-                            ) : (
-                              <p className="reviewer-comment">{r.review}</p>
-                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="ds-no-reviews-box">
@@ -591,64 +713,100 @@ function DetailService() {
                     </div>
                   )}
 
-                  {/* Add Review Form */}
+                  {/* Already Reviewed Banner */}
+                  {hasReviewed && (
+                    <div style={{
+                      marginTop: "24px",
+                      padding: "16px 20px",
+                      borderRadius: "12px",
+                      background: isDarkMode ? "rgba(34, 197, 94, 0.12)" : "#f0fdf4",
+                      border: isDarkMode ? "1px solid rgba(34, 197, 94, 0.25)" : "1px solid #bbf7d0",
+                      color: isDarkMode ? "#86efac" : "#15803d",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      fontSize: "14px",
+                      fontWeight: 500
+                    }}>
+                      <CheckCircle2 size={20} style={{ flexShrink: 0 }} />
+                      <span>Bạn đã đánh giá dịch vụ này. Bạn có thể chỉnh sửa hoặc xóa đánh giá của mình trong danh sách phía trên.</span>
+                    </div>
+                  )}
+
+                  {/* Add Review Form or Login Prompt */}
                   {!hasReviewed && (
-                    <form
-                      onSubmit={handleReviewSubmit}
-                      className="ds-add-review-card"
-                    >
-                      <h3>{t("detailService.writeReview")}</h3>
-                      <div className="rating-picker-row" style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "18px" }}>
-                        <span style={{ fontWeight: 600 }}>{t("detailService.yourRating")}</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                          <Rating
-                            name="service-rating"
-                            value={Number(activeStar || 0)}
-                            precision={0.5}
-                            onChange={(event, newValue) => {
-                              setActiveStar(newValue || 0);
-                            }}
-                            onChangeActive={(event, newHover) => {
-                              setActiveHoverStar(newHover);
-                            }}
-                            size="large"
-                            sx={{
-                              color: "#f59e0b",
-                              "& .MuiRating-icon": {
-                                fontSize: "30px",
-                              },
-                              "& .MuiRating-iconEmpty": {
-                                color: isDarkMode ? "#475569" : "#cbd5e1",
-                              },
-                            }}
-                          />
-                          <span style={{
-                            fontSize: "15px",
-                            fontWeight: 700,
-                            color: (activeHoverStar !== -1 ? activeHoverStar : activeStar) > 0 ? "#f59e0b" : "#94a3b8",
-                            minWidth: "60px"
-                          }}>
-                            {(activeHoverStar !== -1 ? activeHoverStar : activeStar) > 0
-                              ? `${(activeHoverStar !== -1 ? activeHoverStar : activeStar).toFixed(1)} ⭐`
-                              : "Chưa chọn"}
-                          </span>
-                        </div>
-                      </div>
-                      <textarea
-                        placeholder={t("detailService.reviewPlaceholder")}
-                        value={reviewText}
-                        onChange={(e) => setReviewText(e.target.value)}
-                        required
-                        rows={4}
-                      />
-                      <button
-                        type="submit"
-                        disabled={postReviewMutation.isPending}
-                        className="submit-review-btn"
+                    userID ? (
+                      <form
+                        onSubmit={handleReviewSubmit}
+                        className="ds-add-review-card"
                       >
-                        {t("detailService.submitReview")}
-                      </button>
-                    </form>
+                        <h3>{t("detailService.writeReview")}</h3>
+                        <div className="rating-picker-row" style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "18px" }}>
+                          <span style={{ fontWeight: 600 }}>{t("detailService.yourRating")}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <Rating
+                              name="service-rating"
+                              value={Number(activeStar || 0)}
+                              precision={0.5}
+                              onChange={(event, newValue) => {
+                                setActiveStar(newValue || 0);
+                              }}
+                              onChangeActive={(event, newHover) => {
+                                setActiveHoverStar(newHover);
+                              }}
+                              size="large"
+                              sx={{
+                                color: "#f59e0b",
+                                "& .MuiRating-icon": {
+                                  fontSize: "30px",
+                                },
+                                "& .MuiRating-iconEmpty": {
+                                  color: isDarkMode ? "#475569" : "#cbd5e1",
+                                },
+                              }}
+                            />
+                            <span style={{
+                              fontSize: "15px",
+                              fontWeight: 700,
+                              color: (activeHoverStar !== -1 ? activeHoverStar : activeStar) > 0 ? "#f59e0b" : "#94a3b8",
+                              minWidth: "60px"
+                            }}>
+                              {(activeHoverStar !== -1 ? activeHoverStar : activeStar) > 0
+                                ? `${(activeHoverStar !== -1 ? activeHoverStar : activeStar).toFixed(1)} ⭐`
+                                : "Chưa chọn"}
+                            </span>
+                          </div>
+                        </div>
+                        <textarea
+                          placeholder={t("detailService.reviewPlaceholder")}
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          required
+                          rows={4}
+                        />
+                        <button
+                          type="submit"
+                          disabled={postReviewMutation.isLoading}
+                          className="submit-review-btn"
+                        >
+                          {postReviewMutation.isLoading ? "Đang gửi đánh giá..." : t("detailService.submitReview")}
+                        </button>
+                      </form>
+                    ) : (
+                      <div className="ds-add-review-card" style={{ textAlign: "center", padding: "32px 20px" }}>
+                        <p style={{ marginBottom: "16px", color: isDarkMode ? "#94a3b8" : "#64748b", fontSize: "15px" }}>
+                          Vui lòng đăng nhập để gửi đánh giá cho dịch vụ này.
+                        </p>
+                        <button
+                          type="button"
+                          className="submit-review-btn"
+                          style={{ display: "inline-block", width: "auto", padding: "10px 28px", cursor: "pointer" }}
+                          onClick={() => navigate("/login")}
+                        >
+                          Đăng nhập ngay
+                        </button>
+                      </div>
+                    )
                   )}
                 </div>
               </div>
@@ -744,6 +902,22 @@ function DetailService() {
           </section>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={Boolean(deleteReviewId)}
+        onClose={() => setDeleteReviewId(null)}
+        onConfirm={() => {
+          if (deleteReviewId) {
+            deleteReviewMutation.mutate(deleteReviewId);
+          }
+        }}
+        title="Xác nhận xóa đánh giá"
+        message="Bạn có chắc chắn muốn xóa đánh giá này không? Đánh giá sau khi xóa sẽ không thể khôi phục."
+        confirmText="Xóa đánh giá"
+        cancelText="Hủy"
+        variant="danger"
+        isLoading={deleteReviewMutation.isLoading}
+      />
 
       <style>{`
         /* --- CONTAINER & PAGE BASE --- */
@@ -1455,6 +1629,142 @@ function DetailService() {
           font-weight: 800;
           font-size: 17px;
           flex-shrink: 0;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .reviewer-avatar-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        /* --- EDIT REVIEW FORM --- */
+        .ds-edit-review-form {
+          margin-top: 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 16px;
+          border-radius: 12px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+        }
+
+        .dark-theme .ds-edit-review-form {
+          background: #1e293b;
+          border-color: #334155;
+        }
+
+        .edit-stars-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .edit-stars-label {
+          font-size: 13.5px;
+          font-weight: 600;
+          color: #475569;
+        }
+
+        .dark-theme .edit-stars-label {
+          color: #94a3b8;
+        }
+
+        .edit-stars-score {
+          font-size: 14px;
+          font-weight: 700;
+          color: #f59e0b;
+        }
+
+        .ds-edit-review-textarea {
+          width: 100%;
+          padding: 12px 14px;
+          border-radius: 10px;
+          border: 1.5px solid #cbd5e1;
+          background: #f8fafc;
+          font-size: 14px;
+          line-height: 1.5;
+          color: #0f172a;
+          outline: none;
+          resize: vertical;
+          box-sizing: border-box;
+          font-family: inherit;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .ds-edit-review-textarea:focus {
+          border-color: #0284c7;
+          box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        .dark-theme .ds-edit-review-textarea {
+          background: #0f172a;
+          border-color: #475569;
+          color: #f8fafc;
+        }
+
+        .dark-theme .ds-edit-review-textarea:focus {
+          border-color: #38bdf8;
+          box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .ds-edit-review-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 4px;
+        }
+
+        .save-edit-btn {
+          padding: 8px 22px;
+          border-radius: 8px;
+          background: #0284c7;
+          color: #ffffff;
+          border: none;
+          font-weight: 600;
+          font-size: 13.5px;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .save-edit-btn:hover:not(:disabled) {
+          background: #0369a1;
+        }
+
+        .save-edit-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .cancel-edit-btn {
+          padding: 8px 18px;
+          border-radius: 8px;
+          background: transparent;
+          color: #64748b;
+          border: 1px solid #cbd5e1;
+          font-weight: 600;
+          font-size: 13.5px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .cancel-edit-btn:hover {
+          background: #f1f5f9;
+          color: #0f172a;
+        }
+
+        .dark-theme .cancel-edit-btn {
+          color: #94a3b8;
+          border-color: #475569;
+        }
+
+        .dark-theme .cancel-edit-btn:hover {
+          background: #334155;
+          color: #ffffff;
         }
 
         .reviewer-content {

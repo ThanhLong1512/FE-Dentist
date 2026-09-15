@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 import { clearCartUi } from "../redux/slices/cartUiSlice";
 import { usePayments } from "../features/payment/usePayments";
 
@@ -85,7 +86,7 @@ function Checkout() {
       }
     } catch (error) {
       console.error("Error processing order:", error);
-      alert("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!");
+      toast.error("Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!");
     }
   };
 

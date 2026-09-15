@@ -22,6 +22,7 @@ import {
 import { useEmployees } from "../employee/useEmployees";
 import { useServices } from "../services/useServices";
 import Spinner from "../../components/admin/Spinner";
+import { toast } from "react-toastify";
 
 const ModalContainer = styled.div`
   width: 88vw;
@@ -418,7 +419,7 @@ export default function PatientEMRModal({ patient = {}, onCloseModal }) {
   const handleAddProcedureAndSession = (e) => {
     e.preventDefault();
     if (!diagnosis && !clinicalNotes && !selectedService) {
-      alert("Vui lòng nhập chẩn đoán hoặc chọn dịch vụ thực hiện");
+      toast.warning("Vui lòng nhập chẩn đoán hoặc chọn dịch vụ thực hiện");
       return;
     }
 

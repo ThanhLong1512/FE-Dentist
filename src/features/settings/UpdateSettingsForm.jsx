@@ -20,6 +20,7 @@ import FormRow, { FormGrid } from "../../components/admin/FormRow";
 import { useSettings } from "./useSettings";
 import { useUpdateSetting } from "./useUpdateSetting";
 import { handleResetSettings } from "../../apis";
+import ConfirmModal from "../../components/ConfirmModal";
 
 const SettingsContainer = styled.div`
   display: flex;
@@ -175,6 +176,8 @@ function UpdateSettingsForm() {
   const { isUpdating, updateSetting } = useUpdateSetting();
   const [activeTab, setActiveTab] = useState("general");
   const [formData, setFormData] = useState({});
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     if (settings && Object.keys(settings).length > 0) {
@@ -237,17 +240,23 @@ function UpdateSettingsForm() {
     updateSetting(formattedData);
   };
 
-  const handleResetToDefault = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn khôi phục toàn bộ cài đặt về mặc định ban đầu?")) {
-      try {
-        const res = await handleResetSettings();
-        toast.success("Đã khôi phục cài đặt mặc định!");
-        if (res?.data) {
-          setFormData(res.data);
-        }
-      } catch (err) {
-        toast.error("Không thể khôi phục cài đặt");
+  const handleResetToDefault = () => {
+    setShowResetConfirm(true);
+  };
+
+  const handleConfirmReset = async () => {
+    try {
+      setIsResetting(true);
+      const res = await handleResetSettings();
+      toast.success("Đã khôi phục cài đặt mặc định!");
+      if (res?.data) {
+        setFormData(res.data);
       }
+    } catch (err) {
+      toast.error("Không thể khôi phục cài đặt");
+    } finally {
+      setIsResetting(false);
+      setShowResetConfirm(false);
     }
   };
 
@@ -621,6 +630,18 @@ function UpdateSettingsForm() {
           </Button>
         </ActionBar>
       </form>
+
+      <ConfirmModal
+        isOpen={showResetConfirm}
+        onClose={() => !isResetting && setShowResetConfirm(false)}
+        onConfirm={handleConfirmReset}
+        title="Khôi phục cài đặt mặc định?"
+        message="Hành động này sẽ thiết lập lại tất cả các thông số phòng khám, đặt lịch và thanh toán về trạng thái ban đầu của hệ thống. Bạn có chắc chắn muốn tiếp tục?"
+        confirmText="Khôi phục mặc định"
+        cancelText="Hủy bỏ"
+        variant="danger"
+        isLoading={isResetting}
+      />
     </SettingsContainer>
   );
 }
