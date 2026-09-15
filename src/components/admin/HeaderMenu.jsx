@@ -14,7 +14,7 @@ function HeaderMenu() {
   return (
     <StyleHeaderMenu>
       <li>
-        <ButtonIcon onClick={() => navigate("admin/users/")}>
+        <ButtonIcon onClick={() => navigate("/admin/users")}>
           <HiOutlineUser />
         </ButtonIcon>
       </li>

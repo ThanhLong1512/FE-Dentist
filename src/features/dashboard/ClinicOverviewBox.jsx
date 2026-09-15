@@ -168,10 +168,13 @@ const FacilityItem = styled.div`
 
 function ClinicOverviewBox() {
   const navigate = useNavigate();
-  const { facilities = [] } = useFacilities();
-  const { employees = [] } = useEmployees();
+  const { facilities } = useFacilities();
+  const { employees } = useEmployees();
 
-  const activeFacilities = facilities.filter(
+  const safeFacilities = Array.isArray(facilities) ? facilities : [];
+  const safeEmployees = Array.isArray(employees) ? employees : [];
+
+  const activeFacilities = safeFacilities.filter(
     (f) => f.status === "active" || !f.status
   );
 
@@ -198,16 +201,16 @@ function ClinicOverviewBox() {
       <MetricsStrip>
         <MetricMiniCard>
           <span className="label">Cơ sở vận hành</span>
-          <span className="val">{facilities.length || 4} chi nhánh</span>
+          <span className="val">{safeFacilities.length || 4} chi nhánh</span>
         </MetricMiniCard>
         <MetricMiniCard>
           <span className="label">Bác sĩ & Y tá</span>
-          <span className="val">{employees.length || 10} nhân sự</span>
+          <span className="val">{safeEmployees.length || 10} nhân sự</span>
         </MetricMiniCard>
         <MetricMiniCard>
           <span className="label">Ghế nha khoa</span>
           <span className="val">
-            {facilities.reduce((acc, cur) => acc + (cur.dentalChairs || 4), 0)}{" "}
+            {safeFacilities.reduce((acc, cur) => acc + (cur?.dentalChairs || 4), 0)}{" "}
             ghế
           </span>
         </MetricMiniCard>
