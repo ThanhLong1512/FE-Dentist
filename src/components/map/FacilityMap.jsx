@@ -159,26 +159,34 @@ export default function FacilityMap({
       const isSelected = fac._id === selectedFacilityId;
       const isMaint = fac.status === "maintenance";
 
-      // Custom HTML DivIcon
+      // Custom HTML DivIcon with official Cheese Dental logo
       const customIcon = L.divIcon({
         className: "custom-leaflet-marker",
         html: `
           <div class="marker-pin-bubble ${isSelected ? "is-active" : ""} ${
           isMaint ? "is-maintenance" : ""
         }">
-            <span class="marker-icon">🦷</span>
+            <div class="marker-icon">
+              <img src="/logo.png" alt="Cheese Dental" class="marker-pin-logo" />
+            </div>
           </div>
         `,
-        iconSize: [42, 42],
-        iconAnchor: [21, 42],
-        popupAnchor: [0, -38],
+        iconSize: [46, 46],
+        iconAnchor: [23, 46],
+        popupAnchor: [0, -42],
       });
 
       const marker = L.marker([lat, lng], { icon: customIcon });
 
       const popupHtml = `
         <div class="facility-popup-card">
-          <span class="facility-popup-badge">${fac.code || "CHI NHÁNH"}</span>
+          <div class="facility-popup-brand-header">
+            <div class="facility-popup-brand">
+              <img src="/logo.png" alt="Cheese Dental" class="facility-popup-logo" />
+              <span class="facility-popup-brand-name">Cheese Dental</span>
+            </div>
+            <span class="facility-popup-badge">${fac.code || "CHI NHÁNH"}</span>
+          </div>
           <h4 class="facility-popup-title">${fac.name}</h4>
           <div class="facility-popup-info">
             <div class="facility-popup-row">
@@ -250,7 +258,11 @@ export default function FacilityMap({
       <div className="facility-map-header">
         <div className="facility-map-title-group">
           <h3>
-            <Building2 className="title-icon" size={24} />
+            <img
+              src="/logo.png"
+              alt="Cheese Dental"
+              className="facility-map-heading-logo"
+            />
             <span>{displayTitle}</span>
           </h3>
           <p>{displaySubtitle}</p>
@@ -325,7 +337,14 @@ export default function FacilityMap({
                   onClick={() => handleSelectFacility(facility)}
                 >
                   <div className="facility-card-top">
-                    <h4 className="facility-card-name">{facility.name}</h4>
+                    <div className="facility-card-title-wrap">
+                      <img
+                        src="/logo.png"
+                        alt="Cheese Dental"
+                        className="facility-card-logo"
+                      />
+                      <h4 className="facility-card-name">{facility.name}</h4>
+                    </div>
                     <span className="facility-code-pill">{facility.code}</span>
                   </div>
 
