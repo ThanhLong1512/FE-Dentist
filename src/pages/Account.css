@@ -84,6 +84,40 @@
   border: 4px solid #ffffff;
   box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15);
   background: #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
+}
+
+.account-hero-avatar:hover {
+  transform: scale(1.04);
+  filter: brightness(0.96);
+  box-shadow: 0 10px 28px -4px rgba(2, 132, 199, 0.35);
+}
+
+.account-avatar-fullscreen-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  z-index: 2;
+}
+
+.account-avatar-fullscreen-badge:hover {
+  background: #0284c7;
+  transform: scale(1.1);
+  color: #ffffff;
 }
 
 .account-camera-btn {
@@ -102,6 +136,7 @@
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45);
   border: 2px solid #ffffff;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
 }
 
 .account-camera-btn:hover {
@@ -341,7 +376,7 @@
 .form-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 22px;
 }
 
 .form-field {
@@ -351,61 +386,87 @@
 }
 
 .form-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #334155;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #475569;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .form-input-box {
   position: relative;
   display: flex;
   align-items: center;
-  background: #f8fafc;
+  gap: 12px;
+  background: #ffffff;
   border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0 14px;
+  border-radius: 14px;
+  padding: 0 16px;
+  height: 52px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.form-input-box:focus-within,
+.form-input-box.editing {
+  border-color: #0284c7;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
+}
+
+.form-input-box.readonly,
+.form-input-box.disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.input-icon-pill {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(2, 132, 199, 0.08);
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
-.form-input-box:focus-within {
-  border-color: #0284c7;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-}
-
-.form-input-box.disabled {
-  background: #f1f5f9;
-  border-color: #e2e8f0;
-  cursor: not-allowed;
+.form-input-box:focus-within .input-icon-pill,
+.form-input-box.editing .input-icon-pill {
+  background: #0284c7;
+  color: #ffffff;
 }
 
 .input-icon-start {
-  color: #94a3b8;
-  margin-right: 10px;
-  flex-shrink: 0;
-}
-
-.form-input-box:focus-within .input-icon-start {
   color: #0284c7;
+  margin-right: 2px;
+  flex-shrink: 0;
 }
 
 .custom-input {
   width: 100%;
-  height: 44px;
+  height: 100%;
   background: transparent;
   border: none;
   outline: none;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   color: #0f172a;
 }
 
 .custom-input:disabled {
-  color: #64748b;
-  cursor: not-allowed;
+  color: #1e293b;
+  cursor: default;
+  -webkit-text-fill-color: #1e293b;
+  opacity: 1;
+}
+
+.custom-input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 .input-icon-end {
@@ -418,20 +479,49 @@
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
+  flex-shrink: 0;
 }
 
 .input-icon-end:hover {
-  color: #0f172a;
+  color: #0284c7;
 }
 
 .input-locked-badge {
-  font-size: 11px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
   color: #64748b;
   background: #e2e8f0;
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.input-role-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.input-role-pill.admin {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.input-role-pill.client {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
 }
 
 /* Alert Banner */
@@ -701,16 +791,31 @@ html.dark-mode .form-label {
 html.dark-mode .form-input-box {
   background: #0f172a;
   border-color: #334155;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-html.dark-mode .form-input-box:focus-within {
+html.dark-mode .form-input-box:focus-within,
+html.dark-mode .form-input-box.editing {
   border-color: #38bdf8;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+  background: #0f172a;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
 }
 
+html.dark-mode .form-input-box.readonly,
 html.dark-mode .form-input-box.disabled {
-  background: #182234;
-  border-color: #2a3749;
+  background: #0b1120;
+  border-color: #1e293b;
+}
+
+html.dark-mode .input-icon-pill {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+html.dark-mode .form-input-box:focus-within .input-icon-pill,
+html.dark-mode .form-input-box.editing .input-icon-pill {
+  background: #0284c7;
+  color: #ffffff;
 }
 
 html.dark-mode .custom-input {
@@ -718,12 +823,31 @@ html.dark-mode .custom-input {
 }
 
 html.dark-mode .custom-input:disabled {
-  color: #94a3b8;
+  color: #f1f5f9;
+  -webkit-text-fill-color: #f1f5f9;
+  opacity: 0.95;
+}
+
+html.dark-mode .custom-input::placeholder {
+  color: #64748b;
 }
 
 html.dark-mode .input-locked-badge {
-  background: #334155;
+  background: #1e293b;
+  border: 1px solid #334155;
   color: #cbd5e1;
+}
+
+html.dark-mode .input-role-pill.admin {
+  background: rgba(2, 132, 199, 0.2);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+html.dark-mode .input-role-pill.client {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #34d399;
 }
 
 html.dark-mode .badge-pill.role {

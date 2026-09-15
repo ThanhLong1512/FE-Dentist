@@ -1,20 +1,21 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import vi from "../locales/vi";
 import en from "../locales/en";
+import zh from "../locales/zh";
 
-const translations = { vi, en };
+const translations = { vi, en, zh };
 
 const LanguageContext = createContext();
 
 function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
     const stored = localStorage.getItem("language");
-    return stored === "en" || stored === "vi" ? stored : "vi";
+    return stored === "en" || stored === "vi" || stored === "zh" ? stored : "vi";
   });
 
   useEffect(() => {
     localStorage.setItem("language", language);
-    document.documentElement.lang = language === "vi" ? "vi" : "en";
+    document.documentElement.lang = language === "zh" ? "zh-CN" : language === "vi" ? "vi" : "en";
   }, [language]);
 
   const t = (key) => {
@@ -27,7 +28,7 @@ function LanguageProvider({ children }) {
   };
 
   const changeLanguage = (lang) => {
-    if (lang === "vi" || lang === "en") {
+    if (lang === "vi" || lang === "en" || lang === "zh") {
       setLanguage(lang);
     }
   };

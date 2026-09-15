@@ -28,6 +28,7 @@ import {
 } from "../apis";
 import { SOCKET_URL, ADMIN_ID } from "../utils/constants";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { useLanguage } from "../context/LanguageContext";
 
 // --- ANIMATIONS ---
 const pulseGlow = keyframes`
@@ -315,8 +316,9 @@ const MessagesContainer = styled.div`
 const DateDivider = styled.div`
   align-self: center;
   font-size: 1.1rem;
-  color: ${(props) => (props.$isDark ? "#64748b" : "#94a3b8")};
+  color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
   background: ${(props) => (props.$isDark ? "#1e293b" : "#e2e8f0")};
+  border: ${(props) => (props.$isDark ? "1px solid #334155" : "1px solid transparent")};
   padding: 3px 10px;
   border-radius: 999px;
   margin: 6px 0;
@@ -351,15 +353,29 @@ const MessageBubble = styled.div`
       ? "#1e293b"
       : "#ffffff"};
   color: ${(props) =>
-    props.$isClient ? "#ffffff" : props.$isDark ? "#f8fafc" : "#1e293b"};
-  box-shadow: 0 2px 6px ${(props) => (props.$isDark ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.05)")};
+    props.$isClient ? "#ffffff" : props.$isDark ? "#f8fafc" : "#0f172a"};
+  border: ${(props) =>
+    props.$isClient
+      ? "none"
+      : props.$isDark
+      ? "1px solid #334155"
+      : "1px solid #e2e8f0"};
+  box-shadow: 0 2px 6px ${(props) => (props.$isDark ? "rgba(0, 0, 0, 0.35)" : "rgba(0, 0, 0, 0.05)")};
   font-size: 1.35rem;
-  line-height: 1.45;
+  line-height: 1.5;
   word-break: break-word;
 
   .text-content {
     margin: 0;
     white-space: pre-wrap;
+    color: ${(props) =>
+      props.$isClient
+        ? "#ffffff !important"
+        : props.$isDark
+        ? "#f8fafc !important"
+        : "#0f172a !important"};
+    font-size: 1.35rem;
+    line-height: 1.5;
   }
 
   .meta-info {
@@ -369,7 +385,12 @@ const MessageBubble = styled.div`
     gap: 4px;
     margin-top: 4px;
     font-size: 1.05rem;
-    opacity: 0.75;
+    color: ${(props) =>
+      props.$isClient
+        ? "rgba(255, 255, 255, 0.85)"
+        : props.$isDark
+        ? "#94a3b8"
+        : "#64748b"};
   }
 `;
 
@@ -414,6 +435,7 @@ const ImageBubble = styled.div`
     margin-top: 6px;
     padding: 0 4px;
     font-size: 1.25rem;
+    color: ${(props) => (props.$isDark ? "#f1f5f9" : "#334155")};
   }
 `;
 
@@ -452,7 +474,7 @@ const VoiceBubble = styled.div`
 
     .wave-bar {
       flex: 1;
-      background: ${(props) => (props.$isClient ? "rgba(255, 255, 255, 0.7)" : "#0284c7")};
+      background: ${(props) => (props.$isClient ? "rgba(255, 255, 255, 0.85)" : "#0284c7")};
       border-radius: 2px;
       height: 6px;
       transition: height 0.15s;
@@ -467,7 +489,8 @@ const VoiceBubble = styled.div`
   .duration {
     font-size: 1.15rem;
     font-variant-numeric: tabular-nums;
-    font-weight: 500;
+    font-weight: 600;
+    color: ${(props) => (props.$isClient ? "#ffffff" : props.$isDark ? "#f1f5f9" : "#334155")};
   }
 `;
 
@@ -478,6 +501,7 @@ const TypingRow = styled.div`
   padding: 8px 14px;
   border-radius: 18px 18px 18px 4px;
   background: ${(props) => (props.$isDark ? "#1e293b" : "#ffffff")};
+  border: ${(props) => (props.$isDark ? "1px solid #334155" : "1px solid #e2e8f0")};
   align-self: flex-start;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 
@@ -489,7 +513,7 @@ const TypingRow = styled.div`
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background-color: #0284c7;
+      background-color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
       animation: ${typingBounce} 1.2s infinite ease-in-out;
 
       &:nth-child(2) {
@@ -499,6 +523,11 @@ const TypingRow = styled.div`
         animation-delay: 0.4s;
       }
     }
+  }
+
+  .typing-label {
+    font-size: 1.2rem;
+    color: ${(props) => (props.$isDark ? "#cbd5e1" : "#64748b")};
   }
 `;
 
@@ -510,6 +539,7 @@ const AttachmentPreviewBar = styled.div`
   align-items: center;
   gap: 10px;
   border-top: 1px solid ${(props) => (props.$isDark ? "#334155" : "#cbd5e1")};
+  color: ${(props) => (props.$isDark ? "#f8fafc" : "#1e293b")};
 
   .thumb-container {
     position: relative;
@@ -548,6 +578,7 @@ const AttachmentPreviewBar = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: ${(props) => (props.$isDark ? "#f1f5f9" : "#1e293b")};
   }
 `;
 
@@ -558,8 +589,8 @@ const RecordingBar = styled.div`
   gap: 12px;
   padding: 12px 16px;
   background: ${(props) => (props.$isDark ? "#1e293b" : "#fef2f2")};
-  border-top: 1px solid #fecaca;
-  color: #ef4444;
+  border-top: 1px solid ${(props) => (props.$isDark ? "#334155" : "#fecaca")};
+  color: ${(props) => (props.$isDark ? "#fca5a5" : "#ef4444")};
 
   .rec-dot {
     width: 12px;
@@ -573,6 +604,7 @@ const RecordingBar = styled.div`
     font-size: 1.35rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+    color: ${(props) => (props.$isDark ? "#fca5a5" : "#ef4444")};
   }
 
   .wave-animation {
@@ -646,7 +678,7 @@ const ChatInputArea = styled.form`
     border-radius: 50%;
     border: none;
     background: transparent;
-    color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    color: ${(props) => (props.$isDark ? "#cbd5e1" : "#64748b")};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -656,7 +688,7 @@ const ChatInputArea = styled.form`
 
     &:hover:not(:disabled) {
       background: ${(props) => (props.$isDark ? "#1e293b" : "#f1f5f9")};
-      color: #0284c7;
+      color: #38bdf8;
     }
 
     &:disabled {
@@ -666,7 +698,7 @@ const ChatInputArea = styled.form`
 
     &.recording-active {
       color: #ef4444;
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(239, 68, 68, 0.15);
     }
   }
 
@@ -674,7 +706,7 @@ const ChatInputArea = styled.form`
     flex: 1;
     border: 1px solid ${(props) => (props.$isDark ? "#334155" : "#cbd5e1")};
     background: ${(props) => (props.$isDark ? "#1e293b" : "#f8fafc")};
-    color: ${(props) => (props.$isDark ? "#f8fafc" : "#1e293b")};
+    color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")} !important;
     padding: 10px 14px;
     border-radius: 20px;
     font-size: 1.35rem;
@@ -682,13 +714,14 @@ const ChatInputArea = styled.form`
     transition: all 0.2s;
 
     &:focus {
-      border-color: #0284c7;
+      border-color: #38bdf8;
       background: ${(props) => (props.$isDark ? "#0f172a" : "#ffffff")};
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")} !important;
     }
 
     &::placeholder {
-      color: ${(props) => (props.$isDark ? "#64748b" : "#94a3b8")};
+      color: ${(props) => (props.$isDark ? "#94a3b8" : "#94a3b8")};
     }
   }
 
@@ -775,6 +808,7 @@ const LightboxOverlay = styled.div`
 // --- COMPONENT CHAT ---
 export default function Chat() {
   const { isDarkMode } = useDarkMode();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [conservationId, setConservationId] = useState(null);
   const [isLoadingConservation, setIsLoadingConservation] = useState(false);
@@ -1263,8 +1297,8 @@ export default function Chat() {
       <FloatingButton
         type="button"
         onClick={toggleChat}
-        title="Tư vấn trực tuyến với Nha sĩ"
-        aria-label="Chat với nha sĩ"
+        title={t("chat.buttonTitle")}
+        aria-label={t("chat.buttonAria")}
       >
         <span className="online-indicator" />
         {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
@@ -1285,9 +1319,9 @@ export default function Chat() {
                 <span className="status-dot" />
               </div>
               <div className="meta">
-                <div className="name">Bác sĩ DENTIST PRO</div>
+                <div className="name">{t("chat.doctorName")}</div>
                 <div className="status-text">
-                  <span>Trực tuyến</span> • Sẵn sàng giải đáp 24/7
+                  <span>{t("chat.statusOnline")}</span> • {t("chat.ready247")}
                 </div>
               </div>
             </div>
@@ -1296,7 +1330,7 @@ export default function Chat() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                title="Thu nhỏ chat"
+                title={t("chat.minimizeChat")}
               >
                 <X size={18} />
               </button>
@@ -1308,36 +1342,36 @@ export default function Chat() {
             <button
               type="button"
               className="chip"
-              onClick={() => handleSuggestionClick("Bác sĩ tư vấn niềng răng giúp em với ạ")}
+              onClick={() => handleSuggestionClick(t("chat.suggestions.braces"))}
             >
-              🦷 Tư vấn niềng răng
+              {t("chat.suggestions.braces")}
             </button>
             <button
               type="button"
               className="chip"
-              onClick={() => handleSuggestionClick("Chi phí cấy ghép răng Implant bao nhiêu ạ?")}
+              onClick={() => handleSuggestionClick(t("chat.suggestions.implant"))}
             >
-              💎 Giá trồng Implant
+              {t("chat.suggestions.implant")}
             </button>
             <button
               type="button"
               className="chip"
-              onClick={() => handleSuggestionClick("Em muốn đặt lịch khám tổng quát hôm nay")}
+              onClick={() => handleSuggestionClick(t("chat.suggestions.booking"))}
             >
-              📅 Đặt lịch khám
+              {t("chat.suggestions.booking")}
             </button>
             <button
               type="button"
               className="chip"
-              onClick={() => handleSuggestionClick("Tẩy trắng răng bằng công nghệ gì vậy Bác sĩ?")}
+              onClick={() => handleSuggestionClick(t("chat.suggestions.whitening"))}
             >
-              ✨ Tẩy trắng răng
+              {t("chat.suggestions.whitening")}
             </button>
           </QuickSuggestions>
 
           {/* Messages Body */}
           <MessagesContainer $isDark={isDarkMode}>
-            <DateDivider $isDark={isDarkMode}>Hôm nay</DateDivider>
+            <DateDivider $isDark={isDarkMode}>{t("chat.today")}</DateDivider>
 
             {/* Tin nhắn chào đầu tiên */}
             <MessageRow $isClient={false}>
@@ -1348,10 +1382,10 @@ export default function Chat() {
               />
               <MessageBubble $isClient={false} $isDark={isDarkMode}>
                 <p className="text-content">
-                  Xin chào! Nha khoa DENTIST PRO có thể hỗ trợ kiểm tra hoặc giải đáp thắc mắc gì về sức khỏe răng miệng cho bạn hôm nay?
+                  {t("chat.welcomeDoctor")}
                 </p>
                 <div className="meta-info">
-                  <span>Bác sĩ trực</span>
+                  <span>{t("chat.doctorOnDuty")}</span>
                 </div>
               </MessageBubble>
             </MessageRow>
@@ -1363,12 +1397,12 @@ export default function Chat() {
                   alignItems: "center",
                   justifyContent: "center",
                   padding: "20px",
-                  color: "#0284c7",
+                  color: isDarkMode ? "#38bdf8" : "#0284c7",
                   gap: "8px",
                 }}
               >
                 <Loader2 size={20} className="animate-spin" />
-                <span style={{ fontSize: "1.3rem" }}>Đang tải cuộc trò chuyện...</span>
+                <span style={{ fontSize: "1.3rem", fontWeight: 500 }}>{t("chat.loadingChat")}</span>
               </div>
             ) : (
               messages.map((msg) => {
@@ -1393,10 +1427,11 @@ export default function Chat() {
                       {/* Hình ảnh */}
                       {isImage ? (
                         <ImageBubble
+                          $isDark={isDarkMode}
                           onClick={() =>
                             setLightboxImage({
                               url: msg.mediaUrl || msg.text,
-                              caption: msg.text !== "Hình ảnh" ? msg.text : "",
+                              caption: msg.text !== "Hình ảnh" && msg.text !== "Image" ? msg.text : "",
                             })
                           }
                         >
@@ -1408,18 +1443,18 @@ export default function Chat() {
                           <div className="zoom-overlay">
                             <Maximize2 size={22} />
                           </div>
-                          {msg.text && msg.text !== "Hình ảnh" && (
+                          {msg.text && msg.text !== "Hình ảnh" && msg.text !== "Image" && (
                             <p className="image-caption">{msg.text}</p>
                           )}
                         </ImageBubble>
                       ) : isVoice ? (
                         /* Tin nhắn ghi âm thoại */
-                        <VoiceBubble $isClient={isClient}>
+                        <VoiceBubble $isClient={isClient} $isDark={isDarkMode}>
                           <button
                             type="button"
                             className="play-btn"
                             onClick={() => togglePlayAudio(msg.id, msg.mediaUrl)}
-                            title="Nghe tin nhắn thoại"
+                            title={t("chat.voiceMessage")}
                           >
                             {playingAudioId === msg.id ? (
                               <Pause size={18} />
@@ -1438,7 +1473,7 @@ export default function Chat() {
                             <span className={`wave-bar ${playingAudioId === msg.id ? "active" : ""}`} />
                           </div>
                           <span className="duration">
-                            {playingAudioId === msg.id ? "Đang phát" : "Thoại"}
+                            {playingAudioId === msg.id ? t("chat.playing") : t("chat.audioLabel")}
                           </span>
                         </VoiceBubble>
                       ) : (
@@ -1463,8 +1498,8 @@ export default function Chat() {
                   <span />
                   <span />
                 </div>
-                <span style={{ fontSize: "1.2rem", color: "#64748b" }}>
-                  Bác sĩ đang nhập phản hồi...
+                <span className="typing-label">
+                  {t("chat.typingDoctor")}
                 </span>
               </TypingRow>
             )}
@@ -1508,7 +1543,7 @@ export default function Chat() {
                 type="button"
                 className="cancel-btn"
                 onClick={stopAndCancelRecording}
-                title="Hủy ghi âm"
+                title={t("chat.cancelRec")}
               >
                 <Trash2 size={18} />
               </button>
@@ -1516,7 +1551,7 @@ export default function Chat() {
                 type="button"
                 className="send-rec-btn"
                 onClick={stopAndSendRecording}
-                title="Gửi ghi âm ngay"
+                title={t("chat.sendRec")}
               >
                 <Check size={20} />
               </button>
@@ -1536,7 +1571,7 @@ export default function Chat() {
                 type="button"
                 className="icon-tool-btn"
                 onClick={() => fileInputRef.current?.click()}
-                title="Gửi hình ảnh (hoặc dán Ctrl+V)"
+                title={t("chat.sendImage")}
                 disabled={isUploadingMedia}
               >
                 <ImageIcon size={20} />
@@ -1547,7 +1582,7 @@ export default function Chat() {
                 type="button"
                 className="icon-tool-btn"
                 onClick={startRecording}
-                title="Bấm để ghi âm tin nhắn thoại"
+                title={t("chat.clickToRecord")}
                 disabled={isUploadingMedia}
               >
                 <Mic size={20} />
@@ -1558,7 +1593,7 @@ export default function Chat() {
                 type="button"
                 className={`icon-tool-btn ${isDictating ? "recording-active" : ""}`}
                 onClick={toggleSpeechDictation}
-                title={isDictating ? "Đang lắng nghe... (bấm để dừng)" : "Nói để nhập văn bản (Tiếng Việt)"}
+                title={isDictating ? t("chat.voiceListening") : t("chat.voicePrompt")}
               >
                 <Radio size={19} />
               </button>
@@ -1572,10 +1607,10 @@ export default function Chat() {
                 onPaste={handlePasteImage}
                 placeholder={
                   isDictating
-                    ? "Đang nghe giọng nói của bạn..."
+                    ? t("chat.listeningPlaceholder")
                     : selectedImageFile
-                    ? "Nhập chú thích ảnh..."
-                    : "Nhập tin nhắn (Ctrl+V để dán ảnh)..."
+                    ? t("chat.captionPlaceholder")
+                    : t("chat.inputPlaceholder")
                 }
                 disabled={isUploadingMedia}
               />
@@ -1588,7 +1623,7 @@ export default function Chat() {
                   (!inputMessage.trim() && !selectedImageFile) ||
                   isUploadingMedia
                 }
-                title="Gửi tin nhắn"
+                title={t("chat.sendBtn")}
               >
                 {isUploadingMedia ? (
                   <Loader2 size={18} className="animate-spin" />

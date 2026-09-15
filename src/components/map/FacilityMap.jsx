@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { useFacilities } from "../../features/facilities/useFacilities";
 import { useDarkMode } from "../../hooks/useDarkMode";
+import { useLanguage } from "../../context/LanguageContext";
+import { translateFacility } from "../../utils/dataTranslator";
 import "./FacilityMap.css";
 
 // Fallback GPS coordinates if DB record is missing lat/lng
@@ -27,12 +29,16 @@ const FALLBACK_COORDS = {
 
 export default function FacilityMap({
   defaultCity = "all",
-  title = "Hệ Thống Cơ Sở Phòng Khám",
-  subtitle = "Trải nghiệm dịch vụ nha khoa chuẩn quốc tế tại các chi nhánh gần bạn nhất",
+  title,
+  subtitle,
   showBookingAction = true,
 }) {
   const { facilities = [], isLoading } = useFacilities();
   const { isDarkMode } = useDarkMode();
+  const { t, language } = useLanguage();
+
+  const displayTitle = title || t("facilities.title");
+  const displaySubtitle = subtitle || t("facilities.subtitle");
 
   const [selectedCity, setSelectedCity] = useState(defaultCity);
   const [selectedFacilityId, setSelectedFacilityId] = useState(null);
@@ -43,12 +49,26 @@ export default function FacilityMap({
   const markersLayerRef = useRef(null);
   const markersMapRef = useRef({});
 
+  // Translate facilities by active language
+  const translatedFacilities = useMemo(() => {
+    return facilities.map((fac) => translateFacility(fac, language));
+  }, [facilities, language]);
+
   // Filter facilities by city and search term
   const filteredFacilities = useMemo(() => {
-    return facilities.filter((fac) => {
+    return translatedFacilities.filter((fac) => {
       const matchCity =
         selectedCity === "all" ||
-        fac.city?.toLowerCase().includes(selectedCity.toLowerCase());
+        fac.city?.toLowerCase().includes(selectedCity.toLowerCase()) ||
+        (selectedCity === "hồ chí minh" &&
+          (fac.city?.toLowerCase().includes("hồ chí minh") ||
+            fac.city?.toLowerCase().includes("ho chi minh") ||
+            fac.city?.includes("胡志明"))) ||
+        (selectedCity === "hà nội" &&
+          (fac.city?.toLowerCase().includes("hà nội") ||
+            fac.city?.toLowerCase().includes("hanoi") ||
+            fac.city?.includes("河内")));
+
       const matchSearch =
         !searchTerm.trim() ||
         fac.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,7 +76,7 @@ export default function FacilityMap({
         fac.code?.toLowerCase().includes(searchTerm.toLowerCase());
       return matchCity && matchSearch;
     });
-  }, [facilities, selectedCity, searchTerm]);
+  }, [translatedFacilities, selectedCity, searchTerm]);
 
   // Unique city count badges
   const cityCounts = useMemo(() => {
@@ -231,9 +251,9 @@ export default function FacilityMap({
         <div className="facility-map-title-group">
           <h3>
             <Building2 className="title-icon" size={24} />
-            <span>{title}</span>
+            <span>{displayTitle}</span>
           </h3>
-          <p>{subtitle}</p>
+          <p>{displaySubtitle}</p>
         </div>
 
         <div className="facility-city-tabs">
@@ -242,7 +262,7 @@ export default function FacilityMap({
             className={`city-tab-btn ${selectedCity === "all" ? "active" : ""}`}
             onClick={() => setSelectedCity("all")}
           >
-            <span>Tất cả</span>
+            <span>{t("facilities.allCities")}</span>
             <span className="city-tab-badge">{cityCounts.all}</span>
           </button>
           <button
@@ -252,7 +272,13 @@ export default function FacilityMap({
             }`}
             onClick={() => setSelectedCity("hồ chí minh")}
           >
-            <span>TP. Hồ Chí Minh</span>
+            <span>
+              {language === "en"
+                ? "Ho Chi Minh City"
+                : language === "zh"
+                ? "胡志明市"
+                : "TP. Hồ Chí Minh"}
+            </span>
             <span className="city-tab-badge">{cityCounts.hcm}</span>
           </button>
           <button
@@ -262,7 +288,13 @@ export default function FacilityMap({
             }`}
             onClick={() => setSelectedCity("hà nội")}
           >
-            <span>Hà Nội</span>
+            <span>
+              {language === "en"
+                ? "Hanoi"
+                : language === "zh"
+                ? "河内市"
+                : "Hà Nội"}
+            </span>
             <span className="city-tab-badge">{cityCounts.hn}</span>
           </button>
         </div>
@@ -320,8 +352,7 @@ export default function FacilityMap({
                     <div className="facility-meta-row">
                       <Armchair size={15} className="facility-meta-icon" />
                       <span>
-                        Quy mô: {facility.chairCount || 6} ghế điều trị chuyên
-                        khoa
+                        {t("facilities.chairs")}: {facility.chairCount || 6}
                       </span>
                     </div>
 
@@ -333,12 +364,12 @@ export default function FacilityMap({
                       {isMaint ? (
                         <>
                           <Wrench size={12} />
-                          <span>Đang bảo trì / Nâng cấp</span>
+                          <span>{t("facilities.statusMaintenance")}</span>
                         </>
                       ) : (
                         <>
                           <CheckCircle2 size={12} />
-                          <span>Đang hoạt động đón khách</span>
+                          <span>{t("facilities.statusActive")}</span>
                         </>
                       )}
                     </div>
@@ -353,7 +384,7 @@ export default function FacilityMap({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Navigation size={13} />
-                      <span>Chỉ đường</span>
+                      <span>{t("facilities.getDirections")}</span>
                     </a>
                     {showBookingAction && (
                       <a
@@ -366,7 +397,7 @@ export default function FacilityMap({
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ExternalLink size={13} />
-                        <span>Đặt lịch tại cơ sở</span>
+                        <span>{t("nav.booking")}</span>
                       </a>
                     )}
                   </div>

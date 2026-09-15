@@ -20,6 +20,12 @@ import {
 import { useServices } from "../features/services/useServices";
 import { useEmployees } from "../features/employee/useEmployees";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { useLanguage } from "../context/LanguageContext";
+import {
+  translateService,
+  translateDoctor,
+  formatLocalizedPrice,
+} from "../utils/dataTranslator";
 import { getImageUrl, handleImageError } from "../utils/imageHelper";
 
 const HomeWrapper = styled.div`
@@ -428,11 +434,16 @@ const ServiceCard = styled.div`
   transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
     border-color: #0284c7;
+
+    h4 {
+      color: #0284c7;
+    }
   }
 
   .img-holder {
@@ -482,6 +493,7 @@ const ServiceCard = styled.div`
       font-weight: 700;
       margin: 0;
       color: ${(props) => (props.$isDark ? "#ffffff" : "#0f172a")};
+      transition: color 0.2s ease;
     }
 
     p.summary {
@@ -624,9 +636,88 @@ const CTABanner = styled.div`
 
 export default function Home() {
   const { isDarkMode } = useDarkMode();
+  const { language, t } = useLanguage();
   const { services = [] } = useServices();
   const { employees = [] } = useEmployees();
   const navigate = useNavigate();
+
+  const fallbackServices = [
+    {
+      _id: "1",
+      nameService: "Trồng Răng Implant Toàn Hàm All-on-4",
+      summary: "Phục hồi răng mất trọn đời bằng trụ Titanium cao cấp nhập khẩu Thụy Sĩ, ăn nhai như răng thật.",
+      durationMinutes: 45,
+      priceService: 15000000,
+    },
+    {
+      _id: "2",
+      nameService: "Niềng Răng Trong Suốt Invisalign Hoa Kỳ",
+      summary: "Chỉnh nha vô hình công nghệ Mỹ, tính thẩm mỹ cao, tháo lắp linh hoạt, không đau đớn.",
+      durationMinutes: 30,
+      priceService: 45000000,
+    },
+    {
+      _id: "3",
+      nameService: "Bọc Răng Sứ Thẩm Mỹ Nano",
+      summary: "Khắc phục răng ố vàng, sứt mẻ, tạo dáng nụ cười chuẩn tỷ lệ vàng chỉ sau 2 lần hẹn.",
+      durationMinutes: 60,
+      priceService: 3500000,
+    },
+    {
+      _id: "4",
+      nameService: "Nhổ Răng Khôn Sóng Siêu Âm Piezotome",
+      summary: "Kỹ thuật nhổ răng không xâm lấn, lành thương nhanh chóng, hạn chế tối đa cảm giác đau nhức.",
+      durationMinutes: 20,
+      priceService: 1200000,
+    },
+    {
+      _id: "5",
+      nameService: "Tẩy Trắng Răng Laser Whitening",
+      summary: "Bật tông trắng sáng chỉ sau 45 phút điều trị bằng công nghệ ánh sáng Laser an toàn cho men răng.",
+      durationMinutes: 45,
+      priceService: 1800000,
+    },
+    {
+      _id: "6",
+      nameService: "Điều Trị Tủy Vi Phẫu Không Đau",
+      summary: "Làm sạch ống tủy triệt để dưới kính hiển vi chuyên dụng, chấm dứt cơn đau nhức răng cấp tính.",
+      durationMinutes: 40,
+      priceService: 1500000,
+    },
+  ];
+
+  const rawServicesList = services.length > 0 ? services.slice(0, 6) : fallbackServices;
+  const displayedServices = rawServicesList.map((s) => translateService(s, language));
+
+  const fallbackDoctors = [
+    {
+      _id: "doc1",
+      name: "BS. CKI Nguyễn Văn Minh",
+      experience: "15 năm kinh nghiệm",
+      description: "Chuyên gia cấy ghép Implant & Phục hình sứ",
+    },
+    {
+      _id: "doc2",
+      name: "ThS. BS Trần Thị Mai",
+      experience: "12 năm kinh nghiệm",
+      description: "Chuyên gia Chỉnh nha & Niềng răng Invisalign",
+    },
+    {
+      _id: "doc3",
+      name: "BS. CKI Lê Quang Huy",
+      experience: "10 năm kinh nghiệm",
+      description: "Chuyên gia Tiểu phẫu & Nhổ răng khôn Piezotome",
+    },
+    {
+      _id: "doc4",
+      name: "BS. Hoàng Bảo Ngọc",
+      experience: "8 năm kinh nghiệm",
+      description: "Chuyên gia Nha khoa Thẩm mỹ & Tẩy trắng răng",
+    },
+  ];
+
+  const rawDoctorsList = employees.length > 0 ? employees.slice(0, 4) : fallbackDoctors;
+  const displayedDoctors = rawDoctorsList.map((d) => translateDoctor(d, language));
 
   return (
     <HomeWrapper $isDark={isDarkMode}>
@@ -635,24 +726,22 @@ export default function Home() {
         <HeroContainer>
           <HeroContent $isDark={isDarkMode}>
             <div className="badge">
-              <Sparkles size={16} /> Nha Khoa Kỹ Thuật Cao Chuẩn Quốc Tế
+              <Sparkles size={16} /> {t("home.badge")}
             </div>
             <h1>
-              Nụ Cười Tỏa Sáng, <br />
-              <span className="highlight">Tự Tin Tỏa Sắc</span> Mỗi Ngày
+              {t("home.heroTitle1")} <br />
+              <span className="highlight">{t("home.heroHighlight")}</span> {t("home.heroTitle2")}
             </h1>
             <p className="subtitle">
-              Trải nghiệm dịch vụ chăm sóc răng miệng 5 sao với công nghệ vô trùng
-              áp lực dương, máy chụp phim 3D kỹ thuật số và đội ngũ Bác sĩ chuyên
-              khoa đầu ngành Răng Hàm Mặt.
+              {t("home.heroSubtitle")}
             </p>
             <div className="cta-group">
               <PrimaryButton to="/booking">
                 <Calendar size={18} />
-                <span>Đặt Lịch Khám Nhanh</span>
+                <span>{t("home.bookFast")}</span>
               </PrimaryButton>
               <SecondaryButton to="/shop" $isDark={isDarkMode}>
-                <span>Xem Bảng Giá Dịch Vụ</span>
+                <span>{t("home.viewPrice")}</span>
                 <ArrowRight size={16} />
               </SecondaryButton>
             </div>
@@ -671,7 +760,7 @@ export default function Home() {
               </div>
               <div className="info">
                 <h5>4.9 / 5.0</h5>
-                <p>15,000+ Đánh giá hài lòng</p>
+                <p>{t("home.reviewCount")}</p>
               </div>
             </div>
           </HeroVisual>
@@ -682,20 +771,20 @@ export default function Home() {
       <StatsSection>
         <StatsCard $isDark={isDarkMode}>
           <div className="stat-col">
-            <span className="num">15,000+</span>
-            <span className="label">Nụ cười được phục hồi</span>
+            <span className="num">{t("home.stats.s1Num")}</span>
+            <span className="label">{t("home.stats.s1Label")}</span>
           </div>
           <div className="stat-col">
-            <span className="num">20+</span>
-            <span className="label">Bác sĩ chuyên khoa I & II</span>
+            <span className="num">{t("home.stats.s2Num")}</span>
+            <span className="label">{t("home.stats.s2Label")}</span>
           </div>
           <div className="stat-col">
-            <span className="num">100%</span>
-            <span className="label">Vô trùng chuẩn Autoclave</span>
+            <span className="num">{t("home.stats.s3Num")}</span>
+            <span className="label">{t("home.stats.s3Label")}</span>
           </div>
           <div className="stat-col">
-            <span className="num">10+</span>
-            <span className="label">Năm uy tín & đồng hành</span>
+            <span className="num">{t("home.stats.s4Num")}</span>
+            <span className="label">{t("home.stats.s4Label")}</span>
           </div>
         </StatsCard>
       </StatsSection>
@@ -703,12 +792,9 @@ export default function Home() {
       {/* 3. TẠI SAO CHỌN DENTIST PRO */}
       <SectionWrapper>
         <SectionHeader $isDark={isDarkMode}>
-          <span className="tag">Ưu thế vượt trội</span>
-          <h2>Vì Sao 15.000+ Khách Hàng Tin Tưởng?</h2>
-          <p>
-            Chúng tôi ứng dụng công nghệ tiên tiến nhất từ Đức và Hoa Kỳ mang đến
-            trải nghiệm điều trị nha khoa êm ái, an toàn tuyệt đối.
-          </p>
+          <span className="tag">{t("home.whyChooseTag")}</span>
+          <h2>{t("home.whyChooseTitle")}</h2>
+          <p>{t("home.whyChooseDesc")}</p>
         </SectionHeader>
 
         <FeaturesGrid>
@@ -716,44 +802,32 @@ export default function Home() {
             <div className="icon-wrap">
               <Stethoscope size={28} />
             </div>
-            <h3>Bác Sĩ Chuyên Môn Cao</h3>
-            <p>
-              100% đội ngũ bác sĩ tốt nghiệp Đại Học Y Dược, liên tục tu nghiệp
-              chuyên sâu tại Thụy Sĩ, Mỹ và Hàn Quốc.
-            </p>
+            <h3>{t("home.features.f1Title")}</h3>
+            <p>{t("home.features.f1Desc")}</p>
           </FeatureCard>
 
           <FeatureCard $isDark={isDarkMode}>
             <div className="icon-wrap">
               <ShieldCheck size={28} />
             </div>
-            <h3>Vô Trùng Chuẩn Y Tế</h3>
-            <p>
-              Hệ thống phòng mổ vô trùng áp lực dương và thiết bị hấp sấy Autoclave
-              tiêu diệt 99.9% vi khuẩn, ngăn ngừa lây nhiễm chéo.
-            </p>
+            <h3>{t("home.features.f2Title")}</h3>
+            <p>{t("home.features.f2Desc")}</p>
           </FeatureCard>
 
           <FeatureCard $isDark={isDarkMode}>
             <div className="icon-wrap">
               <Award size={28} />
             </div>
-            <h3>Bảo Hành Chính Hãng</h3>
-            <p>
-              Cam kết sử dụng trụ Implant Straumann, Nobel Biocare và răng sứ Cercon,
-              Lava chính hãng có thẻ bảo hành toàn cầu.
-            </p>
+            <h3>{t("home.features.f3Title")}</h3>
+            <p>{t("home.features.f3Desc")}</p>
           </FeatureCard>
 
           <FeatureCard $isDark={isDarkMode}>
             <div className="icon-wrap">
               <HeartHandshake size={28} />
             </div>
-            <h3>Trả Góp 0% Lãi Suất</h3>
-            <p>
-              Hỗ trợ chia nhỏ đợt thanh toán cho dịch vụ Niềng răng và Trồng Implant,
-              giảm nhẹ gánh nặng tài chính cho gia đình.
-            </p>
+            <h3>{t("home.features.f4Title")}</h3>
+            <p>{t("home.features.f4Desc")}</p>
           </FeatureCard>
         </FeaturesGrid>
       </SectionWrapper>
@@ -761,60 +835,18 @@ export default function Home() {
       {/* 4. DỊCH VỤ NỔI BẬT */}
       <SectionWrapper>
         <SectionHeader $isDark={isDarkMode}>
-          <span className="tag">Dịch vụ nha khoa</span>
-          <h2>Các Dịch Vụ Mũi Nhọn Của Chúng Tôi</h2>
-          <p>
-            Đa dạng các giải pháp chăm sóc nụ cười từ điều trị tổng quát đến thẩm
-            mỹ phục hình chuyên sâu.
-          </p>
+          <span className="tag">{t("home.servicesTag")}</span>
+          <h2>{t("home.servicesTitle")}</h2>
+          <p>{t("home.servicesDesc")}</p>
         </SectionHeader>
 
         <ServicesGrid>
-          {(services.length > 0 ? services.slice(0, 6) : [
-            {
-              _id: "1",
-              nameService: "Trồng Răng Implant Kỹ Thuật Số",
-              summary: "Phục hồi răng mất trọn đời bằng trụ Titanium cao cấp nhập khẩu Thụy Sĩ, ăn nhai như răng thật.",
-              durationMinutes: 45,
-              priceService: 15000000,
-            },
-            {
-              _id: "2",
-              nameService: "Niềng Răng Trong Suốt Invisalign",
-              summary: "Chỉnh nha vô hình công nghệ Mỹ, tính thẩm mỹ cao, tháo lắp linh hoạt, không đau đớn.",
-              durationMinutes: 30,
-              priceService: 45000000,
-            },
-            {
-              _id: "3",
-              nameService: "Bọc Răng Sứ Thẩm Mỹ Nano",
-              summary: "Khắc phục răng ố vàng, sứt mẻ, tạo dáng nụ cười chuẩn tỷ lệ vàng chỉ sau 2 lần hẹn.",
-              durationMinutes: 60,
-              priceService: 3500000,
-            },
-            {
-              _id: "4",
-              nameService: "Nhổ Răng Khôn Sóng Siêu Âm Piezotome",
-              summary: "Kỹ thuật nhổ răng không xâm lấn, lành thương nhanh chóng, hạn chế tối đa cảm giác đau nhức.",
-              durationMinutes: 20,
-              priceService: 1200000,
-            },
-            {
-              _id: "5",
-              nameService: "Tẩy Trắng Răng Laser Whitening",
-              summary: "Bật tông trắng sáng chỉ sau 45 phút điều trị bằng công nghệ ánh sáng Laser an toàn cho men răng.",
-              durationMinutes: 45,
-              priceService: 1800000,
-            },
-            {
-              _id: "6",
-              nameService: "Điều Trị Tủy Vi Phẫu Không Đau",
-              summary: "Làm sạch ống tủy triệt để dưới kính hiển vi chuyên dụng, chấm dứt cơn đau nhức răng cấp tính.",
-              durationMinutes: 40,
-              priceService: 1500000,
-            },
-          ]).map((svc) => (
-            <ServiceCard key={svc._id} $isDark={isDarkMode}>
+          {displayedServices.map((svc) => (
+            <ServiceCard
+              key={svc._id}
+              $isDark={isDarkMode}
+              onClick={() => navigate(`/shop/${svc._id}`)}
+            >
               <div className="img-holder">
                 <img
                   src={getImageUrl(
@@ -831,28 +863,48 @@ export default function Home() {
                 />
                 <div className="duration-tag">
                   <Clock size={12} />
-                  <span>{svc.durationMinutes || 30} phút</span>
+                  <span>
+                    {svc.durationMinutes || 30} {t("home.durationMinutes")}
+                  </span>
                 </div>
               </div>
 
               <div className="card-body">
-                <h4>{svc.nameService}</h4>
-                <p className="summary">{svc.summary}</p>
+                <h4
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/shop/${svc._id}`);
+                  }}
+                >
+                  {svc.nameService}
+                </h4>
+                <p className="summary">{svc.summary || svc.description}</p>
 
                 <div className="price-row">
                   <div className="price">
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(svc.priceDiscount || svc.priceService || 0)}
+                    {formatLocalizedPrice(
+                      svc.priceDiscount || svc.priceService || 0,
+                      language
+                    )}
                   </div>
-                  <PrimaryButton
-                    to={`/booking?serviceId=${svc._id}`}
-                    style={{ padding: "0.8rem 1.6rem", fontSize: "1.3rem" }}
-                  >
-                    <span>Đặt Hẹn</span>
-                    <ChevronRight size={14} />
-                  </PrimaryButton>
+                  <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
+                    <SecondaryButton
+                      to={`/shop/${svc._id}`}
+                      $isDark={isDarkMode}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ padding: "0.8rem 1.4rem", fontSize: "1.25rem", borderRadius: "999px" }}
+                    >
+                      <span>{t("home.viewDetail")}</span>
+                    </SecondaryButton>
+                    <PrimaryButton
+                      to={`/booking?serviceId=${svc._id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ padding: "0.8rem 1.6rem", fontSize: "1.3rem" }}
+                    >
+                      <span>{t("home.bookNow")}</span>
+                      <ChevronRight size={14} />
+                    </PrimaryButton>
+                  </div>
                 </div>
               </div>
             </ServiceCard>
@@ -861,7 +913,7 @@ export default function Home() {
 
         <div style={{ textAlign: "center", marginTop: "4rem" }}>
           <SecondaryButton to="/shop" $isDark={isDarkMode}>
-            <span>Xem Tất Cả Dịch Vụ & Bảng Giá Chi Tiết</span>
+            <span>{t("home.viewAllServices")}</span>
             <ArrowRight size={18} />
           </SecondaryButton>
         </div>
@@ -870,41 +922,13 @@ export default function Home() {
       {/* 5. ĐỘI NGŨ BÁC SĨ */}
       <SectionWrapper id="doctors">
         <SectionHeader $isDark={isDarkMode}>
-          <span className="tag">Đội ngũ chuyên gia</span>
-          <h2>Bác Sĩ Răng Hàm Mặt Giàu Kinh Nghiệm</h2>
-          <p>
-            Được dẫn dắt bởi các chuyên gia tu nghiệp quốc tế, tận tâm vì nụ cười
-            và sức khỏe của từng bệnh nhân.
-          </p>
+          <span className="tag">{t("home.doctorsTag")}</span>
+          <h2>{t("home.doctorsTitle")}</h2>
+          <p>{t("home.doctorsDesc")}</p>
         </SectionHeader>
 
         <DoctorsGrid>
-          {(employees.length > 0 ? employees.slice(0, 4) : [
-            {
-              _id: "doc1",
-              name: "BS. CKI Nguyễn Văn Minh",
-              experience: "15 năm kinh nghiệm",
-              description: "Chuyên gia cấy ghép Implant & Phục hình sứ",
-            },
-            {
-              _id: "doc2",
-              name: "ThS. BS Trần Thị Mai",
-              experience: "12 năm kinh nghiệm",
-              description: "Chuyên gia Chỉnh nha & Niềng răng Invisalign",
-            },
-            {
-              _id: "doc3",
-              name: "BS. CKI Lê Quang Huy",
-              experience: "10 năm kinh nghiệm",
-              description: "Chuyên gia Tiểu phẫu & Nhổ răng khôn Piezotome",
-            },
-            {
-              _id: "doc4",
-              name: "BS. Hoàng Bảo Ngọc",
-              experience: "8 năm kinh nghiệm",
-              description: "Chuyên gia Nha khoa Thẩm mỹ & Tẩy trắng răng",
-            },
-          ]).map((doc, idx) => (
+          {displayedDoctors.map((doc, idx) => (
             <DoctorCard key={doc._id} $isDark={isDarkMode}>
               <img
                 src={
@@ -921,8 +945,8 @@ export default function Home() {
               />
               <div className="doc-info">
                 <h4>{doc.name}</h4>
-                <span className="exp">{doc.experience || "Bác sĩ Chuyên Khoa"}</span>
-                <p className="bio">{doc.description || "Tận tâm, chu đáo và giàu kinh nghiệm điều trị lâm sàng."}</p>
+                <span className="exp">{doc.experience}</span>
+                <p className="bio">{doc.description}</p>
                 <div style={{ marginTop: "1rem" }}>
                   <Link
                     to="/booking"
@@ -933,7 +957,7 @@ export default function Home() {
                       textDecoration: "none",
                     }}
                   >
-                    Đặt lịch khám cùng Bác sĩ →
+                    {t("home.bookDoctor")} →
                   </Link>
                 </div>
               </div>
@@ -946,14 +970,11 @@ export default function Home() {
       <SectionWrapper>
         <CTABanner>
           <div className="content">
-            <h2>Sẵn Sàng Cho Nụ Cười Tỏa Sáng?</h2>
-            <p>
-              Đặt lịch hẹn ngay hôm nay để nhận ngay gói khám tổng quát & chụp phim
-              CT Cone Beam miễn phí trị giá 500.000 VNĐ!
-            </p>
+            <h2>{t("home.ctaTitle")}</h2>
+            <p>{t("home.ctaDesc")}</p>
           </div>
           <Link to="/booking" className="btn-white">
-            Đặt Lịch Khám Ngay
+            {t("home.ctaBtn")}
           </Link>
         </CTABanner>
       </SectionWrapper>

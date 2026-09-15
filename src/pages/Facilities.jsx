@@ -1,4 +1,5 @@
 import { useDarkMode } from "../hooks/useDarkMode";
+import { useLanguage } from "../context/LanguageContext";
 import FacilityMap from "../components/map/FacilityMap";
 import { Sparkles, ShieldCheck, Award, PhoneCall } from "lucide-react";
 import styled from "styled-components";
@@ -123,6 +124,7 @@ const FeatureCard = styled.div`
 
 export default function Facilities() {
   const { isDarkMode } = useDarkMode();
+  const { t, language } = useLanguage();
 
   return (
     <PageWrapper $isDark={isDarkMode}>
@@ -130,13 +132,11 @@ export default function Facilities() {
         <HeroBanner $isDark={isDarkMode}>
           <div className="badge-tag">
             <Sparkles size={16} />
-            <span>Mạng Lưới Phòng Khám Toàn Quốc</span>
+            <span>{t("facilities.badge")}</span>
           </div>
-          <h1>Hệ Thống Cơ Sở Nha Khoa Dentist Pro</h1>
+          <h1>{t("facilities.title")}</h1>
           <p>
-            Hệ thống phòng khám nha khoa kỹ thuật cao chuẩn Châu Âu tọa lạc tại
-            các vị trí đắc địa tại TP. Hồ Chí Minh và Hà Nội, trang bị hệ thống
-            vô trùng tuyệt đối và máy móc chẩn đoán 3D hiện đại.
+            {t("facilities.subtitle")}
           </p>
         </HeroBanner>
 
@@ -146,8 +146,20 @@ export default function Facilities() {
               <Award size={24} />
             </div>
             <div className="content">
-              <h4>100% Vị Trí Trung Tâm</h4>
-              <p>Mặt tiền đường lớn, thuận tiện di chuyển và có chỗ đỗ ô tô.</p>
+              <h4>
+                {language === "en"
+                  ? "100% Prime City Locations"
+                  : language === "zh"
+                  ? "100% 核心商圈黄金地标"
+                  : "100% Vị Trí Trung Tâm"}
+              </h4>
+              <p>
+                {language === "en"
+                  ? "Direct frontage on major avenues, easily accessible with car parking."
+                  : language === "zh"
+                  ? "临街主干道黄金口岸，配备专属地面及地下充裕车位。"
+                  : "Mặt tiền đường lớn, thuận tiện di chuyển và có chỗ đỗ ô tô."}
+              </p>
             </div>
           </FeatureCard>
 
@@ -156,8 +168,20 @@ export default function Facilities() {
               <ShieldCheck size={24} />
             </div>
             <div className="content">
-              <h4>Phòng Vô Trùng Đạt Chuẩn</h4>
-              <p>Hệ thống khử khuẩn Melag (Đức) khép kín, an toàn tuyệt đối.</p>
+              <h4>
+                {language === "en"
+                  ? "Sterilization Standards"
+                  : language === "zh"
+                  ? "欧盟医用级感控灭菌"
+                  : "Phòng Vô Trùng Đạt Chuẩn"}
+              </h4>
+              <p>
+                {language === "en"
+                  ? "Closed-loop German Melag sterilization system, absolutely safe."
+                  : language === "zh"
+                  ? "德国Melag全闭环单向无菌层流系统，杜绝交叉感染。"
+                  : "Hệ thống khử khuẩn Melag (Đức) khép kín, an toàn tuyệt đối."}
+              </p>
             </div>
           </FeatureCard>
 
@@ -166,17 +190,26 @@ export default function Facilities() {
               <PhoneCall size={24} />
             </div>
             <div className="content">
-              <h4>Hotline Hỗ Trợ 24/7</h4>
-              <p>Tổng đài tư vấn, điều phối ca cấp cứu và nhắc hẹn thông minh.</p>
+              <h4>
+                {language === "en"
+                  ? "24/7 Priority Hotline"
+                  : language === "zh"
+                  ? "24/7 专属紧急健康热线"
+                  : "Hotline Hỗ Trợ 24/7"}
+              </h4>
+              <p>
+                {language === "en"
+                  ? "Round-the-clock emergency assistance and automated reminders."
+                  : language === "zh"
+                  ? "全天候急诊统筹响应、双语导医与智能复诊提醒服务。"
+                  : "Tổng đài tư vấn, điều phối ca cấp cứu và nhắc hẹn thông minh."}
+              </p>
             </div>
           </FeatureCard>
         </FeatureRow>
 
         {/* The Interactive Map Component */}
-        <FacilityMap
-          title="Bản Đồ & Danh Sách Cơ Sở"
-          subtitle="Chọn chi nhánh để xem vị trí chính xác và nhận lộ trình chỉ đường trực tiếp"
-        />
+        <FacilityMap />
       </Container>
     </PageWrapper>
   );
