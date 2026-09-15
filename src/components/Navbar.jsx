@@ -15,11 +15,14 @@ import {
   Clock,
   Sparkles,
   LayoutDashboard,
+  Maximize2,
 } from "lucide-react";
 import { HiOutlineSun, HiOutlineMoon } from "react-icons/hi2";
 import { useLanguage } from "../context/LanguageContext";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { handleLogoutApi } from "../apis/index";
+import LanguageSwitcher from "./LanguageSwitcher";
+import AvatarFullscreenModal from "./AvatarFullscreenModal";
 
 const HeaderWrapper = styled.header`
   position: sticky;
@@ -521,6 +524,7 @@ export default function Navbar() {
   const [userInfo, setUserInfo] = useState(null);
   const [avatarError, setAvatarError] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -596,11 +600,11 @@ export default function Navbar() {
         <TopInfoGroup>
           <div className="item">
             <Clock size={15} />
-            <span>Giờ mở cửa: Thứ 2 - Thứ 7: 8h00 - 20h00 | CN: 8h00 - 17h00</span>
+            <span>{t("nav.workingHours")}</span>
           </div>
           <div className="item">
             <Phone size={15} />
-            <span>Hotline Cấp cứu 24/7: <a href="tel:19008888">1900 8888</a></span>
+            <span>{t("nav.hotline")} <a href="tel:19008888">1900 8888</a></span>
           </div>
         </TopInfoGroup>
       </TopNoticeBar>
@@ -618,43 +622,36 @@ export default function Navbar() {
         {/* Menu chính */}
         <NavLinks>
           <NavItem to="/home" $isDark={isDarkMode}>
-            Trang chủ
+            {t("nav.home")}
           </NavItem>
           <NavItem to="/shop" $isDark={isDarkMode}>
-            Dịch vụ & Bảng giá
+            {t("nav.shop")}
           </NavItem>
           <NavItem to="/booking" $isDark={isDarkMode}>
-            Đặt lịch khám
+            {t("nav.booking")}
           </NavItem>
           <NavItem to="/blog" $isDark={isDarkMode}>
-            Cẩm nang
+            {t("nav.blog")}
           </NavItem>
           <NavItem to="/facilities" $isDark={isDarkMode}>
-            Hệ thống cơ sở
+            {t("nav.facilities")}
           </NavItem>
           <NavItem to="/contact" $isDark={isDarkMode}>
-            Liên hệ
+            {t("nav.contact")}
           </NavItem>
         </NavLinks>
 
         {/* Nhóm thao tác người dùng */}
         <ActionGroup>
-          {/* Nút đổi ngôn ngữ */}
-          <IconBtn
-            type="button"
-            $isDark={isDarkMode}
-            onClick={() => changeLanguage(language === "vi" ? "en" : "vi")}
-            title={language === "vi" ? "Chuyển sang English" : "Chuyển sang Tiếng Việt"}
-          >
-            <Globe size={18} />
-          </IconBtn>
+          {/* Nút đổi ngôn ngữ xịn xò */}
+          <LanguageSwitcher />
 
           {/* Giỏ hàng */}
           <IconBtn
             as={Link}
             to="/cart"
             $isDark={isDarkMode}
-            title="Giỏ hàng dịch vụ"
+            title={t("nav.cart")}
           >
             <ShoppingCart size={18} />
             {countCart > 0 && <span className="badge">{countCart}</span>}
@@ -663,7 +660,7 @@ export default function Navbar() {
           {/* Nút Đặt lịch khám nhanh */}
           <BookNowCTA to="/booking">
             <Calendar size={18} />
-            <span>Đặt Hẹn Ngay</span>
+            <span>{t("nav.bookNow")}</span>
           </BookNowCTA>
 
           {/* Tài khoản người dùng */}
@@ -715,7 +712,7 @@ export default function Navbar() {
                       style={{ color: "#0284c7", fontWeight: 700 }}
                     >
                       <LayoutDashboard size={18} />
-                      Trang Quản Trị (Admin)
+                      {t("nav.adminDashboard")}
                     </Link>
                   )}
 
@@ -724,7 +721,7 @@ export default function Navbar() {
                     onClick={() => setShowUserDropdown(false)}
                   >
                     <User size={18} />
-                    Hồ sơ cá nhân
+                    {t("nav.profile")}
                   </Link>
 
                   <Link
@@ -732,7 +729,7 @@ export default function Navbar() {
                     onClick={() => setShowUserDropdown(false)}
                   >
                     <Calendar size={18} />
-                    Lịch hẹn của tôi
+                    {t("nav.myAppointments")}
                   </Link>
 
                   <Link
@@ -740,7 +737,7 @@ export default function Navbar() {
                     onClick={() => setShowUserDropdown(false)}
                   >
                     <ShoppingCart size={18} />
-                    Đơn hàng dịch vụ
+                    {t("nav.myOrders")}
                   </Link>
 
                   {/* Chân menu: Nút công tắc Toggle Dark Mode đặt cạnh nút Đăng xuất */}
@@ -775,10 +772,10 @@ export default function Navbar() {
                         setShowUserDropdown(false);
                         handleLogout();
                       }}
-                      title="Đăng xuất khỏi tài khoản"
+                      title={t("nav.logout")}
                     >
                       <LogOut size={16} />
-                      <span>Đăng xuất</span>
+                      <span>{t("nav.logout")}</span>
                     </DropdownLogoutBtn>
                   </DropdownFooterRow>
                 </UserDropdown>
@@ -794,7 +791,7 @@ export default function Navbar() {
               }}
             >
               <User size={18} />
-              <span>Đăng nhập</span>
+              <span>{t("nav.login")}</span>
             </BookNowCTA>
           )}
 
@@ -839,22 +836,22 @@ export default function Navbar() {
 
           <div className="drawer-links">
             <NavLink to="/home" onClick={() => setShowMobileMenu(false)}>
-              Trang chủ
+              {t("nav.home")}
             </NavLink>
             <NavLink to="/shop" onClick={() => setShowMobileMenu(false)}>
-              Dịch vụ & Bảng giá
+              {t("nav.shop")}
             </NavLink>
             <NavLink to="/booking" onClick={() => setShowMobileMenu(false)}>
-              Đặt lịch khám
+              {t("nav.booking")}
             </NavLink>
             <NavLink to="/blog" onClick={() => setShowMobileMenu(false)}>
-              Cẩm nang nha khoa
+              {t("nav.blog")}
             </NavLink>
             <NavLink to="/facilities" onClick={() => setShowMobileMenu(false)}>
-              Hệ thống cơ sở
+              {t("nav.facilities")}
             </NavLink>
             <NavLink to="/contact" onClick={() => setShowMobileMenu(false)}>
-              Liên hệ
+              {t("nav.contact")}
             </NavLink>
           </div>
 
@@ -878,27 +875,30 @@ export default function Navbar() {
                 border: isDarkMode ? "1px solid #334155" : "1px solid #e2e8f0",
               }}
             >
-              <DarkModeToggleSwitch
-                type="button"
-                $isDark={isDarkMode}
-                onClick={toggleDarkMode}
-                title={
-                  isDarkMode
-                    ? "Chuyển sang giao diện Sáng"
-                    : "Chuyển sang giao diện Tối"
-                }
-              >
-                <span className="switch-icon">
-                  {isDarkMode ? (
-                    <HiOutlineMoon size={16} />
-                  ) : (
-                    <HiOutlineSun size={16} />
-                  )}
-                </span>
-                <div className="switch-track">
-                  <div className="switch-knob" />
-                </div>
-              </DarkModeToggleSwitch>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+                <LanguageSwitcher />
+                <DarkModeToggleSwitch
+                  type="button"
+                  $isDark={isDarkMode}
+                  onClick={toggleDarkMode}
+                  title={
+                    isDarkMode
+                      ? "Chuyển sang giao diện Sáng"
+                      : "Chuyển sang giao diện Tối"
+                  }
+                >
+                  <span className="switch-icon">
+                    {isDarkMode ? (
+                      <HiOutlineMoon size={16} />
+                    ) : (
+                      <HiOutlineSun size={16} />
+                    )}
+                  </span>
+                  <div className="switch-track">
+                    <div className="switch-knob" />
+                  </div>
+                </DarkModeToggleSwitch>
+              </div>
 
               {userInfo && (
                 <DropdownLogoutBtn
@@ -910,7 +910,7 @@ export default function Navbar() {
                   }}
                 >
                   <LogOut size={16} />
-                  <span>Đăng xuất</span>
+                  <span>{t("nav.logout")}</span>
                 </DropdownLogoutBtn>
               )}
             </div>
@@ -925,10 +925,21 @@ export default function Navbar() {
               }}
             >
               <Calendar size={20} />
-              <span>Đặt Hẹn Ngay</span>
+              <span>{t("nav.bookNow")}</span>
             </BookNowCTA>
           </div>
         </MobileDrawer>
+      )}
+
+      {userInfo && (
+        <AvatarFullscreenModal
+          isOpen={showAvatarModal}
+          onClose={() => setShowAvatarModal(false)}
+          src={!avatarError ? (userInfo.image || userInfo.photo) : ""}
+          name={userInfo.name || "User"}
+          role={userInfo.role === "admin" ? "Admin" : "Khách hàng"}
+          email={userInfo.email}
+        />
       )}
     </HeaderWrapper>
   );

@@ -13,6 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { useLanguage } from "../context/LanguageContext";
 
 const FooterWrapper = styled.footer`
   background: ${(props) => (props.$isDark ? "#090d16" : "#0f172a")};
@@ -225,6 +226,7 @@ const BottomBar = styled.div`
 
 export default function ModernFooter() {
   const { isDarkMode } = useDarkMode();
+  const { t } = useLanguage();
 
   return (
     <FooterWrapper $isDark={isDarkMode}>
@@ -235,8 +237,8 @@ export default function ModernFooter() {
             <Award size={26} />
           </div>
           <div className="text">
-            <h4>Bác Sĩ Chuyên Khoa I</h4>
-            <p>100% Tốt nghiệp ĐH Y Dược & Tu nghiệp nước ngoài</p>
+            <h4>{t("footer.reassurance.item1Title")}</h4>
+            <p>{t("footer.reassurance.item1Desc")}</p>
           </div>
         </div>
 
@@ -245,8 +247,8 @@ export default function ModernFooter() {
             <ShieldCheck size={26} />
           </div>
           <div className="text">
-            <h4>Vô Trùng Chuẩn Y Tế</h4>
-            <p>Quy trình vô trùng khép kín Autoclave Class B</p>
+            <h4>{t("footer.reassurance.item2Title")}</h4>
+            <p>{t("footer.reassurance.item2Desc")}</p>
           </div>
         </div>
 
@@ -255,8 +257,8 @@ export default function ModernFooter() {
             <Sparkles size={26} />
           </div>
           <div className="text">
-            <h4>Bảo Hành Chính Hãng</h4>
-            <p>Bảo hành trọn đời cho trụ Implant & răng sứ</p>
+            <h4>{t("footer.reassurance.item3Title")}</h4>
+            <p>{t("footer.reassurance.item3Desc")}</p>
           </div>
         </div>
 
@@ -265,8 +267,8 @@ export default function ModernFooter() {
             <CreditCard size={26} />
           </div>
           <div className="text">
-            <h4>Trả Góp 0% Lãi Suất</h4>
-            <p>Hỗ trợ chia đợt thanh toán cho niềng răng & implant</p>
+            <h4>{t("footer.reassurance.item4Title")}</h4>
+            <p>{t("footer.reassurance.item4Desc")}</p>
           </div>
         </div>
       </ReassuranceRow>
@@ -301,11 +303,7 @@ export default function ModernFooter() {
               DENTIST PRO
             </span>
           </div>
-          <p>
-            Hệ thống nha khoa kỹ thuật cao hàng đầu với sứ mệnh kiến tạo nụ cười
-            tự tin, chăm sóc sức khỏe răng miệng toàn diện cho hàng chục ngàn
-            gia đình Việt Nam theo tiêu chuẩn quốc tế.
-          </p>
+          <p>{t("footer.aboutDesc")}</p>
           <div style={{ display: "flex", gap: "1rem", marginTop: "0.8rem" }}>
             <span
               style={{
@@ -317,69 +315,69 @@ export default function ModernFooter() {
                 fontWeight: 600,
               }}
             >
-              Bộ Y Tế Cấp Phép #0892/SYT-GPHĐ
+              {t("footer.license")}
             </span>
           </div>
         </Col>
 
         <Col>
-          <h3>Dịch Vụ Nổi Bật</h3>
+          <h3>{t("footer.featuredServices")}</h3>
           <ul>
             <li>
-              <Link to="/shop">Trồng Răng Implant Kỹ Thuật Số</Link>
+              <Link to="/shop">{t("home.servicesTag", "Dịch Vụ")}</Link>
             </li>
             <li>
-              <Link to="/shop">Niềng Răng Trong Suốt Invisalign</Link>
+              <Link to="/booking">{t("nav.bookNow", "Đặt Hẹn")}</Link>
             </li>
             <li>
-              <Link to="/shop">Bọc Răng Sứ Thẩm Mỹ Nano</Link>
+              <Link to="/facilities">{t("nav.facilities", "Hệ Thống Cơ Sở")}</Link>
             </li>
             <li>
-              <Link to="/shop">Nhổ Răng Khôn Sóng Siêu Âm Piezotome</Link>
-            </li>
-            <li>
-              <Link to="/shop">Điều Trị Tủy Vi Phẫu</Link>
-            </li>
-            <li>
-              <Link to="/shop">Tẩy Trắng Răng Laser Whitening</Link>
+              <Link to="/contact">{t("nav.contact", "Liên Hệ Bác Sĩ")}</Link>
             </li>
           </ul>
         </Col>
 
         <Col>
-          <h3>Thông Tin Liên Hệ</h3>
+          <h3>{t("footer.contactInfo")}</h3>
           <ContactItem>
             <MapPin size={20} />
-            <span>Cơ sở 1: 123 Đường Nam Kỳ Khởi Nghĩa, Quận 1, TP. Hồ Chí Minh</span>
+            <span>{t("footer.branch1")}</span>
           </ContactItem>
           <ContactItem>
             <MapPin size={20} />
-            <span>Cơ sở 2: 45 Đường Hoàng Diệu, Ba Đình, TP. Hà Nội</span>
+            <span>{t("footer.branch2")}</span>
           </ContactItem>
           <ContactItem>
             <Phone size={20} />
-            <span>Hotline 24/7: 1900 8888 - 028 7300 8888</span>
+            <span>{t("footer.hotline")}</span>
           </ContactItem>
           <ContactItem>
             <Mail size={20} />
-            <span>contact@dentistpro.vn</span>
+            <span>{t("footer.email")}</span>
           </ContactItem>
           <ContactItem>
             <Clock size={20} />
-            <span>T2 - T7: 8h00 - 20h00 | CN: 8h00 - 17h00</span>
+            <span>{t("footer.workingHours")}</span>
           </ContactItem>
         </Col>
 
         <Col>
-          <h3>Đăng Ký Tư Vấn</h3>
-          <p>
-            Nhận cẩm nang chăm sóc răng miệng định kỳ và voucher ưu đãi 20% cho
-            lần khám đầu tiên.
-          </p>
-          <NewsletterForm onSubmit={(e) => { e.preventDefault(); alert("Cảm ơn bạn đã đăng ký nhận tư vấn!"); }}>
-            <input type="email" placeholder="Nhập email của bạn..." required />
+          <h3>{t("footer.newsletterTitle")}</h3>
+          <p>{t("footer.newsletterDesc")}</p>
+          <NewsletterForm
+            onSubmit={(e) => {
+              e.preventDefault();
+              alert("Cảm ơn bạn đã đăng ký!");
+            }}
+          >
+            <input
+              type="email"
+              placeholder={t("footer.emailPlaceholder")}
+              required
+            />
             <button type="submit">
-              <span>Đăng Ký Ngay</span>
+              <span>{t("footer.subscribeBtn")}</span>
               <ArrowRight size={16} />
             </button>
           </NewsletterForm>
@@ -388,11 +386,13 @@ export default function ModernFooter() {
 
       <BottomBar>
         <div className="container">
-          <div>© {new Date().getFullYear()} DENTIST PRO. Tất cả quyền được bảo lưu.</div>
+          <div>
+            © {new Date().getFullYear()} {t("footer.copyright")}
+          </div>
           <div className="links">
-            <Link to="/privacy">Chính sách bảo mật</Link>
-            <Link to="/terms">Điều khoản sử dụng</Link>
-            <Link to="/booking">Đặt lịch hẹn khám</Link>
+            <Link to="/privacy">{t("footer.privacy")}</Link>
+            <Link to="/terms">{t("footer.terms")}</Link>
+            <Link to="/booking">{t("footer.booking")}</Link>
           </div>
         </div>
       </BottomBar>

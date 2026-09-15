@@ -10,12 +10,13 @@ import { useAvailableSlots } from "../features/booking/useAvailableSlots";
 import { useHoldAppointment } from "../features/appointment/useHoldAppointment";
 import SlotPicker from "../features/booking/SlotPicker";
 import FacilityMap from "../components/map/FacilityMap";
+import { translateService, translateDoctor } from "../utils/dataTranslator";
 import { Phone, Mail, Clock, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import "./Contact.css";
 
 function Contact() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -66,7 +67,13 @@ function Contact() {
     try {
       const userInfo = JSON.parse(localStorage.getItem("userInfo") || "null");
       if (!userInfo) {
-        toast.error("Vui lòng đăng nhập để đặt lịch");
+        toast.error(
+          language === "zh"
+            ? "请先登录后再预约"
+            : language === "en"
+            ? "Please log in to book an appointment"
+            : "Vui lòng đăng nhập để đặt lịch"
+        );
         navigate("/login");
         return;
       }
@@ -79,7 +86,13 @@ function Contact() {
         !formData.serviceId ||
         !selectedSlot
       ) {
-        toast.error("Vui lòng điền đầy đủ các trường bắt buộc");
+        toast.error(
+          language === "zh"
+            ? "请填写所有必填字段并选择时段"
+            : language === "en"
+            ? "Please fill in all required fields and select a slot"
+            : "Vui lòng điền đầy đủ các trường bắt buộc"
+        );
         return;
       }
 
@@ -187,7 +200,7 @@ function Contact() {
                   </div>
 
                   <div className="contact-field contact-field-full">
-                    <label htmlFor="serviceId">Dịch vụ</label>
+                    <label htmlFor="serviceId">{t("contact.selectService")}</label>
                     <select
                       id="serviceId"
                       name="serviceId"
@@ -195,20 +208,23 @@ function Contact() {
                       onChange={handleServiceChange}
                       required
                     >
-                      <option value="">Chọn dịch vụ</option>
-                      {services.map((svc) => (
-                        <option key={svc._id} value={svc._id}>
-                          {svc.nameService} ({svc.durationMinutes ?? 30} phút)
-                        </option>
-                      ))}
+                      <option value="">{t("contact.chooseServicePlaceholder")}</option>
+                      {services.map((svc) => {
+                        const tSvc = translateService(svc, language);
+                        return (
+                          <option key={svc._id} value={svc._id}>
+                            {tSvc.nameService} ({svc.durationMinutes ?? 30} {t("booking.durationUnit")})
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 </div>
 
                 <div className="contact-field contact-field-full" style={{ marginTop: 12 }}>
-                  <label>Chọn khung giờ</label>
+                  <label>{t("contact.chooseSlot")}</label>
                   {slotsQuery.isLoading ? (
-                    <div style={{ color: "#64748b" }}>Đang tải...</div>
+                    <div style={{ color: "#64748b" }}>{t("contact.loadingSlots")}</div>
                   ) : (
                     <SlotPicker
                       slots={slotsQuery.data || []}
@@ -220,7 +236,8 @@ function Contact() {
 
                 {selectedSlot && (
                   <div style={{ marginTop: 10, color: "#0f172a" }}>
-                    <strong>Đã chọn:</strong> {selectedSlot.doctorName} -{" "}
+                    <strong>{t("contact.selectedSlotLabel")}</strong>{" "}
+                    {translateDoctor({ fullName: selectedSlot.doctorName }, language).fullName} -{" "}
                     {selectedSlot.slotStart} - {selectedSlot.slotEnd}
                   </div>
                 )}
@@ -250,12 +267,12 @@ function Contact() {
 
           <aside className="contact-info-section">
             <div className="contact-info-card">
-              <h3>Hỗ Trợ & Tư Vấn</h3>
+              <h3>{t("contact.supportTitle")}</h3>
               <div className="contact-info-list">
                 <div className="contact-info-item">
                   <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <Phone size={15} color="#0284c7" />
-                    <span>Hotline Đặt Hẹn</span>
+                    <span>{t("contact.hotlineTitle")}</span>
                   </div>
                   <span className="contact-info-value">
                     <a href="tel:02873001234" style={{ color: "#0284c7", fontWeight: 700, textDecoration: "none" }}>
@@ -267,7 +284,7 @@ function Contact() {
                 <div className="contact-info-item">
                   <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <Mail size={15} color="#0284c7" />
-                    <span>Email Chăm Sóc Khách Hàng</span>
+                    <span>{t("contact.emailSupportTitle")}</span>
                   </div>
                   <span className="contact-info-value">contact@dentistpro.vn</span>
                 </div>
@@ -275,17 +292,17 @@ function Contact() {
                 <div className="contact-info-item">
                   <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <Clock size={15} color="#0284c7" />
-                    <span>Thời Gian Làm Việc</span>
+                    <span>{t("contact.hoursTitle")}</span>
                   </div>
-                  <span className="contact-info-value">Thứ 2 - CN: 08:00 - 20:00</span>
+                  <span className="contact-info-value">{t("contact.hoursValue")}</span>
                 </div>
 
                 <div className="contact-info-item">
                   <div className="contact-info-label" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <ShieldCheck size={15} color="#0284c7" />
-                    <span>Cam Kết Dịch Vụ</span>
+                    <span>{t("contact.guaranteeTitle")}</span>
                   </div>
-                  <span className="contact-info-value">100% Khử trùng chuẩn Châu Âu, phác đồ rõ ràng</span>
+                  <span className="contact-info-value">{t("contact.guaranteeValue")}</span>
                 </div>
               </div>
             </div>
@@ -294,8 +311,8 @@ function Contact() {
 
         {/* BẢN ĐỒ TƯƠNG TÁC VÀ MẠNG LƯỚI CƠ SỞ */}
         <FacilityMap
-          title="Bản Đồ Mạng Lưới Chi Nhánh"
-          subtitle="Chọn cơ sở để định vị trực tiếp trên bản đồ và nhận chỉ đường nhanh nhất"
+          title={t("contact.branchMapTitle")}
+          subtitle={t("contact.branchMapSubtitle")}
         />
       </div>
     </div>

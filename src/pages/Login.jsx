@@ -22,16 +22,21 @@ import {
 } from "lucide-react";
 
 import { API_ROOT, FACEBOOK_APP_ID } from "./../utils/constants";
-import { handleLogin, handleRegister } from "../apis";
+import { handleLogin, handleRegister, handleLogoutApi } from "../apis";
 import { useLanguage } from "../context/LanguageContext";
 import { useDarkMode } from "../hooks/useDarkMode";
-import { saveAuthSession } from "../utils/authStorage";
+import { saveAuthSession, clearAuthSession } from "../utils/authStorage";
+import Require2FA from "../components/require-2fa";
 
 function Login({ defaultTab = "login" }) {
   const { t, language } = useLanguage();
   const { isDarkMode } = useDarkMode();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // State for 2FA Challenge during login
+  const [pending2FAUser, setPending2FAUser] = useState(null);
+  const [show2FAModal, setShow2FAModal] = useState(false);
 
   // Determine active tab: query param (?mode=register) or prop defaultTab
   const initialMode = searchParams.get("mode") || defaultTab;
@@ -98,6 +103,11 @@ function Login({ defaultTab = "login" }) {
         }
       );
       if (res.data) {
+        if (res.data.require_2FA && !res.data.is_2fa_verified) {
+          setPending2FAUser(res.data);
+          setShow2FAModal(true);
+          return;
+        }
         saveAuthSession(res.data);
         res.data.role === "user"
           ? navigate("/home")
@@ -128,6 +138,11 @@ function Login({ defaultTab = "login" }) {
         }
       );
       if (res.data) {
+        if (res.data.require_2FA && !res.data.is_2fa_verified) {
+          setPending2FAUser(res.data);
+          setShow2FAModal(true);
+          return;
+        }
         saveAuthSession(res.data);
         res.data.role === "user"
           ? navigate("/home")
@@ -149,8 +164,17 @@ function Login({ defaultTab = "login" }) {
     setIsLoggingIn(true);
     try {
       const res = await handleLogin(payLoad);
-      saveAuthSession(res.data);
-      res.data.role === "user"
+      const userData = res.data;
+
+      // Intercept if 2FA is required and not verified yet
+      if (userData?.require_2FA && !userData?.is_2fa_verified) {
+        setPending2FAUser(userData);
+        setShow2FAModal(true);
+        return;
+      }
+
+      saveAuthSession(userData);
+      userData.role === "user"
         ? navigate("/home")
         : navigate("/admin/dashboard");
     } catch (error) {
@@ -162,6 +186,34 @@ function Login({ defaultTab = "login" }) {
     } finally {
       setIsLoggingIn(false);
     }
+  };
+
+  // 2FA Verification Success Handler
+  const handleSuccessVerify2FA = (verifyResponse) => {
+    const finalUser = {
+      ...pending2FAUser,
+      ...(verifyResponse?.data?.user || {}),
+      is_2fa_verified: true,
+      last_login: verifyResponse?.data?.last_login || new Date().valueOf(),
+    };
+    saveAuthSession(finalUser);
+    setShow2FAModal(false);
+    toast.success("Xác thực 2 bước thành công! Đang chuyển hướng...");
+    finalUser.role === "user"
+      ? navigate("/home")
+      : navigate("/admin/dashboard");
+  };
+
+  // Cancel 2FA Handler
+  const handleCancel2FA = async () => {
+    try {
+      await handleLogoutApi();
+    } catch {
+      // ignore
+    }
+    clearAuthSession();
+    setShow2FAModal(false);
+    setPending2FAUser(null);
   };
 
   // Submit Register
@@ -650,6 +702,15 @@ function Login({ defaultTab = "login" }) {
           </div>
         </div>
       </section>
+
+      {/* Redesigned 2FA Verification Challenge Modal */}
+      {show2FAModal && (
+        <Require2FA
+          user={pending2FAUser}
+          handleSuccessVerify2FA={handleSuccessVerify2FA}
+          onCancel={handleCancel2FA}
+        />
+      )}
     </>
   );
 }

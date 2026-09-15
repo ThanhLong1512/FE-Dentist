@@ -1,18 +1,11 @@
 import { useMemo } from "react";
+import { useLanguage } from "../../context/LanguageContext";
+import { formatLocalizedPrice } from "../../utils/dataTranslator";
 import "./SlotPicker.css";
 
-const formatPrice = (price) => {
-  try {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price || 0);
-  } catch {
-    return `${price || 0} VND`;
-  }
-};
-
 function SlotPicker({ slots = [], selectedSlotStart, onSelectSlot }) {
+  const { t, language } = useLanguage();
+
   const sorted = useMemo(() => {
     const copy = [...slots];
     copy.sort((a, b) => (a.slotStart || "").localeCompare(b.slotStart || ""));
@@ -31,15 +24,19 @@ function SlotPicker({ slots = [], selectedSlotStart, onSelectSlot }) {
             onClick={() => onSelectSlot?.(slot)}
           >
             <div className="slot-card-top">
-              <div className="slot-doctor">{slot.doctorName || "Bác sĩ"}</div>
+              <div className="slot-doctor">
+                {slot.doctorName || t("booking.doctorLabel", "Bác sĩ")}
+              </div>
             </div>
             <div className="slot-time">
               {slot.slotStart} - {slot.slotEnd}
             </div>
             <div className="slot-meta">
-              <span>{slot.durationMinutes} phút</span>
+              <span>
+                {slot.durationMinutes} {t("booking.durationUnit", "phút")}
+              </span>
               <span className="dot">•</span>
-              <span>{formatPrice(slot.price)}</span>
+              <span>{formatLocalizedPrice(slot.price, language)}</span>
             </div>
           </button>
         );
@@ -47,7 +44,7 @@ function SlotPicker({ slots = [], selectedSlotStart, onSelectSlot }) {
 
       {!sorted.length && (
         <div className="slot-empty">
-          Không có khung giờ phù hợp cho ngày này.
+          {t("booking.noSlots", "Không có khung giờ phù hợp cho ngày này.")}
         </div>
       )}
     </div>

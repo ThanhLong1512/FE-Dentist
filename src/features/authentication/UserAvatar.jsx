@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { useState, useEffect } from "react";
+import AvatarFullscreenModal from "../../components/AvatarFullscreenModal";
 
 const StyledUserAvatar = styled.div`
   display: flex;
@@ -13,6 +14,18 @@ const StyledUserAvatar = styled.div`
   background: var(--color-grey-0);
   border: 1px solid var(--color-grey-200);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+`;
+
+const AvatarWrapper = styled.div`
+  position: relative;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.35);
+  }
 `;
 
 const Avatar = styled.img`
@@ -69,8 +82,10 @@ function UserAvatar() {
     name: "Quản trị viên",
     image: "",
     role: "admin",
+    email: "",
   });
   const [imgError, setImgError] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const loadUser = () => {
@@ -82,6 +97,7 @@ function UserAvatar() {
             name: parsed.name || "Quản trị viên",
             image: parsed.image || parsed.photo || "",
             role: parsed.role || "admin",
+            email: parsed.email || "",
           });
           setImgError(false);
         } catch (error) {
@@ -108,21 +124,37 @@ function UserAvatar() {
   const showImage = userInfo.image && !imgError;
 
   return (
-    <StyledUserAvatar>
-      {showImage ? (
-        <Avatar
-          src={userInfo.image}
-          alt={`Avatar of ${userInfo.name}`}
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        <DefaultAvatar>{initials}</DefaultAvatar>
-      )}
-      <UserDetails>
-        <span className="name">{userInfo.name}</span>
-        <RoleTag>{userInfo.role === "admin" ? "Admin" : "Staff"}</RoleTag>
-      </UserDetails>
-    </StyledUserAvatar>
+    <>
+      <StyledUserAvatar>
+        <AvatarWrapper
+          onClick={() => setShowModal(true)}
+          title="Xem ảnh đại diện toàn màn hình"
+        >
+          {showImage ? (
+            <Avatar
+              src={userInfo.image}
+              alt={`Avatar of ${userInfo.name}`}
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <DefaultAvatar>{initials}</DefaultAvatar>
+          )}
+        </AvatarWrapper>
+        <UserDetails>
+          <span className="name">{userInfo.name}</span>
+          <RoleTag>{userInfo.role === "admin" ? "Admin" : "Staff"}</RoleTag>
+        </UserDetails>
+      </StyledUserAvatar>
+
+      <AvatarFullscreenModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        src={showImage ? userInfo.image : ""}
+        name={userInfo.name}
+        role={userInfo.role === "admin" ? "Admin" : "Staff"}
+        email={userInfo.email}
+      />
+    </>
   );
 }
 

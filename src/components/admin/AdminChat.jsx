@@ -588,17 +588,21 @@ const MessageBubble = styled.div`
     props.$isMe
       ? css`
           background: var(--color-brand-gradient);
-          color: #ffffff;
+          color: #ffffff !important;
           border-bottom-right-radius: 0.4rem;
           box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
         `
       : css`
           background: var(--color-grey-0);
-          color: var(--color-grey-800);
+          color: var(--color-grey-800) !important;
           border-bottom-left-radius: 0.4rem;
           border: 1px solid var(--color-grey-200);
           box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         `}
+
+  * {
+    color: inherit;
+  }
 `;
 
 const MessageImage = styled.img`

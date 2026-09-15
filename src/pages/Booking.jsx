@@ -25,6 +25,12 @@ import { useAvailableSlots } from "../features/booking/useAvailableSlots";
 import { useHoldAppointment } from "../features/appointment/useHoldAppointment";
 import SlotPicker from "../features/booking/SlotPicker";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { useLanguage } from "../context/LanguageContext";
+import {
+  translateService,
+  translateDoctor,
+  formatLocalizedPrice,
+} from "../utils/dataTranslator";
 
 const BookingPageWrapper = styled.div`
   min-height: 85vh;
@@ -463,6 +469,7 @@ export default function Booking() {
   });
 
   const { isDarkMode } = useDarkMode();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
 
   const { services = [], isLoading: isLoadingServices } = useServices();
@@ -486,12 +493,16 @@ export default function Booking() {
   const filteredServices = useMemo(() => {
     if (!searchTerm.trim()) return services;
     const q = searchTerm.toLowerCase();
-    return services.filter(
-      (s) =>
+    return services.filter((s) => {
+      const tSvc = translateService(s, language);
+      return (
         s.nameService?.toLowerCase().includes(q) ||
-        s.summary?.toLowerCase().includes(q)
-    );
-  }, [services, searchTerm]);
+        tSvc.nameService?.toLowerCase().includes(q) ||
+        s.summary?.toLowerCase().includes(q) ||
+        tSvc.summary?.toLowerCase().includes(q)
+      );
+    });
+  }, [services, searchTerm, language]);
 
   const handleSelectSlot = (slot) => {
     setSelectedSlot(slot);
@@ -501,12 +512,12 @@ export default function Booking() {
   const handleConfirmBooking = async (e) => {
     e.preventDefault();
     if (!patientForm.name || !patientForm.phone) {
-      toast.error("Vui lòng nhập họ tên và số điện thoại liên hệ");
+      toast.error(t("booking.requireNamePhone"));
       return;
     }
 
     if (!selectedSlot) {
-      toast.error("Vui lòng chọn khung giờ khám");
+      toast.error(t("booking.requireSlot"));
       return;
     }
 
@@ -524,7 +535,7 @@ export default function Booking() {
         notes: patientForm.notes,
       });
 
-      toast.success("Giữ chỗ thành công! Đang chuyển đến trang thanh toán xác nhận...");
+      toast.success(t("booking.holdSuccess"));
       
       const reservationId = result?.data?.reservationId || result?.reservationId;
       if (reservationId) {
@@ -533,7 +544,14 @@ export default function Booking() {
         navigate("/account/appointments");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Không thể giữ chỗ cho khung giờ này. Vui lòng thử lại!");
+      toast.error(
+        err.response?.data?.message ||
+          (language === "zh"
+            ? "无法锁定该时间段，请重试！"
+            : language === "en"
+            ? "Could not hold this time slot. Please try again!"
+            : "Không thể giữ chỗ cho khung giờ này. Vui lòng thử lại!")
+      );
     }
   };
 
@@ -542,13 +560,10 @@ export default function Booking() {
       <Container>
         <PageHeader $isDark={isDarkMode}>
           <div className="badge">
-            <Sparkles size={16} /> Đặt Lịch Trực Tuyến
+            <Sparkles size={16} /> {t("booking.pageBadge")}
           </div>
-          <h1>ĐẶT LỊCH HẸN KHÁM NHA KHOA</h1>
-          <p>
-            Chọn dịch vụ, bác sĩ và khung giờ thuận tiện nhất chỉ với 3 bước đơn
-            giản. Hệ thống giữ chỗ tức thì không lo trùng lịch.
-          </p>
+          <h1>{t("booking.pageTitle")}</h1>
+          <p>{t("booking.pageSubtitle")}</p>
 
           <StepIndicator>
             <StepItem
@@ -559,7 +574,7 @@ export default function Booking() {
               onClick={() => step > 1 && setStep(1)}
             >
               <div className="circle">1</div>
-              <div className="label">Chọn Dịch Vụ</div>
+              <div className="label">{t("booking.step1")}</div>
               <div className="line" />
             </StepItem>
 
@@ -571,7 +586,7 @@ export default function Booking() {
               onClick={() => selectedServiceId && setStep(2)}
             >
               <div className="circle">2</div>
-              <div className="label">Chọn Giờ Khám</div>
+              <div className="label">{t("booking.step2")}</div>
               <div className="line" />
             </StepItem>
 
@@ -581,7 +596,7 @@ export default function Booking() {
               $isDark={isDarkMode}
             >
               <div className="circle">3</div>
-              <div className="label">Xác Nhận Giữ Chỗ</div>
+              <div className="label">{t("booking.step3")}</div>
             </StepItem>
           </StepIndicator>
         </PageHeader>
@@ -592,7 +607,7 @@ export default function Booking() {
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3 style={{ fontSize: "2rem", fontWeight: 700, margin: 0 }}>
-                  Bước 1: Chọn dịch vụ bạn cần khám
+                  {t("booking.step1Title")}
                 </h3>
               </div>
 
@@ -600,40 +615,46 @@ export default function Booking() {
                 <Search size={20} />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm dịch vụ (Niềng răng, Trồng Implant, Tẩy trắng...)"
+                  placeholder={t("booking.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </SearchBox>
 
-              <ServicesGrid>
-                {filteredServices.map((svc) => (
-                  <ServiceCard
-                    key={svc._id}
-                    $selected={selectedServiceId === svc._id}
-                    $isDark={isDarkMode}
-                    onClick={() => {
-                      setSelectedServiceId(svc._id);
-                      setStep(2);
-                    }}
-                  >
-                    <div className="title">{svc.nameService}</div>
-                    <div className="desc">{svc.summary || "Dịch vụ nha khoa chuyên sâu chất lượng cao."}</div>
-                    <div className="meta">
-                      <div className="price">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(svc.priceDiscount || svc.priceService || 0)}
-                      </div>
-                      <div className="duration">
-                        <Clock size={14} />
-                        <span>{svc.durationMinutes || 30} phút</span>
-                      </div>
-                    </div>
-                  </ServiceCard>
-                ))}
-              </ServicesGrid>
+              {filteredServices.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "3rem", color: isDarkMode ? "#94a3b8" : "#64748b", fontSize: "1.5rem" }}>
+                  {t("booking.emptyServices")}
+                </div>
+              ) : (
+                <ServicesGrid>
+                  {filteredServices.map((svc) => {
+                    const tSvc = translateService(svc, language);
+                    return (
+                      <ServiceCard
+                        key={svc._id}
+                        $selected={selectedServiceId === svc._id}
+                        $isDark={isDarkMode}
+                        onClick={() => {
+                          setSelectedServiceId(svc._id);
+                          setStep(2);
+                        }}
+                      >
+                        <div className="title">{tSvc.nameService}</div>
+                        <div className="desc">{tSvc.summary || svc.summary || "Dịch vụ nha khoa chuyên sâu chất lượng cao."}</div>
+                        <div className="meta">
+                          <div className="price">
+                            {formatLocalizedPrice(svc.priceDiscount || svc.priceService || 0, language)}
+                          </div>
+                          <div className="duration">
+                            <Clock size={14} />
+                            <span>{svc.durationMinutes || 30} {t("booking.durationUnit")}</span>
+                          </div>
+                        </div>
+                      </ServiceCard>
+                    );
+                  })}
+                </ServicesGrid>
+              )}
             </>
           )}
 
@@ -643,19 +664,21 @@ export default function Booking() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <h3 style={{ fontSize: "2rem", fontWeight: 700, margin: 0 }}>
-                    Bước 2: Chọn ngày & Khung giờ phù hợp
+                    {t("booking.step2Title")}
                   </h3>
-                  <p style={{ color: "#0284c7", fontWeight: 600, fontSize: "1.4rem", margin: "0.4rem 0 0 0" }}>
-                    Dịch vụ: {selectedService?.nameService} (
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(selectedService?.priceDiscount || selectedService?.priceService || 0)}
-                    )
-                  </p>
+                  {selectedService && (() => {
+                    const tSvc = translateService(selectedService, language);
+                    return (
+                      <p style={{ color: "#0284c7", fontWeight: 600, fontSize: "1.4rem", margin: "0.4rem 0 0 0" }}>
+                        {t("booking.serviceLabel")}: {tSvc.nameService} (
+                        {formatLocalizedPrice(selectedService?.priceDiscount || selectedService?.priceService || 0, language)}
+                        )
+                      </p>
+                    );
+                  })()}
                 </div>
                 <SecondaryBtn $isDark={isDarkMode} onClick={() => setStep(1)}>
-                  <ArrowLeft size={16} /> Đổi dịch vụ
+                  <ArrowLeft size={16} /> {t("booking.backBtn")}
                 </SecondaryBtn>
               </div>
 
@@ -664,7 +687,7 @@ export default function Booking() {
                   <div className="config-block">
                     <label>
                       <CalendarIcon size={16} style={{ display: "inline", marginRight: "0.5rem" }} />
-                      Ngày khám mong muốn:
+                      {t("booking.chooseDate")}:
                     </label>
                     <DatePicker
                       selected={selectedDate}
@@ -681,7 +704,7 @@ export default function Booking() {
                   <div className="config-block">
                     <label>
                       <User size={16} style={{ display: "inline", marginRight: "0.5rem" }} />
-                      Bác sĩ điều trị:
+                      {t("booking.chooseDoctor")}:
                     </label>
                     <select
                       value={selectedDoctorId}
@@ -690,22 +713,25 @@ export default function Booking() {
                         setSelectedSlot(null);
                       }}
                     >
-                      <option value="">-- Tất cả bác sĩ có ca --</option>
-                      {employees.map((emp) => (
-                        <option key={emp._id} value={emp._id}>
-                          {emp.name} ({emp.experience || "Bác sĩ"})
-                        </option>
-                      ))}
+                      <option value="">-- {t("booking.allDoctors")} --</option>
+                      {employees.map((emp) => {
+                        const tDoc = translateDoctor(emp, language);
+                        return (
+                          <option key={emp._id} value={emp._id}>
+                            {tDoc.fullName || tDoc.name} ({tDoc.experience || "Bác sĩ"})
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 </SidebarConfig>
 
                 <div>
                   <h4 style={{ fontSize: "1.5rem", fontWeight: 600, marginBottom: "1.2rem" }}>
-                    Các khung giờ trống khả dụng (Slot):
+                    {t("booking.chooseSlot")}:
                   </h4>
                   {slotsQuery.isLoading ? (
-                    <p style={{ color: "#94a3b8" }}>Đang kiểm tra lịch trống của bác sĩ...</p>
+                    <p style={{ color: "#94a3b8" }}>{t("booking.checkingSlots")}</p>
                   ) : (
                     <SlotPicker
                       slots={slotsQuery.data || []}
@@ -723,42 +749,45 @@ export default function Booking() {
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3 style={{ fontSize: "2rem", fontWeight: 700, margin: 0 }}>
-                  Bước 3: Thông tin người khám & Giữ chỗ
+                  {t("booking.step3Title")}
                 </h3>
                 <SecondaryBtn $isDark={isDarkMode} onClick={() => setStep(2)}>
-                  <ArrowLeft size={16} /> Chọn lại giờ
+                  <ArrowLeft size={16} /> {t("booking.backBtn")}
                 </SecondaryBtn>
               </div>
 
               <BookingSummaryBox $isDark={isDarkMode}>
-                <h4>📋 Tóm tắt thông tin lịch hẹn</h4>
+                <h4>📋 {t("booking.summaryTitle")}</h4>
                 <div className="summary-row">
-                  <span>Dịch vụ khám:</span>
-                  <span className="bold">{selectedService?.nameService}</span>
-                </div>
-                <div className="summary-row">
-                  <span>Ngày khám:</span>
+                  <span>{t("booking.serviceLabel")}:</span>
                   <span className="bold">
-                    {selectedDate ? selectedDate.toLocaleDateString("vi-VN") : "-"}
+                    {selectedService ? translateService(selectedService, language).nameService : "-"}
                   </span>
                 </div>
                 <div className="summary-row">
-                  <span>Khung giờ hẹn:</span>
+                  <span>{t("booking.dateLabel")}:</span>
+                  <span className="bold">
+                    {selectedDate ? selectedDate.toLocaleDateString(language === "zh" ? "zh-CN" : language === "en" ? "en-US" : "vi-VN") : "-"}
+                  </span>
+                </div>
+                <div className="summary-row">
+                  <span>{t("booking.timeLabel")}:</span>
                   <span className="bold" style={{ color: "#0284c7" }}>
                     {selectedSlot?.slotStart} - {selectedSlot?.slotEnd}
                   </span>
                 </div>
                 <div className="summary-row">
-                  <span>Bác sĩ phụ trách:</span>
-                  <span className="bold">{selectedSlot?.doctorName || "Bác sĩ chuyên khoa"}</span>
+                  <span>{t("booking.doctorLabel")}:</span>
+                  <span className="bold">
+                    {selectedSlot?.doctorName
+                      ? translateDoctor({ fullName: selectedSlot.doctorName }, language).fullName
+                      : t("booking.anyDoctor")}
+                  </span>
                 </div>
                 <div className="summary-row">
-                  <span>Chi phí dự kiến:</span>
+                  <span>{t("booking.priceLabel")}:</span>
                   <span className="bold" style={{ color: "#10b981", fontSize: "1.6rem" }}>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(selectedSlot?.price || selectedService?.priceService || 0)}
+                    {formatLocalizedPrice(selectedSlot?.price || selectedService?.priceService || 0, language)}
                   </span>
                 </div>
               </BookingSummaryBox>
@@ -767,12 +796,12 @@ export default function Booking() {
                 <div className="field">
                   <label>
                     <User size={15} style={{ display: "inline", marginRight: "0.4rem" }} />
-                    Họ và tên bệnh nhân (*):
+                    {t("booking.patientName")}
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Nguyễn Văn A"
+                    placeholder={t("booking.patientNamePlaceholder")}
                     value={patientForm.name}
                     onChange={(e) =>
                       setPatientForm((prev) => ({ ...prev, name: e.target.value }))
@@ -783,12 +812,12 @@ export default function Booking() {
                 <div className="field">
                   <label>
                     <Phone size={15} style={{ display: "inline", marginRight: "0.4rem" }} />
-                    Số điện thoại liên hệ (*):
+                    {t("booking.patientPhone")}
                   </label>
                   <input
                     type="tel"
                     required
-                    placeholder="0912 345 678"
+                    placeholder={t("booking.patientPhonePlaceholder")}
                     value={patientForm.phone}
                     onChange={(e) =>
                       setPatientForm((prev) => ({ ...prev, phone: e.target.value }))
@@ -799,11 +828,11 @@ export default function Booking() {
                 <div className="field full-width">
                   <label>
                     <Mail size={15} style={{ display: "inline", marginRight: "0.4rem" }} />
-                    Địa chỉ Email (nhận vé hẹn & lời nhắc tự động):
+                    {t("booking.patientEmail")}
                   </label>
                   <input
                     type="email"
-                    placeholder="email@example.com"
+                    placeholder={t("booking.patientEmailPlaceholder")}
                     value={patientForm.email}
                     onChange={(e) =>
                       setPatientForm((prev) => ({ ...prev, email: e.target.value }))
@@ -814,11 +843,11 @@ export default function Booking() {
                 <div className="field full-width">
                   <label>
                     <FileText size={15} style={{ display: "inline", marginRight: "0.4rem" }} />
-                    Mô tả triệu chứng răng miệng / Yêu cầu đặc biệt:
+                    {t("booking.patientNotes")}
                   </label>
                   <textarea
                     rows={3}
-                    placeholder="Ví dụ: Răng hàm dưới bên phải đau nhức khi nhai, muốn cạo vôi răng và trám răng..."
+                    placeholder={t("booking.patientNotesPlaceholder")}
                     value={patientForm.notes}
                     onChange={(e) =>
                       setPatientForm((prev) => ({ ...prev, notes: e.target.value }))
@@ -829,7 +858,11 @@ export default function Booking() {
                 <div className="full-width" style={{ display: "flex", justifyContent: "flex-end" }}>
                   <PrimaryBtn type="submit" disabled={isHolding}>
                     <ShieldCheck size={20} />
-                    <span>{isHolding ? "Đang giữ chỗ..." : "Xác Nhận Giữ Chỗ Ngay"}</span>
+                    <span>
+                      {isHolding
+                        ? (language === "zh" ? "正在锁定名额..." : language === "en" ? "Holding slot..." : "Đang giữ chỗ...")
+                        : t("booking.confirmBtn")}
+                    </span>
                   </PrimaryBtn>
                 </div>
               </FormGrid>

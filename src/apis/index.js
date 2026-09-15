@@ -23,6 +23,22 @@ export const get2FA_QRCodeAPI = async () => {
   return res.data;
 };
 
+export const handleVerify2FA = async (otpTokenClient) => {
+  const res = await authorizedAxiosInstance.put(
+    `${API_ROOT}/api/v1/users/verify2FA`,
+    { otpTokenClient }
+  );
+  return res.data;
+};
+
+export const handleSetUp2FA = async (otpTokenClient) => {
+  const res = await authorizedAxiosInstance.post(
+    `${API_ROOT}/api/v1/users/setUp2FA`,
+    { otpTokenClient }
+  );
+  return res.data;
+};
+
 export const handleRegister = async (data) => {
   const res = await authorizedAxiosInstance.post(
     `${API_ROOT}/api/v1/users/register`,

@@ -32,6 +32,8 @@ import {
   Sparkles,
   Info,
 } from "lucide-react";
+import AvatarFullscreenModal from "../components/AvatarFullscreenModal";
+import Require2FA from "../components/require-2fa";
 import { handleLogoutApi } from "../apis";
 import { useMe, useUpdateMe } from "../features/authentication/useMe";
 import "./Account.css";
@@ -45,13 +47,27 @@ function Account() {
   const { updateMe, isUpdating } = useUpdateMe();
 
   const [activeTab, setActiveTab] = useState(0);
-  const [userInfo, setUserInfo] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    photo: "",
-    role: "",
-    require_2FA: false,
+  const [userInfo, setUserInfo] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("userInfo") || "{}");
+      return {
+        name: stored.name || "",
+        email: stored.email || "",
+        phone: stored.phone || "",
+        photo: stored.photo || stored.image || "",
+        role: stored.role || "",
+        require_2FA: Boolean(stored.require_2FA),
+      };
+    } catch {
+      return {
+        name: "",
+        email: "",
+        phone: "",
+        photo: "",
+        role: "",
+        require_2FA: false,
+      };
+    }
   });
 
   const [formData, setFormData] = useState({
@@ -75,6 +91,8 @@ function Account() {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [show2FASetupModal, setShow2FASetupModal] = useState(false);
 
   // Notification preferences state
   const [notifications, setNotifications] = useState({
@@ -87,13 +105,14 @@ function Account() {
 
   useEffect(() => {
     if (!me) return;
+    const is2FA = Boolean(me.require_2FA);
     setUserInfo({
       name: me.name || "",
       email: me.email || "",
       phone: me.phone || "",
       photo: me.photo || DEFAULT_AVATAR,
       role: me.role || "user",
-      require_2FA: Boolean(me.require_2FA),
+      require_2FA: is2FA,
     });
     setFormData((prev) => ({
       ...prev,
@@ -103,6 +122,19 @@ function Account() {
       newPassword: "",
       confirmPassword: "",
     }));
+
+    try {
+      const stored = JSON.parse(localStorage.getItem("userInfo") || "{}");
+      if (stored && typeof stored === "object" && stored.require_2FA !== is2FA) {
+        localStorage.setItem(
+          "userInfo",
+          JSON.stringify({ ...stored, require_2FA: is2FA })
+        );
+        window.dispatchEvent(new Event("userInfoUpdated"));
+      }
+    } catch (e) {
+      console.error("Failed to sync userInfo to localStorage:", e);
+    }
   }, [me]);
 
   useEffect(() => {
@@ -321,16 +353,30 @@ function Account() {
   };
 
   const handleToggle2FA = async () => {
+    if (!userInfo.require_2FA) {
+      setShow2FASetupModal(true);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const nextState = !userInfo.require_2FA;
-      await updateMe({ require_2FA: nextState });
-      setUserInfo((prev) => ({ ...prev, require_2FA: nextState }));
-      toast.success(
-        nextState
-          ? "Đã kích hoạt xác thực 2 bước (2FA)"
-          : "Đã tắt xác thực 2 bước (2FA)"
-      );
+      await updateMe({ require_2FA: false });
+      setUserInfo((prev) => ({ ...prev, require_2FA: false }));
+
+      try {
+        const stored = JSON.parse(localStorage.getItem("userInfo") || "{}");
+        if (stored && typeof stored === "object") {
+          localStorage.setItem(
+            "userInfo",
+            JSON.stringify({ ...stored, require_2FA: false })
+          );
+          window.dispatchEvent(new Event("userInfoUpdated"));
+        }
+      } catch (e) {
+        console.error("Failed to sync userInfo to localStorage:", e);
+      }
+
+      toast.success("Đã tắt xác thực 2 bước (2FA)");
       await refetchMe();
     } catch (err) {
       toast.error(
@@ -339,6 +385,23 @@ function Account() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSuccessSetup2FA = () => {
+    setShow2FASetupModal(false);
+    setUserInfo((prev) => ({ ...prev, require_2FA: true }));
+    try {
+      const stored = JSON.parse(localStorage.getItem("userInfo") || "{}");
+      localStorage.setItem(
+        "userInfo",
+        JSON.stringify({ ...stored, require_2FA: true })
+      );
+      window.dispatchEvent(new Event("userInfoUpdated"));
+    } catch (e) {
+      console.error(e);
+    }
+    toast.success("Kích hoạt 2FA thành công!");
+    refetchMe();
   };
 
   const handleToggleNotification = (key) => {
@@ -388,6 +451,9 @@ function Account() {
                 src={photoPreview || userInfo.photo || DEFAULT_AVATAR}
                 alt={userInfo.name}
                 className="account-hero-avatar"
+                onClick={() => setShowAvatarModal(true)}
+                title="Nhấp vào ảnh để xem toàn màn hình"
+                style={{ cursor: "pointer" }}
               />
               <label
                 htmlFor="profile-photo-upload"
@@ -570,9 +636,11 @@ function Account() {
                   <span>Họ và tên *</span>
                 </label>
                 <div
-                  className={`form-input-box ${!editMode ? "disabled" : ""}`}
+                  className={`form-input-box ${editMode ? "editing" : "readonly"}`}
                 >
-                  <User size={18} className="input-icon-start" />
+                  <div className="input-icon-pill">
+                    <User size={16} />
+                  </div>
                   <input
                     type="text"
                     name="name"
@@ -591,8 +659,10 @@ function Account() {
                   <Mail size={15} />
                   <span>Địa chỉ Email</span>
                 </label>
-                <div className="form-input-box disabled">
-                  <Mail size={18} className="input-icon-start" />
+                <div className="form-input-box readonly">
+                  <div className="input-icon-pill">
+                    <Mail size={16} />
+                  </div>
                   <input
                     type="email"
                     name="email"
@@ -600,7 +670,9 @@ function Account() {
                     value={userInfo.email}
                     disabled
                   />
-                  <span className="input-locked-badge">Cố định</span>
+                  <span className="input-locked-badge">
+                    <Lock size={11} /> Cố định
+                  </span>
                 </div>
               </div>
 
@@ -610,9 +682,11 @@ function Account() {
                   <span>Số điện thoại liên hệ</span>
                 </label>
                 <div
-                  className={`form-input-box ${!editMode ? "disabled" : ""}`}
+                  className={`form-input-box ${editMode ? "editing" : "readonly"}`}
                 >
-                  <Phone size={18} className="input-icon-start" />
+                  <div className="input-icon-pill">
+                    <Phone size={16} />
+                  </div>
                   <input
                     type="tel"
                     name="phone"
@@ -620,7 +694,11 @@ function Account() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     disabled={!editMode}
-                    placeholder={editMode ? "Nhập số điện thoại (ví dụ: 0901234567)" : "Chưa cập nhật số điện thoại"}
+                    placeholder={
+                      editMode
+                        ? "Nhập số điện thoại (ví dụ: 0901234567)"
+                        : "Chưa cập nhật số điện thoại"
+                    }
                   />
                 </div>
               </div>
@@ -630,8 +708,10 @@ function Account() {
                   <ShieldCheck size={15} />
                   <span>Vai trò tài khoản</span>
                 </label>
-                <div className="form-input-box disabled">
-                  <ShieldCheck size={18} className="input-icon-start" />
+                <div className="form-input-box readonly">
+                  <div className="input-icon-pill">
+                    <ShieldCheck size={16} />
+                  </div>
                   <input
                     type="text"
                     className="custom-input"
@@ -642,6 +722,13 @@ function Account() {
                     }
                     disabled
                   />
+                  <span
+                    className={`input-role-pill ${
+                      userInfo.role === "admin" ? "admin" : "client"
+                    }`}
+                  >
+                    {userInfo.role === "admin" ? "Admin" : "Member"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -829,24 +916,38 @@ function Account() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                className={
-                  userInfo.require_2FA
-                    ? "btn-secondary-action"
-                    : "btn-primary-action"
-                }
-                onClick={handleToggle2FA}
-                disabled={loading}
-              >
-                {loading ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : userInfo.require_2FA ? (
-                  "Tắt xác thực 2 lớp"
-                ) : (
-                  "Kích hoạt 2FA ngay"
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                {userInfo.require_2FA && (
+                  <button
+                    type="button"
+                    className="btn-secondary-action"
+                    onClick={() => setShow2FASetupModal(true)}
+                    disabled={loading}
+                    style={{ fontSize: "13px", padding: "8px 14px" }}
+                  >
+                    Xem lại mã QR
+                  </button>
                 )}
-              </button>
+
+                <button
+                  type="button"
+                  className={
+                    userInfo.require_2FA
+                      ? "btn-secondary-action"
+                      : "btn-primary-action"
+                  }
+                  onClick={handleToggle2FA}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : userInfo.require_2FA ? (
+                    "Tắt xác thực 2 lớp"
+                  ) : (
+                    "Kích hoạt 2FA ngay"
+                  )}
+                </button>
+              </div>
             </div>
 
             <p style={{ fontSize: "13.5px", color: "#64748b", margin: 0, lineHeight: 1.6 }}>
@@ -1028,6 +1129,24 @@ function Account() {
           </button>
         </DialogActions>
       </Dialog>
+
+      <AvatarFullscreenModal
+        isOpen={showAvatarModal}
+        onClose={() => setShowAvatarModal(false)}
+        src={photoPreview || userInfo.photo || ""}
+        name={userInfo.name || "Người dùng"}
+        role={userInfo.role === "admin" ? "Quản trị viên" : "Khách hàng"}
+        email={userInfo.email}
+      />
+
+      {show2FASetupModal && (
+        <Require2FA
+          user={userInfo}
+          initialShowQR={true}
+          handleSuccessVerify2FA={handleSuccessSetup2FA}
+          onCancel={() => setShow2FASetupModal(false)}
+        />
+      )}
     </div>
   );
 }
