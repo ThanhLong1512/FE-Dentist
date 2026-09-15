@@ -1,12 +1,7 @@
-import { lazy } from "react";
 import styled from "styled-components";
-
-const DashboardHeader = lazy(() =>
-  import("../../features/dashboard/DashboardHeader")
-);
-const DashboardLayout = lazy(() =>
-  import("../../features/dashboard/DashboardLayout")
-);
+import DashboardHeader from "../../features/dashboard/DashboardHeader";
+import DashboardLayout from "../../features/dashboard/DashboardLayout";
+import ErrorBoundary from "../../components/ErrorBoundary";
 
 const DashboardWrapper = styled.div`
   display: flex;
@@ -17,10 +12,15 @@ const DashboardWrapper = styled.div`
 
 function Dashboard() {
   return (
-    <DashboardWrapper>
-      <DashboardHeader />
-      <DashboardLayout />
-    </DashboardWrapper>
+    <ErrorBoundary
+      title="Không thể tải Bảng điều khiển"
+      message="Đã xảy ra lỗi khi lấy dữ liệu phân tích số liệu của phòng khám. Vui lòng tải lại trang."
+    >
+      <DashboardWrapper>
+        <DashboardHeader />
+        <DashboardLayout />
+      </DashboardWrapper>
+    </ErrorBoundary>
   );
 }
 

@@ -155,35 +155,63 @@ function CustomTooltip({ active, payload, label }) {
 function SalesChart({ orders, numDays }) {
   const { isDarkMode } = useDarkMode();
 
-  const validNumDays = numDays && numDays > 0 ? numDays : 7;
-  const allDates = eachDayOfInterval({
-    start: subDays(new Date(), validNumDays - 1),
-    end: new Date(),
-  });
+  const validNumDays = typeof numDays === "number" && numDays > 0 ? numDays : 7;
+  let allDates = [];
+  try {
+    allDates = eachDayOfInterval({
+      start: subDays(new Date(), validNumDays - 1),
+      end: new Date(),
+    });
+  } catch (err) {
+    console.error("Lỗi khi tính khoảng thời gian biểu đồ:", err);
+    allDates = [new Date()];
+  }
 
-  const orderList = orders?.orders || [];
+  const orderList = Array.isArray(orders?.orders) ? orders.orders : [];
 
   const data = allDates.map((date) => {
     const dayOrders = orderList.filter((order) => {
-      const orderDate = new Date(order.createdAt);
-      return isSameDay(date, orderDate);
+      if (!order?.createdAt) return false;
+      try {
+        const orderDate = new Date(order.createdAt);
+        return isSameDay(date, orderDate);
+      } catch {
+        return false;
+      }
     });
 
     const totalSales = dayOrders.reduce(
-      (acc, cur) => acc + (cur.totalPrice || 0),
+      (acc, cur) => acc + (Number(cur?.totalPrice) || 0),
       0
     );
 
+    let label = "";
+    let fullDate = "";
+    try {
+      label = format(date, "dd/MM");
+      fullDate = format(date, "dd/MM/yyyy");
+    } catch {
+      label = "N/A";
+      fullDate = "N/A";
+    }
+
     return {
-      label: format(date, "dd/MM"),
-      fullDate: format(date, "dd/MM/yyyy"),
-      totalSales: totalSales,
+      label,
+      fullDate,
+      totalSales,
     };
   });
 
-  const totalSalesPeriod = data.reduce((acc, cur) => acc + cur.totalSales, 0);
+  const totalSalesPeriod = data.reduce((acc, cur) => acc + (cur.totalSales || 0), 0);
   const avgSalesPerDay = Math.round(totalSalesPeriod / (data.length || 1));
-  const peakSales = Math.max(...data.map((d) => d.totalSales), 0);
+  const peakSales = data.length > 0 ? Math.max(...data.map((d) => d.totalSales), 0) : 0;
+
+  const startDateText =
+    allDates.length > 0 ? format(allDates[0], "dd/MM/yyyy") : "";
+  const endDateText =
+    allDates.length > 0
+      ? format(allDates[allDates.length - 1], "dd/MM/yyyy")
+      : "";
 
   const colors = isDarkMode
     ? {
@@ -209,8 +237,9 @@ function SalesChart({ orders, numDays }) {
           <div>
             <h3>Biểu Đồ Doanh Thu Phòng Khám</h3>
             <span className="period-tag">
-              Từ {format(allDates.at(0), "dd/MM/yyyy")} đến{" "}
-              {format(allDates.at(-1), "dd/MM/yyyy")}
+              {startDateText && endDateText
+                ? `Từ ${startDateText} đến ${endDateText}`
+                : "Khoảng thời gian gần nhất"}
             </span>
           </div>
         </div>
