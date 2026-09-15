@@ -69,6 +69,14 @@ function DetailService() {
   const userID = JSON.parse(localStorage.getItem("userInfo") || "null")?.id;
 
   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [ServiceID]);
+
+  useEffect(() => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     dispatch(setCountCart(cart.length));
   }, [dispatch]);

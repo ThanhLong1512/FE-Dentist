@@ -26,6 +26,7 @@ import AppointmentCheckout from "./pages/AppointmentCheckout";
 
 import AppLayout from "./components/AppLayout";
 import AccountLayout from "./components/AccountLayout";
+import ScrollToTop from "./components/ScrollToTop";
 import Account from "./pages/Account";
 import Appointment from "./pages/Appointment";
 import Order from "./pages/Order";
@@ -70,6 +71,7 @@ function App() {
           <ThemeSync />
           <GlobalStyles />
           <BrowserRouter>
+            <ScrollToTop />
             <Suspense fallback={<Spinner />}>
               <Routes>
                 <Route index element={<Navigate replace to="home" />} />
