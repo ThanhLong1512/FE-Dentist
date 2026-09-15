@@ -296,7 +296,7 @@ function Appointment() {
                       <span>
                         Cơ sở:{" "}
                         {appointment.patient?.address ||
-                          "Phòng khám Nha Khoa Quốc Tế DENTIST PRO"}
+                          "Hệ Thống Nha Khoa Cheese Clinic"}
                       </span>
                     </div>
                   </div>

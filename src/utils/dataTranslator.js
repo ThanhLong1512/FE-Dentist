@@ -283,19 +283,19 @@ const SERVICE_DICTIONARY = {
 const FACILITY_DICTIONARY = {
   "Nha khoa Smile - Trụ sở Quận 1": {
     vi: {
-      name: "Nha khoa DENTIST PRO - Trụ sở Quận 1 (TP.HCM)",
+      name: "Nha khoa CHEESE CLINIC - Trụ sở Quận 1 (TP.HCM)",
       address: "123 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1",
       city: "TP. Hồ Chí Minh",
       desc: "Trụ sở chính hiện đại trang bị máy CT Cone Beam 3D, phòng vô trùng áp lực dương và phòng VIP tiếp đón chuẩn 5 sao.",
     },
     en: {
-      name: "DENTIST PRO - District 1 Flagship (HCMC)",
+      name: "CHEESE CLINIC - District 1 Flagship (HCMC)",
       address: "123 Nam Ky Khoi Nghia St, Ben Thanh, District 1",
       city: "Ho Chi Minh City",
       desc: "Modern flagship equipped with 3D CT Cone Beam, positive pressure surgical rooms, and 5-star VIP reception lounge.",
     },
     zh: {
-      name: "DENTIST PRO - 第1郡旗舰总院 (胡志明市)",
+      name: "CHEESE CLINIC - 第1郡旗舰总院 (胡志明市)",
       address: "胡志明市第1郡南圻起义路123号",
       city: "胡志明市",
       desc: "高科旗舰总院，配备进口德国3D CT锥形束断层扫描仪、正压层流无菌手术室与五星级VIP私享诊室。",
@@ -303,19 +303,19 @@ const FACILITY_DICTIONARY = {
   },
   "Nha khoa Smile - Chi nhánh Phú Mỹ Hưng": {
     vi: {
-      name: "Nha khoa DENTIST PRO - Chi nhánh Phú Mỹ Hưng (Quận 7)",
+      name: "Nha khoa CHEESE CLINIC - Chi nhánh Phú Mỹ Hưng (Quận 7)",
       address: "88 Nguyễn Đức Cảnh, Tân Phong, Quận 7",
       city: "TP. Hồ Chí Minh",
       desc: "Cơ sở chuyên sâu niềng răng trong suốt Invisalign, phục hình nụ cười và nha khoa gia đình chuẩn quốc tế.",
     },
     en: {
-      name: "DENTIST PRO - Phu My Hung International Branch (District 7)",
+      name: "CHEESE CLINIC - Phu My Hung International Branch (District 7)",
       address: "88 Nguyen Duc Canh St, Tan Phong, District 7",
       city: "Ho Chi Minh City",
       desc: "Specialized center for Invisalign aligners, cosmetic smile makeover, and international family dentistry.",
     },
     zh: {
-      name: "DENTIST PRO - 富美兴国际分院 (第7郡)",
+      name: "CHEESE CLINIC - 富美兴国际分院 (第7郡)",
       address: "胡志明市第7郡阮德景路88号",
       city: "胡志明市",
       desc: "国际社区品质专科，专注隐适美透明正畸、全瓷美容微创修复及外籍家庭口腔健康关爱。",
@@ -323,19 +323,19 @@ const FACILITY_DICTIONARY = {
   },
   "Nha khoa Smile - Chi nhánh Cầu Giấy": {
     vi: {
-      name: "Nha khoa DENTIST PRO - Chi nhánh Cầu Giấy (Hà Nội)",
+      name: "Nha khoa CHEESE CLINIC - Chi nhánh Cầu Giấy (Hà Nội)",
       address: "15 Duy Tân, Dịch Vọng Hậu, Cầu Giấy",
       city: "Hà Nội",
       desc: "Trung tâm nha khoa kỹ thuật cao tại Thủ đô, thuận tiện di chuyển, bãi đỗ xe rộng rãi và đội ngũ bác sĩ ĐH Y Hà Nội.",
     },
     en: {
-      name: "DENTIST PRO - Cau Giay Tech Hub Branch (Hanoi)",
+      name: "CHEESE CLINIC - Cau Giay Tech Hub Branch (Hanoi)",
       address: "15 Duy Tan St, Dich Vong Hau, Cau Giay",
       city: "Hanoi",
       desc: "High-tech dental center in Hanoi with spacious parking, cutting-edge equipment and Hanoi Medical University specialists.",
     },
     zh: {
-      name: "DENTIST PRO - 纸桥高科旗舰分院 (河内市)",
+      name: "CHEESE CLINIC - 纸桥高科旗舰分院 (河内市)",
       address: "河内市纸桥郡维新路15号",
       city: "河内市",
       desc: "河内核心商务区大型数字化口腔中心，交通便捷配专属停车场，河内医科大学专家名医坐诊。",
@@ -343,19 +343,19 @@ const FACILITY_DICTIONARY = {
   },
   "Nha khoa Smile - Chi nhánh Bình Thạnh": {
     vi: {
-      name: "Nha khoa DENTIST PRO - Chi nhánh Bình Thạnh",
+      name: "Nha khoa CHEESE CLINIC - Chi nhánh Bình Thạnh",
       address: "246 Xô Viết Nghệ Tĩnh, Phường 21, Bình Thạnh",
       city: "TP. Hồ Chí Minh",
       desc: "Phòng khám nha khoa tiện ích phục vụ khu vực Đông TP.HCM với đầy đủ dịch vụ nhổ răng, trám răng thẩm mỹ và tẩy trắng.",
     },
     en: {
-      name: "DENTIST PRO - Binh Thanh Community Branch",
+      name: "CHEESE CLINIC - Binh Thanh Community Branch",
       address: "246 Xo Viet Nghe Tinh St, Ward 21, Binh Thanh",
       city: "Ho Chi Minh City",
       desc: "Accessible neighborhood clinic serving East HCMC with full services: painless extraction, aesthetic fillings, and whitening.",
     },
     zh: {
-      name: "DENTIST PRO - 平盛区分院 (胡志明市)",
+      name: "CHEESE CLINIC - 平盛区分院 (胡志明市)",
       address: "胡志明市平盛区苏越义静路246号",
       city: "胡志明市",
       desc: "优质便民口腔分院，全面提供无痛微创拔牙、纳米树脂补牙、舒适洗牙及冷光牙齿美白服务。",

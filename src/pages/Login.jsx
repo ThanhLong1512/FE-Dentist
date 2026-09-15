@@ -27,6 +27,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { saveAuthSession, clearAuthSession } from "../utils/authStorage";
 import Require2FA from "../components/require-2fa";
+import CheeseLogo from "../components/CheeseLogo";
 
 function Login({ defaultTab = "login" }) {
   const { t, language } = useLanguage();
@@ -273,12 +274,8 @@ function Login({ defaultTab = "login" }) {
                   <span>Hệ Thống Nha Khoa Kỹ Thuật Cao</span>
                 </div>
 
-                <div className="showcase-brand">
-                  <div className="showcase-brand-icon">🦷</div>
-                  <div className="showcase-brand-text">
-                    <h2>DENTIST PRO</h2>
-                    <p>Trung Tâm Nha Khoa Thẩm Mỹ Quốc Tế</p>
-                  </div>
+                <div className="showcase-brand" style={{ margin: "2rem 0" }}>
+                  <CheeseLogo size="lg" isDark={true} />
                 </div>
 
                 <h1 className="showcase-title">
@@ -661,7 +658,7 @@ function Login({ defaultTab = "login" }) {
                       <div className="terms-privacy-text">
                         Bằng việc đăng ký, bạn đồng ý với{" "}
                         <Link to="/contact">Điều khoản dịch vụ</Link> và{" "}
-                        <Link to="/contact">Chính sách bảo mật</Link> của Dentist Pro.
+                        <Link to="/contact">Chính sách bảo mật</Link> của Cheese Clinic.
                       </div>
 
                       <button

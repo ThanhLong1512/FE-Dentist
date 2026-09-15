@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useLanguage } from "../context/LanguageContext";
+import CheeseLogo from "./CheeseLogo";
 
 const FooterWrapper = styled.footer`
   background: ${(props) => (props.$isDark ? "#090d16" : "#0f172a")};
@@ -276,33 +277,7 @@ export default function ModernFooter() {
       {/* Thông tin chính */}
       <MainFooterGrid>
         <Col>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <div
-              style={{
-                width: "4rem",
-                height: "4rem",
-                borderRadius: "1rem",
-                background: "linear-gradient(135deg, #0ea5e9, #2563eb)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "2rem",
-              }}
-            >
-              🦷
-            </div>
-            <span
-              style={{
-                fontSize: "2.2rem",
-                fontWeight: 800,
-                color: "white",
-                letterSpacing: "-0.03em",
-              }}
-            >
-              DENTIST PRO
-            </span>
-          </div>
+          <CheeseLogo size="md" isDark={true} />
           <p>{t("footer.aboutDesc")}</p>
           <div style={{ display: "flex", gap: "1rem", marginTop: "0.8rem" }}>
             <span

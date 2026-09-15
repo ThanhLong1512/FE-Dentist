@@ -21,7 +21,7 @@ function Logo({ isCollapsed = false }) {
           xmlns="http://www.w3.org/2000/svg"
           role="img"
         >
-          <title>Chesse Dental</title>
+          <title>Cheese Clinic</title>
           <defs>
             <linearGradient id="toothGradSmall" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#ffffff" />
@@ -68,7 +68,7 @@ function Logo({ isCollapsed = false }) {
         role="img"
         aria-labelledby="logo-title"
       >
-        <title id="logo-title">Chesse Dental Logo</title>
+        <title id="logo-title">Cheese Clinic Logo</title>
 
         <defs>
           <linearGradient
@@ -200,7 +200,7 @@ function Logo({ isCollapsed = false }) {
             fill="url(#textGradient)"
             filter="url(#glow)"
           >
-            Chesse
+            Cheese
           </text>
 
           <text
@@ -208,11 +208,11 @@ function Logo({ isCollapsed = false }) {
             y="80"
             fontFamily="'Inter', 'Segoe UI', system-ui, sans-serif"
             fontSize="18"
-            fontWeight="300"
+            fontWeight="600"
             letterSpacing="3px"
-            fill="#4682b4"
+            fill="#0284c7"
           >
-            D E N T A L
+            C L I N I C
           </text>
 
           <line

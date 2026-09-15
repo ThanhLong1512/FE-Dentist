@@ -23,6 +23,7 @@ import { useDarkMode } from "../hooks/useDarkMode";
 import { handleLogoutApi } from "../apis/index";
 import LanguageSwitcher from "./LanguageSwitcher";
 import AvatarFullscreenModal from "./AvatarFullscreenModal";
+import CheeseLogo from "./CheeseLogo";
 
 const HeaderWrapper = styled.header`
   position: sticky;
@@ -610,13 +611,9 @@ export default function Navbar() {
       </TopNoticeBar>
 
       <NavContainer>
-        {/* Logo Nha khoa chuẩn quốc tế */}
+        {/* Logo Cheese Clinic */}
         <LogoLink to="/home" $isDark={isDarkMode}>
-          <div className="logo-icon">🦷</div>
-          <div className="logo-text">
-            <span className="brand">DENTIST PRO</span>
-            <span className="subtitle">Dental & Implant Clinic</span>
-          </div>
+          <CheeseLogo size="md" isDark={isDarkMode} />
         </LogoLink>
 
         {/* Menu chính */}
@@ -815,10 +812,7 @@ export default function Navbar() {
               $isDark={isDarkMode}
               onClick={() => setShowMobileMenu(false)}
             >
-              <div className="logo-icon">🦷</div>
-              <div className="logo-text">
-                <span className="brand">DENTIST PRO</span>
-              </div>
+              <CheeseLogo size="sm" isDark={isDarkMode} showSubtitle={false} />
             </LogoLink>
             <button
               type="button"
