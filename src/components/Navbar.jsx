@@ -16,13 +16,13 @@ import {
   Sparkles,
   LayoutDashboard,
   Maximize2,
+  Sun,
+  Moon,
 } from "lucide-react";
-import { HiOutlineSun, HiOutlineMoon } from "react-icons/hi2";
 import { useLanguage } from "../context/LanguageContext";
 import { useDarkMode } from "../hooks/useDarkMode";
-import { handleLogoutApi } from "../apis/index";
 import LanguageSwitcher from "./LanguageSwitcher";
-import AvatarFullscreenModal from "./AvatarFullscreenModal";
+const AvatarFullscreenModal = React.lazy(() => import("./AvatarFullscreenModal"));
 import CheeseLogo from "./CheeseLogo";
 
 const HeaderWrapper = styled.header`
@@ -546,8 +546,15 @@ export default function Navbar() {
       }
     }
 
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     const handleClickOutside = (e) => {
@@ -556,7 +563,7 @@ export default function Navbar() {
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     document.addEventListener("mousedown", handleClickOutside);
     const handleUserUpdate = () => {
       const updated = localStorage.getItem("userInfo");
@@ -583,6 +590,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
+      const { handleLogoutApi } = await import("../apis/index");
       await handleLogoutApi();
     } catch {
       localStorage.removeItem("userInfo");
@@ -649,6 +657,7 @@ export default function Navbar() {
             to="/cart"
             $isDark={isDarkMode}
             title={t("nav.cart")}
+            aria-label={t("nav.cart") || "Giỏ hàng"}
           >
             <ShoppingCart size={18} />
             {countCart > 0 && <span className="badge">{countCart}</span>}
@@ -681,11 +690,16 @@ export default function Navbar() {
                     type="button"
                     onClick={() => setShowUserDropdown((prev) => !prev)}
                     title="Tài khoản của bạn"
+                    aria-label="Tài khoản của bạn"
                   >
                     {showUserImage ? (
                       <img
                         src={avatarSrc}
                         alt={userInfo.name || "User"}
+                        width="42"
+                        height="42"
+                        loading="lazy"
+                        decoding="async"
                         onError={() => setAvatarError(true)}
                       />
                     ) : (
@@ -752,9 +766,9 @@ export default function Navbar() {
                     >
                       <span className="switch-icon">
                         {isDarkMode ? (
-                          <HiOutlineMoon size={16} />
+                          <Moon size={16} />
                         ) : (
-                          <HiOutlineSun size={16} />
+                          <Sun size={16} />
                         )}
                       </span>
                       <div className="switch-track">
@@ -797,6 +811,7 @@ export default function Navbar() {
             type="button"
             $isDark={isDarkMode}
             onClick={() => setShowMobileMenu(true)}
+            aria-label="Mở menu điều hướng"
           >
             <Menu size={26} />
           </MobileMenuBtn>
@@ -817,6 +832,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setShowMobileMenu(false)}
+              aria-label="Đóng menu"
               style={{
                 background: "none",
                 border: "none",
@@ -880,12 +896,13 @@ export default function Navbar() {
                       ? "Chuyển sang giao diện Sáng"
                       : "Chuyển sang giao diện Tối"
                   }
+                  aria-label="Chuyển chế độ giao diện"
                 >
                   <span className="switch-icon">
                     {isDarkMode ? (
-                      <HiOutlineMoon size={16} />
+                      <Moon size={16} />
                     ) : (
-                      <HiOutlineSun size={16} />
+                      <Sun size={16} />
                     )}
                   </span>
                   <div className="switch-track">
@@ -902,6 +919,7 @@ export default function Navbar() {
                     setShowMobileMenu(false);
                     handleLogout();
                   }}
+                  aria-label="Đăng xuất"
                 >
                   <LogOut size={16} />
                   <span>{t("nav.logout")}</span>
@@ -925,15 +943,17 @@ export default function Navbar() {
         </MobileDrawer>
       )}
 
-      {userInfo && (
-        <AvatarFullscreenModal
-          isOpen={showAvatarModal}
-          onClose={() => setShowAvatarModal(false)}
-          src={!avatarError ? (userInfo.image || userInfo.photo) : ""}
-          name={userInfo.name || "User"}
-          role={userInfo.role === "admin" ? "Admin" : "Khách hàng"}
-          email={userInfo.email}
-        />
+      {userInfo && showAvatarModal && (
+        <React.Suspense fallback={null}>
+          <AvatarFullscreenModal
+            isOpen={showAvatarModal}
+            onClose={() => setShowAvatarModal(false)}
+            src={!avatarError ? (userInfo.image || userInfo.photo) : ""}
+            name={userInfo.name || "User"}
+            role={userInfo.role === "admin" ? "Admin" : "Khách hàng"}
+            email={userInfo.email}
+          />
+        </React.Suspense>
       )}
     </HeaderWrapper>
   );

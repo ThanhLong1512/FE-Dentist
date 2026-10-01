@@ -1,5 +1,4 @@
 import axios from "axios";
-import { toast } from "react-toastify";
 import { handleLogoutApi, handleRefreshTokenApi } from "../apis/index";
 import {
   clearAuthSession,
@@ -22,9 +21,21 @@ authorizedAxiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+const isProtectedRoute = () => {
+  const path = window.location.pathname;
+  return (
+    path.startsWith("/account") ||
+    path.startsWith("/admin") ||
+    path.startsWith("/checkout") ||
+    path.startsWith("/appointment/checkout")
+  );
+};
+
 const redirectToLogin = () => {
   clearAuthSession();
-  window.location.href = "/login";
+  if (isProtectedRoute()) {
+    window.location.href = "/login";
+  }
 };
 
 authorizedAxiosInstance.interceptors.response.use(
@@ -54,19 +65,30 @@ authorizedAxiosInstance.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !isAuthRequest) {
-      toast.error(
-        error.response?.data?.message ||
-          "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!",
-        {
-          position: "top-right",
-          autoClose: 7000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
-      );
-      redirectToLogin();
+      const hadToken = Boolean(getAccessToken());
+      clearAuthSession();
+
+      if (isProtectedRoute()) {
+        import("react-toastify").then(({ toast }) => {
+          toast.error(
+            error.response?.data?.message ||
+              "Vui lòng đăng nhập để tiếp tục tính năng này!",
+            {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            }
+          );
+        });
+        window.location.href = "/login";
+      } else if (hadToken) {
+        // If token was expired during normal browsing, clear session silently or notify gently
+        console.warn("Phiên làm việc đã hết hạn.");
+      }
+
       return Promise.reject(error);
     }
 

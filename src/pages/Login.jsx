@@ -712,4 +712,13 @@ function Login({ defaultTab = "login" }) {
   );
 }
 
-export default Login;
+export default function LoginWrapper(props) {
+  if (REACT_GOOGLE_CLIENT_ID) {
+    return (
+      <GoogleOAuthProvider clientId={REACT_GOOGLE_CLIENT_ID}>
+        <Login {...props} />
+      </GoogleOAuthProvider>
+    );
+  }
+  return <Login {...props} />;
+}

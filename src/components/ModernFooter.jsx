@@ -14,12 +14,11 @@ import {
 } from "lucide-react";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useLanguage } from "../context/LanguageContext";
-import { toast } from "react-toastify";
 import CheeseLogo from "./CheeseLogo";
 
 const FooterWrapper = styled.footer`
   background: ${(props) => (props.$isDark ? "#090d16" : "#0f172a")};
-  color: #94a3b8;
+  color: #cbd5e1;
   padding-top: 5rem;
   border-top: 1px solid
     ${(props) => (props.$isDark ? "#1e293b" : "#1e293b")};
@@ -53,7 +52,8 @@ const ReassuranceRow = styled.div`
     }
 
     .text {
-      h4 {
+      h4,
+      .item-title {
         color: #ffffff;
         font-size: 1.5rem;
         font-weight: 700;
@@ -62,7 +62,7 @@ const ReassuranceRow = styled.div`
       p {
         font-size: 1.3rem;
         margin: 0;
-        color: #94a3b8;
+        color: #cbd5e1;
       }
     }
   }
@@ -125,7 +125,7 @@ const Col = styled.div`
     gap: 1rem;
 
     li a {
-      color: #94a3b8;
+      color: #cbd5e1;
       text-decoration: none;
       font-size: 1.4rem;
       transition: all 0.2s;
@@ -216,10 +216,10 @@ const BottomBar = styled.div`
       gap: 2rem;
 
       a {
-        color: #64748b;
+        color: #cbd5e1;
         text-decoration: none;
         &:hover {
-          color: #94a3b8;
+          color: #ffffff;
         }
       }
     }
@@ -239,7 +239,7 @@ export default function ModernFooter() {
             <Award size={26} />
           </div>
           <div className="text">
-            <h4>{t("footer.reassurance.item1Title")}</h4>
+            <div className="item-title">{t("footer.reassurance.item1Title")}</div>
             <p>{t("footer.reassurance.item1Desc")}</p>
           </div>
         </div>
@@ -249,7 +249,7 @@ export default function ModernFooter() {
             <ShieldCheck size={26} />
           </div>
           <div className="text">
-            <h4>{t("footer.reassurance.item2Title")}</h4>
+            <div className="item-title">{t("footer.reassurance.item2Title")}</div>
             <p>{t("footer.reassurance.item2Desc")}</p>
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function ModernFooter() {
             <Sparkles size={26} />
           </div>
           <div className="text">
-            <h4>{t("footer.reassurance.item3Title")}</h4>
+            <div className="item-title">{t("footer.reassurance.item3Title")}</div>
             <p>{t("footer.reassurance.item3Desc")}</p>
           </div>
         </div>
@@ -269,7 +269,7 @@ export default function ModernFooter() {
             <CreditCard size={26} />
           </div>
           <div className="text">
-            <h4>{t("footer.reassurance.item4Title")}</h4>
+            <div className="item-title">{t("footer.reassurance.item4Title")}</div>
             <p>{t("footer.reassurance.item4Desc")}</p>
           </div>
         </div>
@@ -344,7 +344,9 @@ export default function ModernFooter() {
           <NewsletterForm
             onSubmit={(e) => {
               e.preventDefault();
-              toast.success("Cảm ơn bạn đã đăng ký nhận bản tin!");
+              import("react-toastify").then(({ toast }) => {
+                toast.success("Cảm ơn bạn đã đăng ký nhận bản tin!");
+              });
             }}
           >
             <input
@@ -352,7 +354,7 @@ export default function ModernFooter() {
               placeholder={t("footer.emailPlaceholder")}
               required
             />
-            <button type="submit">
+            <button type="submit" aria-label={t("footer.subscribeBtn") || "Đăng ký nhận bản tin"}>
               <span>{t("footer.subscribeBtn")}</span>
               <ArrowRight size={16} />
             </button>

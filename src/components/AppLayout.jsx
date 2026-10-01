@@ -1,10 +1,33 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import styled from "styled-components";
 import Navbar from "./Navbar";
-import ModernFooter from "./ModernFooter";
-import Chat from "./Chat";
 import { useDarkMode } from "../hooks/useDarkMode";
+
+const ModernFooter = lazy(() => import("./ModernFooter"));
+const Chat = lazy(() =>
+  new Promise((resolve) => {
+    let loaded = false;
+    const load = () => {
+      if (loaded) return;
+      loaded = true;
+      resolve(import("./Chat"));
+    };
+
+    if (typeof window !== "undefined") {
+      const idleId =
+        "requestIdleCallback" in window
+          ? window.requestIdleCallback(load, { timeout: 4000 })
+          : setTimeout(load, 2500);
+
+      window.addEventListener("pointerdown", load, { once: true, passive: true });
+      window.addEventListener("keydown", load, { once: true, passive: true });
+      window.addEventListener("scroll", load, { once: true, passive: true });
+    } else {
+      resolve(import("./Chat"));
+    }
+  })
+);
 
 const LayoutWrapper = styled.div`
   min-height: 100vh;
@@ -33,8 +56,10 @@ export default function AppLayout() {
       <MainContent>
         <Outlet />
       </MainContent>
-      <ModernFooter />
-      <Chat />
+      <Suspense fallback={null}>
+        <ModernFooter />
+        <Chat />
+      </Suspense>
     </LayoutWrapper>
   );
 }

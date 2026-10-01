@@ -85,8 +85,9 @@ const HeroContent = styled.div`
     gap: 0.8rem;
     padding: 0.6rem 1.6rem;
     border-radius: 999px;
-    background: rgba(14, 165, 233, 0.15);
-    color: #0284c7;
+    background: ${(props) =>
+      props.$isDark ? "rgba(14, 165, 233, 0.2)" : "rgba(14, 165, 233, 0.12)"};
+    color: ${(props) => (props.$isDark ? "#38bdf8" : "#0369a1")};
     font-size: 1.35rem;
     font-weight: 700;
     align-self: flex-start;
@@ -114,7 +115,7 @@ const HeroContent = styled.div`
   p.subtitle {
     font-size: 1.7rem;
     line-height: 1.7;
-    color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    color: ${(props) => (props.$isDark ? "#cbd5e1" : "#334155")};
     margin: 0;
     max-width: 580px;
   }
@@ -312,7 +313,7 @@ const HeroVisual = styled.div`
 
     .info {
       white-space: nowrap;
-      h5 {
+      .rating-num {
         margin: 0;
         font-size: 1.8rem;
         font-weight: 800;
@@ -323,7 +324,7 @@ const HeroVisual = styled.div`
         margin: 0;
         font-size: 1.25rem;
         white-space: nowrap;
-        color: #64748b;
+        color: ${(props) => (props.$isDark ? "#cbd5e1" : "#334155")};
       }
     }
 
@@ -399,7 +400,7 @@ const StatsCard = styled.div`
       font-size: 1.4rem;
       font-weight: 600;
       white-space: nowrap;
-      color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+      color: ${(props) => (props.$isDark ? "#cbd5e1" : "#334155")};
     }
   }
 `;
@@ -425,8 +426,9 @@ const SectionHeader = styled.div`
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #0284c7;
-    background: rgba(14, 165, 233, 0.1);
+    color: ${(props) => (props.$isDark ? "#38bdf8" : "#0369a1")};
+    background: ${(props) =>
+      props.$isDark ? "rgba(14, 165, 233, 0.2)" : "rgba(14, 165, 233, 0.12)"};
     padding: 0.4rem 1.4rem;
     border-radius: 999px;
   }
@@ -441,7 +443,7 @@ const SectionHeader = styled.div`
 
   p {
     font-size: 1.6rem;
-    color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    color: ${(props) => (props.$isDark ? "#cbd5e1" : "#334155")};
     max-width: 600px;
     margin: 0;
     line-height: 1.6;
@@ -501,7 +503,7 @@ const FeatureCard = styled.div`
   p {
     font-size: 1.4rem;
     line-height: 1.6;
-    color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+    color: ${(props) => (props.$isDark ? "#cbd5e1" : "#334155")};
     margin: 0;
   }
 `;
@@ -540,7 +542,7 @@ const ServiceCard = styled.div`
         : "0 16px 36px rgba(0, 0, 0, 0.08)"};
     border-color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
 
-    h4 {
+    h3 {
       color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
     }
   }
@@ -587,7 +589,7 @@ const ServiceCard = styled.div`
     gap: 1.2rem;
     flex: 1;
 
-    h4 {
+    h3 {
       font-size: 1.8rem;
       font-weight: 700;
       margin: 0;
@@ -598,7 +600,7 @@ const ServiceCard = styled.div`
     p.summary {
       font-size: 1.35rem;
       line-height: 1.6;
-      color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+      color: ${(props) => (props.$isDark ? "#cbd5e1" : "#334155")};
       margin: 0;
       flex: 1;
       display: -webkit-box;
@@ -620,7 +622,7 @@ const ServiceCard = styled.div`
       .price {
         font-size: 1.9rem;
         font-weight: 800;
-        color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
+        color: ${(props) => (props.$isDark ? "#38bdf8" : "#0369a1")};
         white-space: nowrap;
       }
     }
@@ -652,7 +654,7 @@ const DoctorCard = styled.div`
         : "0 14px 30px rgba(0, 0, 0, 0.07)"};
     border-color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
 
-    h4 {
+    h3 {
       color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
     }
   }
@@ -670,7 +672,7 @@ const DoctorCard = styled.div`
     flex-direction: column;
     gap: 0.6rem;
 
-    h4 {
+    h3 {
       font-size: 1.8rem;
       font-weight: 700;
       margin: 0;
@@ -681,17 +683,17 @@ const DoctorCard = styled.div`
     span.exp {
       font-size: 1.3rem;
       font-weight: 600;
-      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")};
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0369a1")};
     }
 
     p.bio {
       font-size: 1.3rem;
-      color: ${(props) => (props.$isDark ? "#94a3b8" : "#64748b")};
+      color: ${(props) => (props.$isDark ? "#cbd5e1" : "#334155")};
       margin: 0;
     }
 
     .doctor-book-link {
-      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0284c7")} !important;
+      color: ${(props) => (props.$isDark ? "#38bdf8" : "#0369a1")} !important;
       font-weight: 700;
       font-size: 1.35rem;
       text-decoration: none;
@@ -701,7 +703,7 @@ const DoctorCard = styled.div`
       transition: all 0.2s ease;
 
       &:hover {
-        color: ${(props) => (props.$isDark ? "#7dd3fc" : "#0369a1")} !important;
+        color: ${(props) => (props.$isDark ? "#7dd3fc" : "#0284c7")} !important;
         transform: translateX(4px);
       }
     }
@@ -736,7 +738,8 @@ const CTABanner = styled.div`
     p {
       font-size: 1.6rem;
       margin: 0;
-      opacity: 0.9;
+      color: #f8fafc;
+      opacity: 0.95;
       max-width: 600px;
     }
   }
@@ -745,7 +748,7 @@ const CTABanner = styled.div`
     padding: 1.5rem 3rem;
     border-radius: 999px;
     background: #ffffff;
-    color: #0284c7 !important;
+    color: #0369a1 !important;
     font-size: 1.6rem;
     font-weight: 800;
     text-decoration: none;
@@ -756,7 +759,7 @@ const CTABanner = styled.div`
     &:hover {
       transform: scale(1.04);
       background: #f8fafc;
-      color: #0369a1 !important;
+      color: #0284c7 !important;
     }
   }
 `;
@@ -877,8 +880,13 @@ export default function Home() {
           <HeroVisual $isDark={isDarkMode}>
             <div className="card-banner">
               <img
-                src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80"
+                src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=440&h=480&q=70&fm=webp"
                 alt="Modern Dental Clinic"
+                fetchpriority="high"
+                loading="eager"
+                decoding="async"
+                width="440"
+                height="480"
               />
             </div>
             <div className="floating-badge">
@@ -886,7 +894,7 @@ export default function Home() {
                 <Star size={24} fill="#f59e0b" />
               </div>
               <div className="info">
-                <h5>4.9 / 5.0</h5>
+                <div className="rating-num">4.9 / 5.0</div>
                 <p>{t("home.reviewCount")}</p>
               </div>
             </div>
@@ -978,13 +986,17 @@ export default function Home() {
                 <img
                   src={getImageUrl(
                     svc.photoService,
-                    "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=600&q=80"
+                    "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=340&h=200&q=70&fm=webp"
                   )}
                   alt={svc.nameService}
+                  loading="lazy"
+                  decoding="async"
+                  width="340"
+                  height="200"
                   onError={(e) =>
                     handleImageError(
                       e,
-                      "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=600&q=80"
+                      "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&w=340&h=200&q=70&fm=webp"
                     )
                   }
                 />
@@ -997,14 +1009,14 @@ export default function Home() {
               </div>
 
               <div className="card-body">
-                <h4
+                <h3
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/shop/${svc._id}`);
                   }}
                 >
                   {svc.nameService}
-                </h4>
+                </h3>
                 <p className="summary">{svc.summary || svc.description}</p>
 
                 <div className="price-row">
@@ -1060,17 +1072,21 @@ export default function Home() {
                 src={
                   doc.photo ||
                   [
-                    "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1594824813515-5334c93540eb?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=260&h=240&q=70&fm=webp",
+                    "https://images.unsplash.com/photo-1594824813515-5334c93540eb?auto=format&fit=crop&w=260&h=240&q=70&fm=webp",
+                    "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=260&h=240&q=70&fm=webp",
+                    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=260&h=240&q=70&fm=webp",
                   ][idx % 4]
                 }
                 alt={doc.name}
+                loading="lazy"
+                decoding="async"
+                width="260"
+                height="240"
                 className="doc-avatar"
               />
               <div className="doc-info">
-                <h4>{doc.name}</h4>
+                <h3>{doc.name}</h3>
                 <span className="exp">{doc.experience}</span>
                 <p className="bio">{doc.description}</p>
                 <div style={{ marginTop: "1rem" }}>
