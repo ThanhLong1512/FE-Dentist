@@ -48,6 +48,10 @@ export default function CheeseLogo({
         src="/logo.png"
         alt="Nha Khoa Cheese - Cheese Clinic"
         className="cheese-logo-img"
+        width="160"
+        height="46"
+        loading="eager"
+        decoding="async"
       />
     </LogoWrapper>
   );

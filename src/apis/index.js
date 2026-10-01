@@ -1,4 +1,3 @@
-import { data } from "jquery";
 import authorizedAxiosInstance from "../utils/authorizedAxios";
 import { clearAuthSession } from "../utils/authStorage";
 import { API_ROOT } from "../utils/constants";

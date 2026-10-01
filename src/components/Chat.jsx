@@ -1332,6 +1332,7 @@ export default function Chat() {
                 type="button"
                 onClick={() => setIsOpen(false)}
                 title={t("chat.minimizeChat")}
+                aria-label={t("chat.minimizeChat") || "Thu nhỏ cửa sổ chat"}
               >
                 <X size={18} />
               </button>
@@ -1545,6 +1546,7 @@ export default function Chat() {
                 className="cancel-btn"
                 onClick={stopAndCancelRecording}
                 title={t("chat.cancelRec")}
+                aria-label={t("chat.cancelRec") || "Hủy ghi âm"}
               >
                 <Trash2 size={18} />
               </button>
@@ -1553,6 +1555,7 @@ export default function Chat() {
                 className="send-rec-btn"
                 onClick={stopAndSendRecording}
                 title={t("chat.sendRec")}
+                aria-label={t("chat.sendRec") || "Gửi ghi âm"}
               >
                 <Check size={20} />
               </button>
@@ -1573,6 +1576,7 @@ export default function Chat() {
                 className="icon-tool-btn"
                 onClick={() => fileInputRef.current?.click()}
                 title={t("chat.sendImage")}
+                aria-label={t("chat.sendImage") || "Gửi hình ảnh"}
                 disabled={isUploadingMedia}
               >
                 <ImageIcon size={20} />
@@ -1584,6 +1588,7 @@ export default function Chat() {
                 className="icon-tool-btn"
                 onClick={startRecording}
                 title={t("chat.clickToRecord")}
+                aria-label={t("chat.clickToRecord") || "Ghi âm giọng nói"}
                 disabled={isUploadingMedia}
               >
                 <Mic size={20} />
@@ -1595,6 +1600,7 @@ export default function Chat() {
                 className={`icon-tool-btn ${isDictating ? "recording-active" : ""}`}
                 onClick={toggleSpeechDictation}
                 title={isDictating ? t("chat.voiceListening") : t("chat.voicePrompt")}
+                aria-label={isDictating ? t("chat.voiceListening") : (t("chat.voicePrompt") || "Chuyển giọng nói thành chữ")}
               >
                 <Radio size={19} />
               </button>
@@ -1625,6 +1631,7 @@ export default function Chat() {
                   isUploadingMedia
                 }
                 title={t("chat.sendBtn")}
+                aria-label={t("chat.sendBtn") || "Gửi tin nhắn"}
               >
                 {isUploadingMedia ? (
                   <Loader2 size={18} className="animate-spin" />
@@ -1648,6 +1655,7 @@ export default function Chat() {
               type="button"
               className="close-lightbox"
               onClick={() => setLightboxImage(null)}
+              aria-label="Đóng phóng to ảnh"
             >
               ×
             </button>
