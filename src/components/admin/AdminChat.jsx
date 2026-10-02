@@ -838,22 +838,27 @@ function AdminChat() {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const activeConvRef = useRef(null);
-
-  // Keep activeConvRef in sync for socket callback
-  useEffect(() => {
-    activeConvRef.current = activeConv;
-  }, [activeConv]);
+  const currentUserIdRef = useRef("");
 
   const currentUserId = useMemo(() => {
     try {
       const stored = localStorage.getItem("userInfo");
       if (stored) {
         const u = JSON.parse(stored);
-        return u.id || u._id || "";
+        return (u.id || u._id || "").toString();
       }
     } catch (e) {}
     return "";
   }, []);
+
+  // Keep refs in sync for socket callbacks
+  useEffect(() => {
+    activeConvRef.current = activeConv;
+  }, [activeConv]);
+
+  useEffect(() => {
+    currentUserIdRef.current = currentUserId;
+  }, [currentUserId]);
 
   // Fetch all conversations from backend
   const fetchConversations = useCallback(async (autoSelectFirst = false) => {
@@ -915,24 +920,63 @@ function AdminChat() {
 
     s.on("connect", () => {
       console.log("AdminChat connected to socket:", s.id);
-      if (currentUserId) {
-        s.emit("addUser", { userID: currentUserId, role: "admin" });
+      const myId = currentUserIdRef.current || currentUserId;
+      if (myId) {
+        s.emit("addUser", myId);
         s.emit("joinDashboard", { role: "admin" });
       }
     });
 
     const handleIncomingMessage = (msg) => {
+      if (!msg) return;
+
+      // 1. NEVER append messages sent by the admin themselves (prevents duplicate on admin screen)
+      const myId = currentUserIdRef.current || currentUserId;
+      const senderStr = (msg.senderID?._id || msg.senderID || "")?.toString();
+      if (myId && senderStr && senderStr === myId.toString()) {
+        return;
+      }
+
       playIncomingChime();
 
       // Check if message belongs to current open conversation
       const currentActive = activeConvRef.current;
+      const otherMemberId = (
+        currentActive?.otherMember?._id ||
+        currentActive?.otherMember?.id ||
+        currentActive?.otherMember ||
+        ""
+      )?.toString();
+
       const isCurrent =
         currentActive &&
         (msg.conservationID === currentActive._id ||
-          msg.senderID === currentActive.otherMember?._id);
+          (otherMemberId && senderStr === otherMemberId));
 
       if (isCurrent) {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => {
+          // Prevent duplicates by ID or content within 2.5s
+          if (msg._id && prev.some((m) => m._id === msg._id)) return prev;
+          const msgContent = msg.content || msg.text || "";
+          if (
+            prev.some(
+              (m) =>
+                (m.content === msgContent || m.text === msgContent) &&
+                Math.abs(Date.now() - new Date(m.createdAt || 0).getTime()) < 2500
+            )
+          ) {
+            return prev;
+          }
+          return [
+            ...prev,
+            {
+              ...msg,
+              _id: msg._id || Date.now(),
+              content: msgContent,
+              createdAt: msg.createdAt || new Date().toISOString(),
+            },
+          ];
+        });
       } else {
         setUnreadTotal((prev) => prev + 1);
         toast(`Tin nhắn mới từ ${msg.senderName || "Khách hàng"}`, {
@@ -1019,7 +1063,7 @@ function AdminChat() {
   const sendMessage = async (content, messageType = "text", mediaUrl = "") => {
     if (!activeConv?._id) return;
     const customer = getCustomer(activeConv);
-    const receiverID = customer?._id || customer?.id;
+    const receiverID = (customer?._id || customer?.id)?.toString();
 
     const payload = {
       conservationID: activeConv._id,
@@ -1030,15 +1074,22 @@ function AdminChat() {
     };
 
     // Optimistic message update
+    const optimisticId = "opt_" + Date.now();
     const optimisticMsg = {
       ...payload,
-      _id: "opt_" + Date.now(),
+      _id: optimisticId,
       createdAt: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimisticMsg]);
 
     try {
-      await handleCreateMessage(payload);
+      const response = await handleCreateMessage(payload);
+      const realId = response?._id || response?.id;
+      if (realId) {
+        setMessages((prev) =>
+          prev.map((m) => (m._id === optimisticId ? { ...m, _id: realId } : m))
+        );
+      }
 
       // Emit via socket
       if (socketRef.current) {
@@ -1046,6 +1097,7 @@ function AdminChat() {
           ...payload,
           receiverID,
           text: content,
+          content: content,
         });
       }
 
@@ -1054,6 +1106,7 @@ function AdminChat() {
     } catch (err) {
       console.error("Error creating message:", err);
       toast.error("Không thể gửi tin nhắn. Vui lòng thử lại!");
+      setMessages((prev) => prev.filter((m) => m._id !== optimisticId));
     }
   };
 

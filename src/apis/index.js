@@ -372,21 +372,22 @@ export const handleGetMyConservation = async () => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/conservations/getConservationByMembers`
   );
-  return res.data.data;
+  return res.data?.data || res.data;
 };
 
 export const handleGetMessagesByConservation = async (conservationID) => {
   const res = await authorizedAxiosInstance.get(
     `${API_ROOT}/api/v1/messages/${conservationID}`
   );
-  return res.data.data.messages;
+  return res.data?.data?.messages || res.data?.data || [];
 };
 
-export const handleCreateConservation = async () => {
+export const handleCreateConservation = async (data = {}) => {
   const res = await authorizedAxiosInstance.post(
-    `${API_ROOT}/api/v1/conservations`
+    `${API_ROOT}/api/v1/conservations`,
+    data
   );
-  return res.data.data;
+  return res.data?.data || res.data;
 };
 
 export const handleCreateMessage = async (data) => {
@@ -394,7 +395,7 @@ export const handleCreateMessage = async (data) => {
     `${API_ROOT}/api/v1/messages`,
     data
   );
-  return res.data.data.data;
+  return res.data?.data?.data || res.data?.data || res.data;
 };
 
 export const handleUploadChatMedia = async (formData) => {

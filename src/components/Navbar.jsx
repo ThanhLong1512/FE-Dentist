@@ -574,16 +574,20 @@ export default function Navbar() {
         } catch {
           setUserInfo(null);
         }
+      } else {
+        setUserInfo(null);
       }
     };
 
     window.addEventListener("userInfoUpdated", handleUserUpdate);
+    window.addEventListener("authChange", handleUserUpdate);
     window.addEventListener("storage", handleUserUpdate);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("userInfoUpdated", handleUserUpdate);
+      window.removeEventListener("authChange", handleUserUpdate);
       window.removeEventListener("storage", handleUserUpdate);
     };
   }, []);

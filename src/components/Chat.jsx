@@ -25,6 +25,7 @@ import {
   handleCreateConservation,
   handleGetMessagesByConservation,
   handleUploadChatMedia,
+  handleGetMyConservation,
 } from "../apis";
 import { SOCKET_URL, ADMIN_ID } from "../utils/constants";
 import { useDarkMode } from "../hooks/useDarkMode";
@@ -845,7 +846,10 @@ export default function Chat() {
 
   const socket = useRef(null);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef(null);
+  const conservationPromiseRef = useRef(null);
+  const activeConservationIdRef = useRef(null);
 
   // Format time
   const formatTime = (date) => {
@@ -875,21 +879,36 @@ export default function Chat() {
     };
   }, []);
 
-  // Initialize user & socket
+  // Synchronize user & socket in real-time
   useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
-    if (userInfo) {
-      try {
-        const parsed = JSON.parse(userInfo);
-        setCurrentUserId(parsed.id || parsed._id);
-      } catch (err) {
-        console.error("Error parsing user info:", err);
+    const syncUser = () => {
+      const stored = localStorage.getItem("userInfo");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          const uid = parsed.id || parsed._id;
+          setCurrentUserId(uid || null);
+        } catch (err) {
+          console.error("Error parsing user info:", err);
+          setCurrentUserId(null);
+        }
+      } else {
+        setCurrentUserId(null);
       }
-    }
+    };
+
+    syncUser();
+
+    window.addEventListener("userInfoUpdated", syncUser);
+    window.addEventListener("authChange", syncUser);
+    window.addEventListener("storage", syncUser);
 
     socket.current = io(`${SOCKET_URL}`);
 
     return () => {
+      window.removeEventListener("userInfoUpdated", syncUser);
+      window.removeEventListener("authChange", syncUser);
+      window.removeEventListener("storage", syncUser);
       if (socket.current) {
         socket.current.disconnect();
       }
@@ -898,56 +917,119 @@ export default function Chat() {
 
   // Setup socket message listener
   useEffect(() => {
-    if (currentUserId && socket.current) {
-      socket.current.emit("addUser", currentUserId);
+    if (!socket.current) return;
 
-      socket.current.on("getMessage", ({ senderID, text, messageType = "text", mediaUrl = "" }) => {
-        const newMessage = {
-          id: Date.now(),
-          text: text || "",
-          messageType,
-          mediaUrl,
-          sender: "admin",
-          senderID: senderID,
-          timestamp: formatTime(new Date()),
-        };
+    const handleIncomingMessage = (payload) => {
+      if (!payload) return;
+      const { senderID, text, messageType = "text", mediaUrl = "", conservationID } = payload;
 
-        setMessages((prev) => [...prev, newMessage]);
-        setIsTyping(false);
-
-        if (!isOpen) {
-          setUnreadCount((c) => c + 1);
+      const myId = currentUserId || (() => {
+        try {
+          const stored = JSON.parse(localStorage.getItem("userInfo"));
+          return stored?.id || stored?._id;
+        } catch {
+          return null;
         }
+      })();
+
+      // 1. NEVER duplicate own messages (when sender is the current user)
+      if (myId && senderID && senderID.toString() === myId.toString()) {
+        return;
+      }
+
+      // 2. Ignore messages not belonging to current conversation if ID is specified
+      const currentActiveId = activeConservationIdRef.current || conservationId;
+      if (conservationID && currentActiveId && conservationID !== currentActiveId) {
+        return;
+      }
+
+      const newMessage = {
+        id: payload._id || Date.now(),
+        text: text || "",
+        messageType,
+        mediaUrl,
+        sender: "admin",
+        senderID: senderID,
+        timestamp: formatTime(new Date()),
+      };
+
+      setMessages((prev) => {
+        // Prevent duplicate by id
+        if (newMessage.id && prev.some((m) => m.id === newMessage.id)) {
+          return prev;
+        }
+        // Prevent duplicate by text within 2.5s
+        if (
+          prev.some(
+            (m) =>
+              m.text === newMessage.text &&
+              m.sender === "admin" &&
+              Math.abs(Date.now() - (m.createdAt ? new Date(m.createdAt).getTime() : m.id)) < 2500
+          )
+        ) {
+          return prev;
+        }
+        return [...prev, newMessage];
       });
+
+      setIsTyping(false);
+
+      if (!isOpen) {
+        setUnreadCount((c) => c + 1);
+      }
+    };
+
+    if (currentUserId) {
+      socket.current.emit("addUser", currentUserId);
     }
+
+    socket.current.on("getMessage", handleIncomingMessage);
 
     return () => {
       if (socket.current) {
-        socket.current.off("getMessage");
+        socket.current.off("getMessage", handleIncomingMessage);
       }
     };
-  }, [currentUserId, isOpen]);
+  }, [currentUserId, isOpen, conservationId]);
 
   // Fetch messages when conversation opened
   useEffect(() => {
     if (conservationId) {
-      fetchMessages();
+      fetchMessages(conservationId);
     }
   }, [conservationId]);
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (targetId) => {
+    const idToFetch = targetId || activeConservationIdRef.current || conservationId;
+    if (!idToFetch) return;
+
     try {
       setIsLoadingMessages(true);
-      const response = await handleGetMessagesByConservation(conservationId);
-      const formatted = (response || []).map((msg) => ({
-        id: msg._id,
-        text: msg.content,
-        messageType: msg.messageType || (msg.mediaUrl ? "image" : "text"),
-        mediaUrl: msg.mediaUrl || "",
-        sender: msg.senderID === currentUserId ? "client" : "admin",
-        senderID: msg.senderID,
-        timestamp: formatTime(msg.createdAt),
-      }));
+      const response = await handleGetMessagesByConservation(idToFetch);
+      const effectiveUid = currentUserId || (() => {
+        try {
+          const stored = JSON.parse(localStorage.getItem("userInfo"));
+          return stored?.id || stored?._id;
+        } catch {
+          return null;
+        }
+      })();
+
+      const formatted = (response || []).map((msg) => {
+        const msgSenderId = (msg.senderID?._id || msg.senderID)?.toString();
+        const isMe = Boolean(effectiveUid && msgSenderId && msgSenderId === effectiveUid.toString());
+
+        return {
+          id: msg._id,
+          text: msg.content,
+          messageType: msg.messageType || (msg.mediaUrl ? "image" : "text"),
+          mediaUrl: msg.mediaUrl || "",
+          sender: isMe ? "client" : "admin",
+          senderID: msgSenderId,
+          timestamp: formatTime(msg.createdAt),
+          createdAt: msg.createdAt,
+        };
+      });
       setMessages(formatted);
     } catch (err) {
       console.error("Error fetching messages:", err);
@@ -956,28 +1038,89 @@ export default function Chat() {
     }
   };
 
-  const createConservation = async () => {
-    try {
-      setIsLoadingConservation(true);
-      const response = await handleCreateConservation();
-      if (response?.conservation?._id) {
-        setConservationId(response.conservation._id);
-      }
-    } catch (err) {
-      console.error("Error creating conservation:", err);
-    } finally {
-      setIsLoadingConservation(false);
+  const ensureConservation = async () => {
+    if (activeConservationIdRef.current) return activeConservationIdRef.current;
+    if (conservationId) {
+      activeConservationIdRef.current = conservationId;
+      return conservationId;
     }
+    if (conservationPromiseRef.current) {
+      return await conservationPromiseRef.current;
+    }
+
+    const promise = (async () => {
+      try {
+        setIsLoadingConservation(true);
+
+        // Try to find existing conversation for current user
+        const existing = await handleGetMyConservation().catch((err) => {
+          console.warn("Get conversation API fallback:", err);
+          return null;
+        });
+
+        const list = Array.isArray(existing)
+          ? existing
+          : Array.isArray(existing?.conservation)
+          ? existing.conservation
+          : [];
+
+        if (list.length > 0 && list[0]?._id) {
+          const foundId = list[0]._id;
+          activeConservationIdRef.current = foundId;
+          setConservationId(foundId);
+          return foundId;
+        }
+
+        // Otherwise create a new conversation
+        const response = await handleCreateConservation({});
+        const newId =
+          response?.conservation?._id ||
+          response?._id ||
+          response?.data?.conservation?._id ||
+          response?.data?._id;
+        if (newId) {
+          activeConservationIdRef.current = newId;
+          setConservationId(newId);
+          return newId;
+        }
+      } catch (err) {
+        console.error("Error ensuring conservation:", err);
+      } finally {
+        setIsLoadingConservation(false);
+        conservationPromiseRef.current = null;
+      }
+      return null;
+    })();
+
+    conservationPromiseRef.current = promise;
+    return await promise;
   };
 
-  const toggleChat = async () => {
-    if (!isOpen && !conservationId) {
-      await createConservation();
+  // Automatically ensure conversation when chat opens or user is authenticated
+  useEffect(() => {
+    let uid = currentUserId;
+    if (!uid) {
+      try {
+        const stored = JSON.parse(localStorage.getItem("userInfo"));
+        uid = stored?.id || stored?._id;
+        if (uid) setCurrentUserId(uid);
+      } catch {}
     }
-    if (!isOpen) {
+
+    if (isOpen && uid && !conservationId) {
+      ensureConservation();
+    }
+  }, [isOpen, currentUserId, conservationId]);
+
+  const toggleChat = () => {
+    const nextOpen = !isOpen;
+    setIsOpen(nextOpen);
+    if (nextOpen) {
       setUnreadCount(0);
+      if (!conservationId) {
+        ensureConservation();
+      }
     }
-    setIsOpen(!isOpen);
   };
 
   // --- IMAGE HANDLING ---
@@ -1081,17 +1224,37 @@ export default function Chat() {
   };
 
   const sendVoiceMessage = async (audioBlob) => {
-    if (!conservationId || !currentUserId) return;
+    let uid = currentUserId;
+    if (!uid) {
+      try {
+        const stored = JSON.parse(localStorage.getItem("userInfo"));
+        uid = stored?.id || stored?._id;
+        if (uid) setCurrentUserId(uid);
+      } catch {}
+    }
+
+    if (!uid) {
+      toast.warning("Vui lòng đăng nhập để gửi tin nhắn thoại!");
+      return;
+    }
+
+    let activeConsId = activeConservationIdRef.current || conservationId;
+    if (!activeConsId) {
+      activeConsId = await ensureConservation();
+    }
+    if (!activeConsId) return;
 
     const localAudioUrl = URL.createObjectURL(audioBlob);
+    const tempId = `temp_voice_${Date.now()}`;
     const tempMessage = {
-      id: Date.now(),
+      id: tempId,
       text: "Tin nhắn thoại",
       messageType: "audio",
       mediaUrl: localAudioUrl,
       sender: "client",
-      senderID: currentUserId,
+      senderID: uid,
       timestamp: formatTime(new Date()),
+      createdAt: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, tempMessage]);
@@ -1113,16 +1276,17 @@ export default function Chat() {
 
       if (socket.current) {
         socket.current.emit("sendMessage", {
-          senderID: currentUserId,
+          senderID: uid,
           receiverID: ADMIN_ID,
           text: "Tin nhắn thoại",
           messageType: "audio",
           mediaUrl: uploadedUrl,
+          conservationID: activeConsId,
         });
       }
 
       const response = await handleCreateMessage({
-        conservationID: conservationId,
+        conservationID: activeConsId,
         content: "Tin nhắn thoại",
         messageType: "audio",
         mediaUrl: uploadedUrl,
@@ -1130,13 +1294,15 @@ export default function Chat() {
 
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === tempMessage.id
-            ? { ...msg, id: response._id, mediaUrl: uploadedUrl }
+          msg.id === tempId
+            ? { ...msg, id: response?._id || msg.id, mediaUrl: uploadedUrl }
             : msg
         )
       );
     } catch (err) {
       console.error("Error sending voice message:", err);
+      toast.error("Không thể gửi tin nhắn thoại. Vui lòng thử lại!");
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
     } finally {
       setIsUploadingMedia(false);
     }
@@ -1199,8 +1365,18 @@ export default function Chat() {
   // --- SEND MESSAGE (TEXT / IMAGE) ---
   const handleSendMessage = async (e) => {
     e?.preventDefault?.();
+    if (isSending) return;
 
-    if (!conservationId || !currentUserId) {
+    let uid = currentUserId;
+    if (!uid) {
+      try {
+        const stored = JSON.parse(localStorage.getItem("userInfo"));
+        uid = stored?.id || stored?._id;
+        if (uid) setCurrentUserId(uid);
+      } catch {}
+    }
+
+    if (!uid) {
       toast.warning("Vui lòng đăng nhập để bắt đầu trò chuyện với Bác sĩ!");
       return;
     }
@@ -1210,18 +1386,32 @@ export default function Chat() {
 
     if (!hasText && !hasImage) return;
 
+    let activeConsId = activeConservationIdRef.current || conservationId;
+    if (!activeConsId) {
+      activeConsId = await ensureConservation();
+    }
+
+    if (!activeConsId) {
+      toast.error("Đang kết nối hội thoại, vui lòng thử gửi lại sau 1-2 giây!");
+      return;
+    }
+
+    setIsSending(true);
+
     const messageType = hasImage ? "image" : "text";
     const tempText = hasText ? inputMessage : hasImage ? "Hình ảnh đính kèm" : "";
     const localMediaUrl = selectedImagePreview || "";
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
     const tempMessage = {
-      id: Date.now(),
+      id: tempId,
       text: tempText,
       messageType,
       mediaUrl: localMediaUrl,
       sender: "client",
-      senderID: currentUserId,
+      senderID: uid,
       timestamp: formatTime(new Date()),
+      createdAt: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, tempMessage]);
@@ -1252,16 +1442,19 @@ export default function Chat() {
 
       if (socket.current) {
         socket.current.emit("sendMessage", {
-          senderID: currentUserId,
+          senderID: uid,
           receiverID: ADMIN_ID,
           text: messageToSend || (hasImage ? "Hình ảnh" : ""),
+          content: messageToSend || (hasImage ? "Hình ảnh" : ""),
           messageType,
           mediaUrl: finalMediaUrl,
+          conservationID: activeConsId,
         });
       }
 
       const response = await handleCreateMessage({
-        conservationID: conservationId,
+        conservationID: activeConsId,
+        senderID: uid,
         content: messageToSend || (hasImage ? "Hình ảnh" : ""),
         messageType,
         mediaUrl: finalMediaUrl,
@@ -1269,16 +1462,22 @@ export default function Chat() {
 
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === tempMessage.id
-            ? { ...msg, id: response._id, mediaUrl: finalMediaUrl || msg.mediaUrl }
+          msg.id === tempId
+            ? {
+                ...msg,
+                id: response?._id || msg.id,
+                mediaUrl: finalMediaUrl || msg.mediaUrl,
+              }
             : msg
         )
       );
     } catch (err) {
       console.error("Error sending message:", err);
-      setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
+      toast.error("Không thể gửi tin nhắn. Vui lòng thử lại!");
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
     } finally {
       setIsUploadingMedia(false);
+      setIsSending(false);
     }
   };
 
@@ -1612,6 +1811,12 @@ export default function Chat() {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onPaste={handlePasteImage}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage(e);
+                  }
+                }}
                 placeholder={
                   isDictating
                     ? t("chat.listeningPlaceholder")

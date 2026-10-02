@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "@greatsumini/react-facebook-login";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -21,7 +21,11 @@ import {
   CalendarCheck,
 } from "lucide-react";
 
-import { API_ROOT, FACEBOOK_APP_ID } from "./../utils/constants";
+import {
+  API_ROOT,
+  FACEBOOK_APP_ID,
+  REACT_GOOGLE_CLIENT_ID,
+} from "./../utils/constants";
 import { handleLogin, handleRegister, handleLogoutApi } from "../apis";
 import { useLanguage } from "../context/LanguageContext";
 import { useDarkMode } from "../hooks/useDarkMode";
@@ -76,6 +80,7 @@ function Login({ defaultTab = "login" }) {
   const {
     register: registerLogin,
     handleSubmit: handleSubmitLogin,
+    setValue: setValueLogin,
     formState: { errors: errorsLogin },
   } = useForm();
 
@@ -228,12 +233,17 @@ function Login({ defaultTab = "login" }) {
       passwordConfirm: payLoad.passwordConfirm,
     };
     try {
-      const res = await handleRegister(apiPayload);
-      saveAuthSession(res);
-      toast.success(t("toast.registerSuccess"));
-      (res?.role || "user") === "admin"
-        ? navigate("/admin/dashboard")
-        : navigate("/home");
+      await handleRegister(apiPayload);
+      toast.success(
+        language === "en"
+          ? "Account registered successfully! Please enter your password to log in."
+          : language === "zh"
+          ? "账号注册成功！请输入密码登录。"
+          : "Đăng ký tài khoản thành công! Vui lòng nhập mật khẩu để đăng nhập."
+      );
+      // Chuyển sang tab Đăng nhập và điền sẵn email vừa đăng ký
+      handleSwitchTab("login");
+      setValueLogin("email", apiPayload.email);
     } catch (error) {
       const message =
         error.response?.data?.message ||
@@ -458,45 +468,105 @@ function Login({ defaultTab = "login" }) {
 
                     <div className="modern-social-group">
                       <div className="google-btn-container">
-                        <GoogleLogin
-                          onSuccess={handleSuccessGoogle}
-                          onError={() => toast.error(t("login.googleFail"))}
-                          useOneTap={false}
-                          theme={isDarkMode ? "filled_black" : "outline"}
-                          size="large"
-                          text="signin_with"
-                          width="100%"
-                          locale={language === "vi" ? "vi" : "en"}
-                        />
-                      </div>
-
-                      <FacebookLogin
-                        appId={FACEBOOK_APP_ID}
-                        autoLoad={false}
-                        fields="name,email,picture"
-                        onSuccess={handleResponseFacebook}
-                        onFail={(error) =>
-                          toast.error(error?.message || t("login.facebookFail"))
-                        }
-                        render={({ onClick }) => (
+                        {REACT_GOOGLE_CLIENT_ID ? (
+                          <GoogleLogin
+                            onSuccess={handleSuccessGoogle}
+                            onError={() => toast.error(t("login.googleFail"))}
+                            useOneTap={false}
+                            theme={isDarkMode ? "filled_black" : "outline"}
+                            size="large"
+                            text="signin_with"
+                            width="100%"
+                            locale={language === "vi" ? "vi" : "en"}
+                          />
+                        ) : (
                           <button
                             type="button"
-                            onClick={onClick}
-                            className="modern-facebook-btn"
+                            className="modern-google-btn"
+                            onClick={() =>
+                              toast.info(
+                                "Chức năng đăng nhập Google chưa được cấu hình Client ID."
+                              )
+                            }
                           >
                             <svg
-                              className="fb-svg-icon"
+                              className="google-svg-icon"
                               viewBox="0 0 24 24"
-                              width="20"
-                              height="20"
-                              fill="currentColor"
+                              width="18"
+                              height="18"
                             >
-                              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                              <path
+                                fill="#4285F4"
+                                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.02h3.88c2.27-2.09 3.665-5.17 3.665-9.12z"
+                              />
+                              <path
+                                fill="#34A853"
+                                d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.02c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.12C3.27 21.36 7.34 24 12 24z"
+                              />
+                              <path
+                                fill="#FBBC05"
+                                d="M5.28 14.3c-.24-.72-.38-1.49-.38-2.3s.14-1.58.38-2.3V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.12z"
+                              />
+                              <path
+                                fill="#EA4335"
+                                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.27 2.64 1.26 6.58l4.02 3.12c.95-2.83 3.6-4.95 6.72-4.95z"
+                              />
                             </svg>
-                            <span>{t("login.facebook")}</span>
+                            <span>{t("login.google") || "Đăng nhập với Google"}</span>
                           </button>
                         )}
-                      />
+                      </div>
+
+                      {FACEBOOK_APP_ID ? (
+                        <FacebookLogin
+                          appId={FACEBOOK_APP_ID}
+                          autoLoad={false}
+                          fields="name,email,picture"
+                          onSuccess={handleResponseFacebook}
+                          onFail={(error) =>
+                            toast.error(error?.message || t("login.facebookFail"))
+                          }
+                          render={({ onClick }) => (
+                            <button
+                              type="button"
+                              onClick={onClick}
+                              className="modern-facebook-btn"
+                            >
+                              <svg
+                                className="fb-svg-icon"
+                                viewBox="0 0 24 24"
+                                width="20"
+                                height="20"
+                                fill="currentColor"
+                              >
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                              </svg>
+                              <span>{t("login.facebook")}</span>
+                            </button>
+                          )}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toast.info(
+                              "Chức năng đăng nhập Facebook chưa được cấu hình App ID."
+                            )
+                          }
+                          className="modern-facebook-btn"
+                        >
+                          <svg
+                            className="fb-svg-icon"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            fill="currentColor"
+                          >
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                          </svg>
+                          <span>{t("login.facebook")}</span>
+                        </button>
+                      )}
                     </div>
 
                     <div className="auth-footer-switch">
