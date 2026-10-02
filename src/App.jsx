@@ -63,7 +63,8 @@ function App() {
   const UnauthorizedRoutes = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-      if (userInfo) return <Navigate to="/home" replace={true} />;
+      const token = localStorage.getItem("accessToken");
+      if (userInfo?.id && token) return <Navigate to="/home" replace={true} />;
     } catch {
       // ignore
     }

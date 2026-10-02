@@ -1,3 +1,63 @@
+.slot-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Session Filter Tabs */
+.slot-session-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 4px;
+}
+
+.slot-session-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slot-session-btn:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+  background: #f0f9ff;
+}
+
+.slot-session-btn.active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+}
+
+.slot-tab-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 11.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.slot-session-btn.active .slot-tab-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Grid of slots */
 .slot-picker {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -8,20 +68,23 @@
   text-align: left;
   cursor: pointer;
   border-radius: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid #e2e8f0;
   background: #ffffff;
   padding: 14px 16px;
-  transition: transform 0.06s ease, border-color 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
 }
 
 .slot-card:hover {
-  transform: translateY(-1px);
-  border-color: #93c5fd;
+  transform: translateY(-2px);
+  border-color: #0284c7;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.1);
 }
 
 .slot-card.selected {
-  border-color: #1370b5;
-  box-shadow: 0 0 0 3px rgba(19, 112, 181, 0.15);
+  border-color: #0284c7;
+  background: #f0f9ff;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
 }
 
 .slot-card-top {
@@ -33,13 +96,15 @@
 .slot-doctor {
   font-weight: 700;
   color: #0f172a;
+  font-size: 14px;
 }
 
 .slot-time {
   margin-top: 8px;
-  font-weight: 700;
-  color: #1d4ed8;
-  font-size: 16px;
+  font-weight: 800;
+  color: #0284c7;
+  font-size: 16.5px;
+  letter-spacing: -0.01em;
 }
 
 .slot-meta {
@@ -47,20 +112,126 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  color: #475569;
+  color: #64748b;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .slot-meta .dot {
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .slot-empty {
   grid-column: 1 / -1;
-  padding: 16px;
-  border: 1px dashed #cbd5e1;
+  padding: 32px 16px;
+  border: 1.5px dashed #cbd5e1;
   border-radius: 14px;
   color: #64748b;
+  text-align: center;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+/* Pagination Footer */
+.slot-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.slot-pagination-info {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.slot-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slot-page-arrow {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slot-page-arrow:hover:not(:disabled) {
+  border-color: #0284c7;
+  color: #0284c7;
+  background: #f0f9ff;
+}
+
+.slot-page-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.slot-page-num {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.slot-page-num:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+  background: #f0f9ff;
+}
+
+.slot-page-num.active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.3);
+}
+
+/* ================= DARK MODE OVERRIDES ================= */
+html.dark-mode .slot-session-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+html.dark-mode .slot-session-btn:hover {
+  background: #0f172a;
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+html.dark-mode .slot-session-btn.active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+html.dark-mode .slot-tab-badge {
+  background: #334155;
+  color: #94a3b8;
 }
 
 html.dark-mode .slot-card {
@@ -68,15 +239,59 @@ html.dark-mode .slot-card {
   border-color: #334155;
 }
 
+html.dark-mode .slot-card:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+html.dark-mode .slot-card.selected {
+  background: #0f2744;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
 html.dark-mode .slot-doctor {
-  color: #e2e8f0;
+  color: #f1f5f9;
 }
 
 html.dark-mode .slot-time {
-  color: #7dd3fc;
+  color: #38bdf8;
 }
 
 html.dark-mode .slot-meta {
+  color: #94a3b8;
+}
+
+html.dark-mode .slot-empty {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+html.dark-mode .slot-pagination {
+  border-top-color: #334155;
+}
+
+html.dark-mode .slot-pagination-info {
+  color: #94a3b8;
+}
+
+html.dark-mode .slot-page-arrow,
+html.dark-mode .slot-page-num {
+  background: #1e293b;
+  border-color: #334155;
   color: #cbd5e1;
 }
 
+html.dark-mode .slot-page-arrow:hover:not(:disabled),
+html.dark-mode .slot-page-num:hover {
+  background: #0f172a;
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+html.dark-mode .slot-page-num.active {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}

@@ -730,7 +730,33 @@ input.with-suffix-btn {
 
 .google-btn-container > div,
 .google-btn-container iframe {
-  width: 100% !important;
+  width: 100%;
+}
+
+.modern-google-btn {
+  width: 100%;
+  height: 44px;
+  padding: 0 1.6rem;
+  border-radius: 1.2rem;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.modern-google-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .modern-facebook-btn {
@@ -1027,6 +1053,17 @@ html.dark-mode .switch-link-btn {
 
 html.dark-mode .switch-link-btn:hover {
   color: #7dd3fc;
+}
+
+html.dark-mode .modern-google-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+html.dark-mode .modern-google-btn:hover {
+  background: #334155;
+  border-color: #475569;
 }
 
 /* =========================================================

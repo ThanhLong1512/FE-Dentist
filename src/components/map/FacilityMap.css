@@ -612,9 +612,9 @@ html.dark-mode .btn-directions:hover {
   color: #7dd3fc;
 }
 
-/* Dark Mode Tiles Filter for OpenStreetMap */
+/* Google Maps tiles styling in dark mode */
 html.dark-mode .facility-leaflet-map .leaflet-tile-pane {
-  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.35);
+  filter: brightness(0.9) contrast(1.05);
 }
 
 html.dark-mode .leaflet-popup-content-wrapper {

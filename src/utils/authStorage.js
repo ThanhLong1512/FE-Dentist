@@ -12,10 +12,18 @@ export const clearAccessToken = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
 };
 
+export const notifyAuthChange = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("userInfoUpdated"));
+    window.dispatchEvent(new Event("authChange"));
+  }
+};
+
 export const clearAuthSession = () => {
   localStorage.removeItem("userInfo");
   localStorage.removeItem("cart");
   clearAccessToken();
+  notifyAuthChange();
 };
 
 export const saveAuthSession = (userData) => {
@@ -34,4 +42,5 @@ export const saveAuthSession = (userData) => {
   if (userData.accessToken) {
     setAccessToken(userData.accessToken);
   }
+  notifyAuthChange();
 };

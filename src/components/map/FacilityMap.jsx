@@ -27,6 +27,78 @@ const FALLBACK_COORDS = {
   "CS-HN": { lat: 21.0336, lng: 105.7955 },
 };
 
+// Default facilities fallback to guarantee map always displays full branches
+const DEFAULT_FACILITIES = [
+  {
+    _id: "6abf6d08dcdb19b0d2f66b7e",
+    name: "Nha khoa CHEESE CLINIC - Trụ sở Quận 1 (TP.HCM)",
+    code: "CS-Q1",
+    address: "123 Nam Kỳ Khởi Nghĩa, Bến Thành, Quận 1",
+    city: "TP. Hồ Chí Minh",
+    phoneNumber: "1900 6868",
+    email: "quan1@cheeseclinic.vn",
+    workingHours: "08:00 - 20:00 (Thứ 2 - CN)",
+    chairCount: 10,
+    managerName: "BS. CKI Nguyễn Văn Long",
+    status: "active",
+    image: "/images/resource/facility-1.jpg",
+    description: "Trụ sở chính hiện đại trang bị máy CT Cone Beam 3D, phòng vô trùng áp lực dương và phòng VIP tiếp đón chuẩn 5 sao.",
+    latitude: 10.7865,
+    longitude: 106.6998,
+  },
+  {
+    _id: "6abf6d08dcdb19b0d2f66b7f",
+    name: "Nha khoa CHEESE CLINIC - Chi nhánh Phú Mỹ Hưng (Quận 7)",
+    code: "CS-Q7",
+    address: "88 Nguyễn Đức Cảnh, Tân Phong, Quận 7",
+    city: "TP. Hồ Chí Minh",
+    phoneNumber: "1900 6869",
+    email: "quan7@cheeseclinic.vn",
+    workingHours: "08:00 - 20:00 (Thứ 2 - CN)",
+    chairCount: 8,
+    managerName: "BS. Trần Thảo Vy",
+    status: "active",
+    image: "/images/resource/facility-2.jpg",
+    description: "Cơ sở chuyên sâu niềng răng trong suốt Invisalign, phục hình nụ cười và nha khoa gia đình chuẩn quốc tế.",
+    latitude: 10.7291,
+    longitude: 106.7218,
+  },
+  {
+    _id: "6abf6d08dcdb19b0d2f66b80",
+    name: "Nha khoa CHEESE CLINIC - Chi nhánh Bình Thạnh",
+    code: "CS-BT",
+    address: "246 Xô Viết Nghệ Tĩnh, Phường 21, Bình Thạnh",
+    city: "TP. Hồ Chí Minh",
+    phoneNumber: "1900 6870",
+    email: "binhthanh@cheeseclinic.vn",
+    workingHours: "08:00 - 20:00 (Thứ 2 - CN)",
+    chairCount: 6,
+    managerName: "ThS. BS Hoàng Minh Nhật",
+    status: "active",
+    image: "/images/resource/facility-3.jpg",
+    description: "Phòng khám nha khoa tiện ích phục vụ khu vực Đông TP.HCM với đầy đủ dịch vụ nhổ răng, trám răng thẩm mỹ và tẩy trắng.",
+    latitude: 10.7989,
+    longitude: 106.7082,
+  },
+  {
+    _id: "6abf6d08dcdb19b0d2f66b81",
+    name: "Nha khoa CHEESE CLINIC - Chi nhánh Cầu Giấy (Hà Nội)",
+    code: "CS-HN",
+    address: "15 Duy Tân, Dịch Vọng Hậu, Cầu Giấy",
+    city: "Hà Nội",
+    phoneNumber: "1900 6871",
+    email: "caugiay@cheeseclinic.vn",
+    workingHours: "08:00 - 20:00 (Thứ 2 - CN)",
+    chairCount: 8,
+    managerName: "BS. Lê Hồng Sơn",
+    status: "active",
+    image: "/images/resource/facility-4.jpg",
+    description: "Trung tâm nha khoa kỹ thuật cao tại Thủ đô, thuận tiện di chuyển, bãi đỗ xe rộng rãi và đội ngũ bác sĩ ĐH Y Hà Nội.",
+    latitude: 21.0336,
+    longitude: 105.7955,
+  },
+];
+
 export default function FacilityMap({
   defaultCity = "all",
   title,
@@ -46,28 +118,43 @@ export default function FacilityMap({
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
   const markersMapRef = useRef({});
 
+  // Ensure we always have facilities even if backend is starting or offline
+  const effectiveFacilities = useMemo(() => {
+    if (Array.isArray(facilities) && facilities.length > 0) {
+      return facilities;
+    }
+    return DEFAULT_FACILITIES;
+  }, [facilities]);
+
   // Translate facilities by active language
   const translatedFacilities = useMemo(() => {
-    return facilities.map((fac) => translateFacility(fac, language));
-  }, [facilities, language]);
+    return effectiveFacilities.map((fac) => translateFacility(fac, language));
+  }, [effectiveFacilities, language]);
 
   // Filter facilities by city and search term
   const filteredFacilities = useMemo(() => {
     return translatedFacilities.filter((fac) => {
+      const c = (fac.city || "").toLowerCase();
       const matchCity =
         selectedCity === "all" ||
-        fac.city?.toLowerCase().includes(selectedCity.toLowerCase()) ||
+        c.includes(selectedCity.toLowerCase()) ||
         (selectedCity === "hồ chí minh" &&
-          (fac.city?.toLowerCase().includes("hồ chí minh") ||
-            fac.city?.toLowerCase().includes("ho chi minh") ||
-            fac.city?.includes("胡志明"))) ||
+          (c.includes("hồ chí minh") ||
+            c.includes("ho chi minh") ||
+            c.includes("hcm") ||
+            c.includes("quận") ||
+            c.includes("bình thạnh") ||
+            c.includes("胡志明"))) ||
         (selectedCity === "hà nội" &&
-          (fac.city?.toLowerCase().includes("hà nội") ||
-            fac.city?.toLowerCase().includes("hanoi") ||
-            fac.city?.includes("河内")));
+          (c.includes("hà nội") ||
+            c.includes("hanoi") ||
+            c.includes("cầu giấy") ||
+            c.includes("hn") ||
+            c.includes("河内")));
 
       const matchSearch =
         !searchTerm.trim() ||
@@ -80,14 +167,29 @@ export default function FacilityMap({
 
   // Unique city count badges
   const cityCounts = useMemo(() => {
-    const counts = { all: facilities.length, hcm: 0, hn: 0 };
-    facilities.forEach((f) => {
-      const c = f.city?.toLowerCase() || "";
-      if (c.includes("hồ chí minh") || c.includes("hcm")) counts.hcm++;
-      if (c.includes("hà nội") || c.includes("hn")) counts.hn++;
+    const counts = { all: effectiveFacilities.length, hcm: 0, hn: 0 };
+    effectiveFacilities.forEach((f) => {
+      const c = (f.city || "").toLowerCase();
+      if (
+        c.includes("hồ chí minh") ||
+        c.includes("hcm") ||
+        c.includes("quận") ||
+        c.includes("bình thạnh") ||
+        c.includes("ho chi minh") ||
+        c.includes("胡志明")
+      ) {
+        counts.hcm++;
+      } else if (
+        c.includes("hà nội") ||
+        c.includes("hanoi") ||
+        c.includes("cầu giấy") ||
+        c.includes("河内")
+      ) {
+        counts.hn++;
+      }
     });
     return counts;
-  }, [facilities]);
+  }, [effectiveFacilities]);
 
   // Helper to extract GPS coordinates
   const getCoords = (facility) => {
@@ -122,22 +224,57 @@ export default function FacilityMap({
       scrollWheelZoom: false,
     });
 
-    // OpenStreetMap standard tile layer
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    // Google Maps Vietnam tile layer: Full Vietnamese street names, landmarks, highly detailed, no API key required
+    const hl = language === "en" ? "en" : language === "zh" ? "zh-CN" : "vi";
+    const googleMapsUrl = `https://mt{s}.google.com/vt/lyrs=m&hl=${hl}&x={x}&y={y}&z={z}`;
+
+    const tileLayer = L.tileLayer(googleMapsUrl, {
+      maxZoom: 20,
+      subdomains: ["0", "1", "2", "3"],
+      attribution: '&copy; Google Maps',
     }).addTo(map);
+    tileLayerRef.current = tileLayer;
 
     const markersGroup = L.layerGroup().addTo(map);
     markersLayerRef.current = markersGroup;
     mapInstanceRef.current = map;
 
+    // Multiple invalidateSize timers to guarantee rendering as layout stabilizes
+    const t1 = setTimeout(() => map.invalidateSize(), 150);
+    const t2 = setTimeout(() => map.invalidateSize(), 500);
+
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    window.addEventListener("resize", handleResize);
+
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", handleResize);
       map.remove();
       mapInstanceRef.current = null;
+      tileLayerRef.current = null;
     };
   }, []);
+
+  // Update map language dynamically if user switches language
+  useEffect(() => {
+    if (!tileLayerRef.current) return;
+    const hl = language === "en" ? "en" : language === "zh" ? "zh-CN" : "vi";
+    const googleMapsUrl = `https://mt{s}.google.com/vt/lyrs=m&hl=${hl}&x={x}&y={y}&z={z}`;
+    tileLayerRef.current.setUrl(googleMapsUrl);
+  }, [language]);
+
+  // Invalidate map size whenever tab or list changes
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 200);
+    return () => clearTimeout(t);
+  }, [filteredFacilities, selectedCity]);
 
   // 2. Render Markers whenever facilities or selection change
   useEffect(() => {
@@ -317,7 +454,7 @@ export default function FacilityMap({
       <div className="facility-map-body">
         {/* Left Side: Branch List */}
         <div className="facility-list-panel">
-          {isLoading ? (
+          {isLoading && effectiveFacilities.length === 0 ? (
             <div className="facility-empty-state">
               Đang tải danh sách chi nhánh...
             </div>
