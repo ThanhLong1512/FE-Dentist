@@ -9,6 +9,7 @@ export function useServices() {
   } = useQuery({
     queryKey: ["services"],
     queryFn: handleGetServices,
+    staleTime: 5 * 60 * 1000,
   });
 
   return { isLoading, error, services };
